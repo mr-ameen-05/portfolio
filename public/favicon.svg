@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark background matching the theme -->
+  <rect width="512" height="512" rx="120" fill="#0A0A0A" />
+  
+  <!-- Terminal Prompt ">" -->
+  <path d="M140 160 L280 256 L140 352" fill="none" stroke="#C8FF00" stroke-width="52" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Terminal Cursor "_" -->
+  <line x1="300" y1="360" x2="380" y2="360" stroke="#C8FF00" stroke-width="52" stroke-linecap="round" />
+</svg>
