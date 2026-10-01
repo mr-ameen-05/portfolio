@@ -1,6 +1,6 @@
 export type SpriteState = 
   | 'IDLE_FRONT' | 'IDLE_BACK' | 'TALK' | 'THINK' | 'WAVE' | 'THUMBS_UP' | 'JUMP'
-  | 'RUN_RIGHT' | 'RUN_LEFT' | 'WALK_RIGHT' | 'WALK_LEFT' | 'WALK_FRONT'
+  | 'RUN_RIGHT' | 'RUN_LEFT' | 'RUN_FRONT' | 'WALK_RIGHT' | 'WALK_LEFT' | 'WALK_FRONT'
   | 'LOOK_LEFT' | 'LOOK_RIGHT' | 'TELEPORT';
 
 interface FrameData {
@@ -20,14 +20,11 @@ export class SpriteEngine {
   fps: number = 8;
 
   renderWidth: number = 140;
-  renderHeight: number = 0; 
 
   opacity: number = 1;
 
   // Accumulated time for continuous animation effects (bob, breathe)
   totalTime: number = 0;
-
-  private sheetHeights: Record<string, number> = {};
 
   constructor() {
     this.loadImages();
@@ -42,13 +39,8 @@ export class SpriteEngine {
       img.src = `/sprites/${name}.png`;
       img.onload = () => {
         loadedCount++;
-        const frameWidth = img.width / 4;
-        const aspect = img.height / frameWidth;
-        this.sheetHeights[name] = this.renderWidth * aspect;
-        
         if (loadedCount === sheets.length) {
           this.loaded = true;
-          this.renderHeight = this.sheetHeights['Pose'];
         }
       };
       this.images[name] = img;
@@ -78,6 +70,7 @@ export class SpriteEngine {
       // Flip for left direction. Animation is faked via bob + squash/stretch.
       case 'RUN_RIGHT':   return { sheet: 'Runing', index: 3, flipX: false };
       case 'RUN_LEFT':    return { sheet: 'Runing', index: 3, flipX: true };
+      case 'RUN_FRONT':   return { sheet: 'Runing', index: this.currentFrameIndex % 2, flipX: false };
 
       default: return { sheet: 'Pose', index: 0, flipX: false };
     }
@@ -87,8 +80,6 @@ export class SpriteEngine {
     if (this.state !== newState) {
       this.state = newState;
       this.currentFrameIndex = 0;
-      const fd = this.getFrameData();
-      this.renderHeight = this.sheetHeights[fd.sheet] || this.renderHeight;
     }
   }
 
@@ -112,13 +103,14 @@ export class SpriteEngine {
 
     const frameWidth = img.width / 4;
     const frameHeight = img.height;
-    const rh = this.sheetHeights[sheet] || this.renderHeight;
+    const aspect = frameHeight / frameWidth;
     const rw = this.renderWidth;
+    const rh = rw * aspect;
 
     ctx.save();
     ctx.globalAlpha = this.opacity;
 
-    const isRunning = this.state === 'RUN_RIGHT' || this.state === 'RUN_LEFT';
+    const isRunning = this.state === 'RUN_RIGHT' || this.state === 'RUN_LEFT' || this.state === 'RUN_FRONT';
     const isWalking = this.state === 'WALK_RIGHT' || this.state === 'WALK_LEFT' || this.state === 'WALK_FRONT';
     const isIdle = this.state === 'IDLE_FRONT' || this.state === 'IDLE_BACK';
 
