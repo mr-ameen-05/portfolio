@@ -8,7 +8,7 @@ interface InfoCard {
 const infoCards: InfoCard[] = [
   {
     label: 'CURRENT FOCUS',
-    value: 'SOC Analyst · [VERIFY]',
+    value: 'SOC Analyst',
   },
   {
     label: 'EDUCATION',
