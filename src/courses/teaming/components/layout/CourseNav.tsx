@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Shield, BookOpen, FileText, Bookmark, Award, Menu, X, ArrowLeft } from 'lucide-react';
+import { Search, Shield, BookOpen, FileText, Bookmark, Award, Menu, X, ArrowLeft, LogOut, User } from 'lucide-react';
 import { StorageBadge } from './StorageBadge';
 import { CourseSearchModal } from '../search/CourseSearchModal';
 import { progressService } from '../../services/progressService';
+import { useLearner } from '../../context/LearnerContext';
 
 export const CourseNav: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { profile, signOut } = useLearner();
 
   const stats = progressService.getCourseCompletionStats();
 
@@ -76,6 +78,26 @@ export const CourseNav: React.FC = () => {
                 </Link>
               );
             })}
+            <a
+              href="/privacy.html"
+              className="text-xs font-mono uppercase tracking-wider transition-colors py-1 border-b-2 border-transparent text-text-muted hover:text-text-primary"
+            >
+              Privacy
+            </a>
+            <a
+              href="/terms.html"
+              className="text-xs font-mono uppercase tracking-wider transition-colors py-1 border-b-2 border-transparent text-text-muted hover:text-text-primary"
+            >
+              Terms
+            </a>
+            <a
+              href="https://buymeacoffee.com/aiameen"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-mono uppercase tracking-wider transition-colors py-1 border-b-2 border-transparent text-text-muted hover:text-text-primary"
+            >
+              ☕ Support
+            </a>
           </nav>
 
           {/* Right: Search, Storage badge & Mobile Toggle */}
@@ -102,8 +124,26 @@ export const CourseNav: React.FC = () => {
               <Search className="w-4 h-4" />
             </button>
 
+            {/* Learner identity + sign out */}
+            {profile && (
+              <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-bg-secondary border border-border-subtle text-[11px] font-mono">
+                <User className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="text-text-secondary max-w-[140px] truncate" title={profile.name}>
+                  {profile.name}
+                </span>
+                <button
+                  onClick={signOut}
+                  className="p-1 -mr-1 rounded hover:bg-white/5 text-text-muted hover:text-text-primary transition-colors"
+                  title="Sign out / switch learner"
+                  aria-label="Sign out or switch learner"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* Storage status badge */}
-            <StorageBadge isServerSynced={false} className="hidden md:inline-flex" />
+            <StorageBadge isServerSynced={profile?.source === 'server'} className="hidden md:inline-flex" />
 
             {/* Mobile Menu Toggle */}
             <button
@@ -134,11 +174,28 @@ export const CourseNav: React.FC = () => {
         {/* Mobile Dropdown Drawer */}
         {mobileMenuOpen && (
           <div className="lg:hidden bg-bg-primary border-b border-border-subtle px-6 py-4 space-y-3">
-            <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
-              <span className="text-xs font-mono text-text-muted">
-                Progress: {stats.completedRequired}/{stats.totalRequired} Lessons ({stats.percentage}%)
-              </span>
-              <StorageBadge isServerSynced={false} />
+            <div className="flex flex-col gap-2 pb-3 border-b border-border-subtle">
+              {profile && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[11px] font-mono text-text-secondary">
+                    <User className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="max-w-[180px] truncate">{profile.name}</span>
+                  </div>
+                  <button
+                    onClick={signOut}
+                    className="p-1 rounded hover:bg-white/5 text-text-muted hover:text-text-primary transition-colors"
+                    title="Sign out / switch learner"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono text-text-muted">
+                  Progress: {stats.completedRequired}/{stats.totalRequired} Lessons ({stats.percentage}%)
+                </span>
+                <StorageBadge isServerSynced={profile?.source === 'server'} />
+              </div>
             </div>
             {navLinks.map((link) => (
               <Link
@@ -152,6 +209,29 @@ export const CourseNav: React.FC = () => {
                 {link.label}
               </Link>
             ))}
+            <a
+              href="/privacy.html"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block py-2 text-sm font-mono uppercase tracking-wider transition-colors text-text-secondary hover:text-text-primary"
+            >
+              Privacy Policy
+            </a>
+            <a
+              href="/terms.html"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block py-2 text-sm font-mono uppercase tracking-wider transition-colors text-text-secondary hover:text-text-primary"
+            >
+              Terms &amp; Conditions
+            </a>
+            <a
+              href="https://buymeacoffee.com/aiameen"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block py-2 text-sm font-mono uppercase tracking-wider transition-colors text-text-secondary hover:text-text-primary"
+            >
+              ☕ Buy me a coffee
+            </a>
           </div>
         )}
       </header>

@@ -152,6 +152,17 @@ export interface ResourceItem {
   contentMarkdown: string;
 }
 
+export interface LearnerProfile {
+  /** Display name supplied at enrollment. */
+  name: string;
+  /** Contact email supplied at enrollment. */
+  email: string;
+  /** Epoch ms of when the learner enrolled on this device. */
+  enrolledAt: number;
+  /** Where the enrollment record was ultimately persisted. */
+  source: 'server' | 'local';
+}
+
 export interface LearnerProgress {
   learnerId: string;
   completedLessonIds: string[];

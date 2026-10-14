@@ -284,7 +284,7 @@ if (!order) {
         'Ethical commitment and continuous learning define long-term career success.'
       ],
       references: [
-        { title: 'The Practical Purple Team Handbook', publisher: 'Al Ameen N R', url: 'https://alameen.dev/', lastReviewed: '2026-03-01' }
+        { title: 'The Practical Purple Team Handbook', publisher: 'Al Ameen N R', url: 'https://aiameen.online/', lastReviewed: '2026-03-01' }
       ],
       publishedAt: '2026-03-01',
       version: '1.0'

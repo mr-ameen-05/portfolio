@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy · Al Ameen N R</title>
+  <meta name="description" content="Privacy policy for aiameen.online portfolio and Practical Cybersecurity course.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0A0A0A; --panel:#111111; --text:#F5F5F5; --text2:#A0A0A0; --muted:#555555; --border:#1E1E1E; --accent:#C8FF00;
+    }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.7}
+    header{border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(17,17,17,.9),transparent)}
+    .wrap{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem}
+    h1,h2,h3{font-family:Space Grotesk,sans-serif;letter-spacing:-.01em}
+    h1{margin:1rem 0 .5rem;font-size:2rem}
+    h2{margin:2rem 0 .75rem;font-size:1.4rem}
+    h3{margin:1.25rem 0 .5rem;font-size:1.1rem}
+    p,li{color:var(--text2);font-size:.98rem}
+    ul{padding-left:1.25rem}
+    a{color:var(--accent)}
+    .meta{font-family:JetBrains Mono,monospace;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+    code{font-family:JetBrains Mono,monospace;font-size:.9em;background:rgba(200,255,0,.1);color:var(--accent);padding:.15em .4em;border-radius:3px}
+    footer{border-top:1px solid var(--border);padding:1.5rem 1.25rem;text-align:center;font-family:JetBrains Mono,monospace;font-size:.75rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <a href="/" style="text-decoration:none;color:var(--text);font-family:JetBrains Mono,monospace;font-size:.8rem;letter-spacing:.18em;text-transform:uppercase">ALAMEEN.DEV</a>
+      <h1>Privacy Policy</h1>
+      <div class="meta">Last updated: <span id="date"></span></div>
+    </div>
+  </header>
+  <main class="wrap">
+    <p>This Privacy Policy explains how aiameen.online ("we", "us", or "our") collects, uses, and protects information when you visit this website and use the Practical Cybersecurity course.</p>
+
+    <h2>1. Information We Collect</h2>
+    <h3>Enrollment Data</h3>
+    <p>When you enroll in the course, we collect your name and email address. This information is stored locally in your browser (device-local) and may also be transmitted to our backend for record-keeping and to contact you regarding the course.</p>
+    <h3>Usage Data</h3>
+    <p>We may collect standard server access logs (IP address, user agent, timestamps) to maintain security and monitor performance. These logs are retained for a reasonable period.</p>
+    <h3>Local Storage</h3>
+    <p>The course uses your browser's localStorage to save your progress (completed lessons, quiz attempts, lab states) and your enrollment profile. This data never leaves your device unless you explicitly submit it to our backend.</p>
+
+    <h2>2. How We Use Information</h2>
+    <ul>
+      <li>To provide and operate the course</li>
+      <li>To track your progress and enable certificate generation</li>
+      <li>To respond to inquiries and manage course enrollments</li>
+      <li>To maintain security and prevent abuse</li>
+      <li>To comply with legal obligations</li>
+    </ul>
+
+    <h2>3. Data Sharing</h2>
+    <p>We do not sell, trade, or rent your personal information to third parties. We may share information only when required by law or to protect our rights and safety.</p>
+
+    <h2>4. Data Security</h2>
+    <p>We implement reasonable security measures to protect collected information. However, no method of transmission over the internet or electronic storage is 100% secure.</p>
+
+    <h2>5. Your Choices</h2>
+    <ul>
+      <li>You can clear your enrollment/profile and course progress at any time via the course's "Reset Progress" option or by clearing localStorage in your browser.</li>
+      <li>You can contact us to request access to or deletion of enrollment data we have received.</li>
+    </ul>
+
+    <h2>6. Third-Party Links</h2>
+    <p>This site may link to third-party services (e.g. Buy Me a Coffee, external resources). Those services have their own privacy policies.</p>
+
+    <h2>7. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. Changes will be posted with an updated "Last updated" date.</p>
+
+    <h2>8. Contact</h2>
+    <p>For questions about this Privacy Policy, contact: <a href="mailto:26alameen2005@gmail.com">26alameen2005@gmail.com</a></p>
+  </main>
+  <footer>
+    © <span id="year"></span> Al Ameen N R · <a href="/">Home</a> · <a href="/terms.html">Terms & Conditions</a>
+  </footer>
+  <script>
+    document.getElementById('date').textContent = new Date().toISOString().split('T')[0];
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

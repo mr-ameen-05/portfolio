@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms & Conditions · Al Ameen N R</title>
+  <meta name="description" content="Terms and Conditions for aiameen.online portfolio and Practical Cybersecurity course.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0A0A0A; --panel:#111111; --text:#F5F5F5; --text2:#A0A0A0; --muted:#555555; --border:#1E1E1E; --accent:#C8FF00;
+    }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.7}
+    header{border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(17,17,17,.9),transparent)}
+    .wrap{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem}
+    h1,h2,h3{font-family:Space Grotesk,sans-serif;letter-spacing:-.01em}
+    h1{margin:1rem 0 .5rem;font-size:2rem}
+    h2{margin:2rem 0 .75rem;font-size:1.4rem}
+    h3{margin:1.25rem 0 .5rem;font-size:1.1rem}
+    p,li{color:var(--text2);font-size:.98rem}
+    ul{padding-left:1.25rem}
+    a{color:var(--accent)}
+    .meta{font-family:JetBrains Mono,monospace;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+    code{font-family:JetBrains Mono,monospace;font-size:.9em;background:rgba(200,255,0,.1);color:var(--accent);padding:.15em .4em;border-radius:3px}
+    footer{border-top:1px solid var(--border);padding:1.5rem 1.25rem;text-align:center;font-family:JetBrains Mono,monospace;font-size:.75rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <a href="/" style="text-decoration:none;color:var(--text);font-family:JetBrains Mono,monospace;font-size:.8rem;letter-spacing:.18em;text-transform:uppercase">ALAMEEN.DEV</a>
+      <h1>Terms & Conditions</h1>
+      <div class="meta">Last updated: <span id="date"></span></div>
+    </div>
+  </header>
+  <main class="wrap">
+    <p>By accessing and using aiameen.online and the Practical Cybersecurity course, you agree to these Terms & Conditions.</p>
+
+    <h2>1. Educational Purpose Only</h2>
+    <p>This site provides educational content about cybersecurity for defensive understanding and authorized evaluation only. All course labs use synthetic data and isolated fixtures.</p>
+
+    <h2>2. Ethical Conduct</h2>
+    <p>You agree to use the course materials ethically. You must not use the knowledge to attack public systems, unauthorized networks, or third-party devices. Any such use is strictly prohibited.</p>
+
+    <h2>3. Eligibility</h2>
+    <p>You must provide accurate name and email during enrollment. You are responsible for maintaining the confidentiality of your local progress data.</p>
+
+    <h2>4. Intellectual Property</h2>
+    <p>All content on this site (text, code, diagrams, curriculum) is owned by Al Ameen N R unless otherwise stated. You may use materials for personal educational purposes only.</p>
+
+    <h2>5. Local Storage & Data</h2>
+    <p>The course stores progress and enrollment data in your browser's localStorage. You are responsible for managing this data on your device. We reserve the right to process enrollment data you submit to our backend as described in the Privacy Policy.</p>
+
+    <h2>6. No Warranty</h2>
+    <p>The site and course are provided "as is" without warranties of any kind. We do not guarantee uninterrupted access or accuracy.</p>
+
+    <h2>7. Limitation of Liability</h2>
+    <p>To the maximum extent permitted by law, we are not liable for any damages arising from your use of this site or course.</p>
+
+    <h2>8. Termination</h2>
+    <p>We may restrict or terminate access if you violate these terms.</p>
+
+    <h2>9. Governing Law</h2>
+    <p>These terms are governed by applicable laws. Any disputes shall be resolved in accordance with those laws.</p>
+
+    <h2>10. Changes</h2>
+    <p>We may update these Terms & Conditions at any time. Continued use constitutes acceptance of updated terms.</p>
+
+    <h2>11. Contact</h2>
+    <p>For questions about these Terms, contact: <a href="mailto:26alameen2005@gmail.com">26alameen2005@gmail.com</a></p>
+  </main>
+  <footer>
+    © <span id="year"></span> Al Ameen N R · <a href="/">Home</a> · <a href="/privacy.html">Privacy Policy</a>
+  </footer>
+  <script>
+    document.getElementById('date').textContent = new Date().toISOString().split('T')[0];
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

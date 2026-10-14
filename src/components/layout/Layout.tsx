@@ -76,7 +76,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <p className="font-mono text-xs text-text-muted">Cybersecurity Analyst & Systems Builder</p>
           <p className="font-serif text-sm text-text-secondary mt-3 max-w-sm">"{SITE.tagline}"</p>
         </div>
-        <div className="flex flex-wrap justify-center gap-6">
+        <div className="flex flex-wrap justify-center gap-6 items-center">
           {SITE.nav.slice(1).map(n => (
             <a key={n.id} href={`/#${n.id}`} className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors">
               {n.label}
@@ -85,6 +85,27 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link to="/courses/teaming" className="text-xs font-mono text-accent hover:underline font-semibold">
             Security Course
           </Link>
+          <a
+            href="https://buymeacoffee.com/aiameen"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors"
+            aria-label="Buy me a coffee"
+          >
+            ☕ Buy me a coffee
+          </a>
+          <a
+            href="/privacy.html"
+            className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors"
+          >
+            Privacy Policy
+          </a>
+          <a
+            href="/terms.html"
+            className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors"
+          >
+            Terms &amp; Conditions
+          </a>
         </div>
         <p className="text-xs font-mono text-text-muted">© {new Date().getFullYear()} {SITE.name}</p>
       </footer>

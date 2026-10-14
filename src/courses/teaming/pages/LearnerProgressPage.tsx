@@ -6,8 +6,10 @@ import { CourseNav } from '../components/layout/CourseNav';
 import { CourseBreadcrumb } from '../components/layout/CourseBreadcrumb';
 import { StorageBadge } from '../components/layout/StorageBadge';
 import { COURSE_METADATA } from '../data/courseMetadata';
+import { useLearner } from '../context/LearnerContext';
 
 export const LearnerProgressPage: React.FC = () => {
+  const { profile } = useLearner();
   const [stats, setStats] = useState(() => progressService.getCourseCompletionStats());
   const [learnerName, setLearnerName] = useState('Security Practitioner');
   const [showCertificate, setShowCertificate] = useState(false);
@@ -16,9 +18,9 @@ export const LearnerProgressPage: React.FC = () => {
 
   useEffect(() => {
     setStats(progressService.getCourseCompletionStats());
-    const savedName = localStorage.getItem('course_learner_name');
-    if (savedName) setLearnerName(savedName);
-  }, []);
+    const savedName = profile?.name || localStorage.getItem('course_learner_name') || 'Security Practitioner';
+    setLearnerName(savedName);
+  }, [profile]);
 
   const handleNameChange = (name: string) => {
     setLearnerName(name);
@@ -55,7 +57,7 @@ export const LearnerProgressPage: React.FC = () => {
                 <span className="text-xs font-mono uppercase tracking-wider text-accent font-bold">
                   Learner Dashboard
                 </span>
-                <StorageBadge isServerSynced={false} />
+                <StorageBadge isServerSynced={profile?.source === 'server'} />
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold font-sans text-text-primary">
                 Your Course Progress

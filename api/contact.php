@@ -103,7 +103,7 @@ $email_content = "
 $headers = "MIME-Version: 1.0\r\n";
 $headers .= "Content-type: text/html; charset=UTF-8\r\n";
 // The email is sent FROM the server to avoid Gmail flagging it as spam (DMARC/SPF checks)
-$headers .= "From: Portfolio Contact <no-reply@alameen.dev>\r\n"; 
+$headers .= "From: Portfolio Contact <no-reply@aiameen.online>\r\n"; 
 // But the Reply-To is set to the requester, so hitting "Reply" goes straight to them
 $headers .= "Reply-To: $name <$email>\r\n";
 $headers .= "X-Mailer: PHP/" . phpversion();
