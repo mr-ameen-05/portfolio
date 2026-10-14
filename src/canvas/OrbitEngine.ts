@@ -3,7 +3,9 @@ import { Vector2D } from '../lib/math';
 
 export class OrbitEngine {
   bodies: OrbitBody[] = [];
-  centerPos: Vector2D = new Vector2D(0, 0);
+  leftCenter: Vector2D = new Vector2D(0, 0);
+  rightCenter: Vector2D = new Vector2D(0, 0);
+  currentScale: number = 1.0;
   
   constructor() {
     this.initBodies();
@@ -11,88 +13,137 @@ export class OrbitEngine {
 
   initBodies() {
     const createRing = (
+      galaxy: 'left' | 'right',
       ringIndex: number,
       tilt: number,
       speed: number,
-      items: { id: string, label: string, icon: string }[]
+      items: { id: string; label: string; icon: string; color: string }[]
     ): OrbitBodyConfig[] => {
-      const baseRadius = 180 + ringIndex * 70;
+      // Radius progression for each galaxy cluster (fitted safely within margins)
+      const baseRadius = 105 + ringIndex * 46;
       return items.map((item, i) => ({
         ...item,
         semiMajor: baseRadius,
-        semiMinor: baseRadius * 0.4,
+        semiMinor: baseRadius * 0.62,
         inclination: tilt,
         angularVelocity: speed,
         phase: (Math.PI * 2 / items.length) * i,
-        size: 20, // slightly smaller icons for monochrome
-        galaxy: 'left' as const, // Legacy prop
-        color: '#000',
+        size: 32,
+        galaxy,
         ringIndex,
       }));
     };
 
-    // 5 Domains from blueprint
-    const cyber = createRing(0, 0.1, 0.2, [
-      { id: 'wazuh', label: 'Wazuh', icon: 'simple-icons:wazuh' },
-      { id: 'linux-sec', label: 'Linux Security', icon: 'logos:linux-tux' },
-      { id: 'wireshark', label: 'Wireshark', icon: 'simple-icons:wireshark' },
-      { id: 'mitre', label: 'MITRE ATT&CK', icon: 'mdi:shield-search' },
+    // ── LEFT GALAXY: Cybersecurity, Defense & Infrastructure ──
+    // Ring 0: Core Foundation (3 items)
+    const leftRing0 = createRing('left', 0, 0.18, 0.22, [
+      { id: 'linux-sec', label: 'Linux Security', icon: 'logos:linux-tux', color: '#FCC624' },
+      { id: 'wazuh', label: 'Wazuh SIEM', icon: 'simple-icons:wazuh', color: '#00A3E0' },
+      { id: 'wireshark', label: 'Wireshark', icon: 'simple-icons:wireshark', color: '#1679A7' },
     ]);
 
-    const pentest = createRing(1, -0.05, -0.15, [
-      { id: 'kali', label: 'Kali Linux', icon: 'simple-icons:kalilinux' },
-      { id: 'burp', label: 'Burp Suite', icon: 'mdi:shield-bug' },
-      { id: 'nmap', label: 'Nmap', icon: 'mdi:radar' },
-      { id: 'nuclei', label: 'Nuclei', icon: 'mdi:atom' },
+    // Ring 1: Offensive & Assessment (4 items)
+    const leftRing1 = createRing('left', 1, -0.14, -0.16, [
+      { id: 'kali', label: 'Kali Linux', icon: 'simple-icons:kalilinux', color: '#00D2FF' },
+      { id: 'burp', label: 'Burp Suite', icon: 'simple-icons:burpsuite', color: '#FF6633' },
+      { id: 'nmap', label: 'Nmap Scanner', icon: 'mdi:radar', color: '#38BDF8' },
+      { id: 'nuclei', label: 'Nuclei Vuln Scanning', icon: 'mdi:atom', color: '#A855F7' },
     ]);
 
-    const software = createRing(2, 0.08, 0.12, [
-      { id: 'python', label: 'Python', icon: 'simple-icons:python' },
-      { id: 'ts', label: 'TypeScript', icon: 'simple-icons:typescript' },
-      { id: 'react', label: 'React', icon: 'simple-icons:react' },
-      { id: 'node', label: 'Node.js', icon: 'simple-icons:nodedotjs' },
+    // Ring 2: Hardening & Cloud Infrastructure (3 items)
+    const leftRing2 = createRing('left', 2, 0.10, 0.12, [
+      { id: 'mitre', label: 'MITRE ATT&CK', icon: 'mdi:shield-search', color: '#EF4444' },
+      { id: 'docker', label: 'Docker Hardening', icon: 'logos:docker-icon', color: '#2496ED' },
+      { id: 'aws', label: 'AWS Cloud Security', icon: 'logos:aws', color: '#FF9900' },
     ]);
 
-    const ai = createRing(3, -0.12, -0.1, [
-      { id: 'ollama', label: 'Ollama', icon: 'mdi:robot-outline' },
-      { id: 'llms', label: 'Local LLMs', icon: 'mdi:brain' },
-      { id: 'agents', label: 'AI Agents', icon: 'mdi:cog-transfer' },
-      { id: 'eval', label: 'Model Eval', icon: 'mdi:chart-bell-curve-cumulative' },
+    // ── RIGHT GALAXY: Software Systems, Data & AI ──
+    // Ring 0: Modern Web & Systems (3 items)
+    const rightRing0 = createRing('right', 0, -0.18, -0.22, [
+      { id: 'python', label: 'Python Systems', icon: 'logos:python', color: '#3776AB' },
+      { id: 'react', label: 'React Frontend', icon: 'logos:react', color: '#61DAFB' },
+      { id: 'ts', label: 'TypeScript', icon: 'logos:typescript-icon', color: '#3178C6' },
     ]);
 
-    const infra = createRing(4, 0.05, 0.08, [
-      { id: 'docker', label: 'Docker', icon: 'simple-icons:docker' },
-      { id: 'postgres', label: 'PostgreSQL', icon: 'simple-icons:postgresql' },
-      { id: 'git', label: 'GitOps', icon: 'simple-icons:git' },
-      { id: 'aws', label: 'AWS', icon: 'simple-icons:amazonaws' },
+    // Ring 1: Backend, DB & Observability (4 items)
+    const rightRing1 = createRing('right', 1, 0.14, 0.16, [
+      { id: 'node', label: 'Node.js Backend', icon: 'logos:nodejs-icon', color: '#5FA04E' },
+      { id: 'postgres', label: 'PostgreSQL DB', icon: 'logos:postgresql', color: '#4169E1' },
+      { id: 'git', label: 'GitOps & CI/CD', icon: 'logos:git-icon', color: '#F05032' },
+      { id: 'grafana', label: 'Grafana Telemetry', icon: 'logos:grafana', color: '#F47E20' },
+    ]);
+
+    // Ring 2: Artificial Intelligence & Automation (3 items)
+    const rightRing2 = createRing('right', 2, -0.10, -0.12, [
+      { id: 'ollama', label: 'Ollama Local LLMs', icon: 'simple-icons:ollama', color: '#F8FAFC' },
+      { id: 'llms', label: 'Local LLM Reasoning', icon: 'mdi:brain', color: '#EC4899' },
+      { id: 'agents', label: 'Autonomous Agents', icon: 'mdi:robot', color: '#10B981' },
     ]);
 
     this.bodies = [
-      ...cyber, ...pentest, ...software, ...ai, ...infra
+      ...leftRing0, ...leftRing1, ...leftRing2,
+      ...rightRing0, ...rightRing1, ...rightRing2
     ].map(c => new OrbitBody(c));
   }
 
   resize(width: number, height: number) {
-    this.centerPos = new Vector2D(width / 2, height / 2);
+    if (width >= 1280) {
+      // Large screens: place clearly in left and right wings with generous margin
+      this.leftCenter = new Vector2D(Math.max(210, width * 0.18), height * 0.52);
+      this.rightCenter = new Vector2D(Math.min(width - 210, width * 0.82), height * 0.52);
+      this.scaleOrbits(0.95);
+    } else if (width >= 1024) {
+      // Standard desktop: keep well inside margins
+      this.leftCenter = new Vector2D(Math.max(190, width * 0.19), height * 0.52);
+      this.rightCenter = new Vector2D(Math.min(width - 190, width * 0.81), height * 0.52);
+      this.scaleOrbits(0.78);
+    } else if (width >= 768) {
+      // Tablet: tighter margins
+      this.leftCenter = new Vector2D(width * 0.16, height * 0.52);
+      this.rightCenter = new Vector2D(width * 0.84, height * 0.52);
+      this.scaleOrbits(0.68);
+    } else {
+      // Mobile: compact wings
+      this.leftCenter = new Vector2D(width * 0.22, height * 0.48);
+      this.rightCenter = new Vector2D(width * 0.78, height * 0.56);
+      this.scaleOrbits(0.52);
+    }
+
+    // Immediately snap positions to centers on initial layout
+    for (const body of this.bodies) {
+      const center = body.config.galaxy === 'left' ? this.leftCenter : this.rightCenter;
+      body.initPosition(center);
+    }
+  }
+
+  scaleOrbits(scale: number) {
+    this.currentScale = scale;
+    for (const body of this.bodies) {
+      body.setScale(scale);
+    }
   }
 
   update(dt: number, mousePos: Vector2D | null, mouseActive: boolean) {
     for (const body of this.bodies) {
-      body.update(dt, this.centerPos, mousePos, mouseActive);
+      const center = body.config.galaxy === 'left' ? this.leftCenter : this.rightCenter;
+      body.update(dt, center, mousePos, mouseActive);
     }
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    // Draw thin, subtle orbital tracks
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+    // Refined, glowing orbital tracks for each ring (clean vector lines without gradient artifacts)
     ctx.lineWidth = 1;
-
-    const drawnRings = new Set<number>();
+    const drawnRings = new Set<string>();
     
     for (const body of this.bodies) {
-      const ri = (body.config as any).ringIndex as number;
-      if (drawnRings.has(ri)) continue;
-      drawnRings.add(ri);
+      const center = body.config.galaxy === 'left' ? this.leftCenter : this.rightCenter;
+      const key = `${body.config.galaxy}-${body.config.ringIndex}`;
+      if (drawnRings.has(key)) continue;
+      drawnRings.add(key);
+
+      const isLeft = body.config.galaxy === 'left';
+      ctx.strokeStyle = isLeft ? 'rgba(0, 210, 255, 0.07)' : 'rgba(168, 85, 247, 0.07)';
+      ctx.setLineDash([3, 6]);
       
       ctx.beginPath();
       for (let i = 0; i <= Math.PI * 2; i += 0.05) {
@@ -101,11 +152,12 @@ export class OrbitEngine {
         const phi = body.config.inclination;
         const xRot = xBase * Math.cos(phi) - yBase * Math.sin(phi);
         const yRot = xBase * Math.sin(phi) + yBase * Math.cos(phi);
-        if (i === 0) ctx.moveTo(this.centerPos.x + xRot, this.centerPos.y + yRot);
-        else ctx.lineTo(this.centerPos.x + xRot, this.centerPos.y + yRot);
+        if (i === 0) ctx.moveTo(center.x + xRot, center.y + yRot);
+        else ctx.lineTo(center.x + xRot, center.y + yRot);
       }
       ctx.closePath();
       ctx.stroke();
     }
+    ctx.setLineDash([]);
   }
 }

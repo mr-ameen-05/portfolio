@@ -6,15 +6,16 @@ import JournalSection from './components/journal/JournalSection'
 import JourneySection from './components/journey/JourneySection'
 import CommunitySection from './components/community/CommunitySection'
 import AboutSection from './components/about/AboutSection'
+import StartLearning from './pages/StartLearning'
+import CyberRoadmap from './components/CyberRoadmap'
 import ContactSection from './components/contact/ContactSection'
-import GlobalSprite from './components/sprite/GlobalSprite'
+import TerminalBox from './components/TerminalBox'
 
 function App() {
   return (
     <ThemeProvider>
       <Layout>
         {/* The interactive companion */}
-        <GlobalSprite />
         
         <main className="min-h-screen">
           <HeroSection />
@@ -23,6 +24,8 @@ function App() {
           <JourneySection />
           <CommunitySection />
           <AboutSection />
+          <StartLearning />
+          <CyberRoadmap />
           <ContactSection />
         </main>
       </Layout>

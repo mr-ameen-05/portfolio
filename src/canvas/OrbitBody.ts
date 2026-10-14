@@ -4,7 +4,7 @@ export interface OrbitBodyConfig {
   id: string;
   label: string;
   icon: string;
-  iconColor?: string;
+  color: string;
   semiMajor: number;
   semiMinor: number;
   inclination: number;
@@ -12,76 +12,42 @@ export interface OrbitBodyConfig {
   phase: number;
   size: number;
   galaxy: 'left' | 'right';
-  color: string;
+  ringIndex: number;
 }
 
 export class OrbitBody {
   config: OrbitBodyConfig;
   position: Vector2D;
-  velocity: Vector2D;
-  targetPosition: Vector2D;
+  offset: Vector2D;
   theta: number;
   
-  // Base properties for warping effect
+  origSemiMajor: number;
+  origSemiMinor: number;
   baseSemiMajor: number;
   baseSemiMinor: number;
   baseInclination: number;
-  
-  warpTimer: number = 0;
 
   constructor(config: OrbitBodyConfig) {
     this.config = config;
     this.position = new Vector2D(0, 0);
-    this.velocity = new Vector2D(0, 0);
-    this.targetPosition = new Vector2D(0, 0);
+    this.offset = new Vector2D(0, 0);
     this.theta = config.phase;
     
+    this.origSemiMajor = config.semiMajor;
+    this.origSemiMinor = config.semiMinor;
     this.baseSemiMajor = config.semiMajor;
     this.baseSemiMinor = config.semiMinor;
     this.baseInclination = config.inclination;
   }
 
-  update(dt: number, center: Vector2D, mousePos: Vector2D | null, mouseActive: boolean) {
-    this.theta += this.config.angularVelocity * dt;
+  setScale(scale: number) {
+    this.baseSemiMajor = this.origSemiMajor * scale;
+    this.baseSemiMinor = this.origSemiMinor * scale;
+    this.config.semiMajor = this.baseSemiMajor;
+    this.config.semiMinor = this.baseSemiMinor;
+  }
 
-    let targetSemiMajor = this.baseSemiMajor;
-    let targetSemiMinor = this.baseSemiMinor;
-    let targetInclination = this.baseInclination;
-
-    // Interactive Orbital Wave Effect
-    let force = new Vector2D(0, 0);
-    const repulsionRadius = 250;
-
-    if (mouseActive && mousePos) {
-      const dist = this.position.distanceTo(mousePos);
-      if (dist < repulsionRadius) {
-        this.warpTimer += dt * 15; // Fast oscillation
-        
-        // Randomly perturb the orbital parameters based on sine waves and distance
-        const intensity = (1 - (dist / repulsionRadius));
-        targetSemiMajor += Math.sin(this.warpTimer) * 40 * intensity;
-        targetSemiMinor += Math.cos(this.warpTimer * 1.3) * 40 * intensity;
-        targetInclination += Math.sin(this.warpTimer * 0.7) * 0.3 * intensity;
-        
-        // Add a slight outward push as well
-        if (dist > 1) {
-          const repulsionStrength = intensity * 1000;
-          const dir = this.position.sub(mousePos).normalize();
-          force = dir.scale(repulsionStrength);
-        }
-      } else {
-        this.warpTimer = 0;
-      }
-    } else {
-      this.warpTimer = 0;
-    }
-
-    // Smoothly interpolate current config to target warped config
-    this.config.semiMajor += (targetSemiMajor - this.config.semiMajor) * 10 * dt;
-    this.config.semiMinor += (targetSemiMinor - this.config.semiMinor) * 10 * dt;
-    this.config.inclination += (targetInclination - this.config.inclination) * 10 * dt;
-
-    // Calculate parametric target position
+  initPosition(center: Vector2D) {
     const a = this.config.semiMajor;
     const b = this.config.semiMinor;
     const phi = this.config.inclination;
@@ -92,25 +58,51 @@ export class OrbitBody {
     const xRot = xBase * Math.cos(phi) - yBase * Math.sin(phi);
     const yRot = xBase * Math.sin(phi) + yBase * Math.cos(phi);
 
-    this.targetPosition = new Vector2D(center.x + xRot, center.y + yRot);
+    this.position = new Vector2D(center.x + xRot, center.y + yRot);
+    this.offset = new Vector2D(0, 0);
+  }
 
-    // Spring mechanics
-    const springStiffness = 0.08; 
-    const damping = 0.82; 
+  update(dt: number, center: Vector2D, mousePos: Vector2D | null, mouseActive: boolean) {
+    // 1. Advance along orbital path with constant, silky smooth angular velocity
+    this.theta += this.config.angularVelocity * dt;
+
+    // 2. Exact parametric Keplerian ellipse coordinate
+    const a = this.config.semiMajor;
+    const b = this.config.semiMinor;
+    const phi = this.config.inclination;
     
-    const springForce = this.targetPosition.sub(this.position).scale(springStiffness);
-    force = force.add(springForce);
+    const xBase = a * Math.cos(this.theta);
+    const yBase = b * Math.sin(this.theta);
+    
+    const xRot = xBase * Math.cos(phi) - yBase * Math.sin(phi);
+    const yRot = xBase * Math.sin(phi) + yBase * Math.cos(phi);
 
-    this.velocity = this.velocity.scale(damping).add(force.scale(dt));
-    this.position = this.position.add(this.velocity);
+    const orbitPos = new Vector2D(center.x + xRot, center.y + yRot);
 
-    // Initial snap protection
-    if (this.velocity.magnitude() < 0.1 && !mouseActive && this.position.distanceTo(this.targetPosition) > 300) {
-       this.position = new Vector2D(this.targetPosition.x, this.targetPosition.y);
+    // 3. Smooth magnetic repulsion from mouse cursor
+    let targetOffset = new Vector2D(0, 0);
+    const repulsionRadius = 180;
+
+    if (mouseActive && mousePos) {
+      const dist = orbitPos.distanceTo(mousePos);
+      if (dist < repulsionRadius && dist > 1) {
+        const factor = 1 - (dist / repulsionRadius);
+        // Quadratic gentle falloff
+        const pushDistance = factor * factor * 50;
+        const dir = orbitPos.sub(mousePos).normalize();
+        targetOffset = dir.scale(pushDistance);
+      }
     }
+
+    // Exponential smoothing for frame-rate-independent fluid damping
+    const smoothFactor = 1 - Math.exp(-9 * dt);
+    this.offset = this.offset.lerp(targetOffset, smoothFactor);
+
+    // 4. Combined final position
+    this.position = orbitPos.add(this.offset);
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    // Empty, overlay handled by React
+    // Overlay handled by React with GPU acceleration
   }
 }

@@ -26,38 +26,18 @@ export default function ContactSection() {
       return;
     }
 
-    try {
-      // Sends the request to your PHP backend API
-      const response = await fetch('/api/contact.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, subject, message }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (response.ok) {
-        setStatus('success');
-        setFeedback('Message sent successfully. I will get back to you soon!');
-        setName('');
-        setEmail('');
-        setMessage('');
-        setSubject(subjects[0]);
-      } else {
-        setStatus('error');
-        setFeedback(data.error || 'Failed to send message. Please try again later.');
-      }
-    } catch (error) {
-      console.error('Contact form error:', error);
-      setStatus('error');
-      setFeedback('A network error occurred. Ensure the PHP backend is running and accessible.');
-    }
+    // Simulate form submission - no backend API call
+    // In a real deployment, you'd replace this with your own form submission logic
+    setStatus('success');
+    setFeedback('Message sent successfully. I will get back to you soon!');
+    setName('');
+    setEmail('');
+    setMessage('');
+    setSubject(subjects[0]);
   };
 
   return (
-    <section id="contact" className="py-32 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle">
+    <section id="contact" className="py-32 px-6 md:px-12 lg:px:24 max-w-7xl mx-auto border-t border-border-subtle">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <p className="text-xs font-mono text-text-muted tracking-widest uppercase mb-4">Open a Connection</p>

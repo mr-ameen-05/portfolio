@@ -58,7 +58,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border-subtle py-12 px-6 md:px-12 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6 w-full max-w-[100vw] overflow-hidden">
         <div>
           <p className="font-sans font-bold text-lg text-text-primary mb-1">{SITE.name.toUpperCase()}</p>
-          <p className="font-mono text-xs text-text-muted">Cybersecurity · Software · AI</p>
+          <p className="font-mono text-xs text-text-muted">Cybersecurity Analyst & Systems Builder</p>
           <p className="font-serif text-sm text-text-secondary mt-3 max-w-sm">"{SITE.tagline}"</p>
         </div>
         <div className="flex flex-wrap justify-center gap-6">

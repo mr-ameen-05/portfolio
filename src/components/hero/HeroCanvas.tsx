@@ -16,7 +16,7 @@ export default function HeroCanvas() {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let lastTime = performance.now();
+    let lastTime = 0;
     const orbit = new OrbitEngine();
     engineRef.current = orbit;
     setBodies(orbit.bodies.map(b => b.config));
@@ -33,7 +33,7 @@ export default function HeroCanvas() {
       canvas.height = window.innerHeight * dpr;
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       orbit.resize(window.innerWidth, window.innerHeight);
     };
 
@@ -46,11 +46,16 @@ export default function HeroCanvas() {
     handleResize();
 
     const render = (time: number) => {
-      // If reduced motion, stop the clock
-      const dt = prefersReducedMotion ? 0 : Math.min((time - lastTime) / 1000, 0.1);
+      if (!lastTime) lastTime = time;
+      const dt = prefersReducedMotion ? 0 : Math.min((time - lastTime) / 1000, 0.05);
       lastTime = time;
       
+      // Cleanly clear full device pixel canvas
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+
       orbit.update(dt, mousePos, mouseActive);
       orbit.render(ctx);
 
@@ -60,19 +65,18 @@ export default function HeroCanvas() {
           const body = orbit.bodies[i];
           const node = nodes[i] as HTMLElement;
           if (node) {
-            node.style.transform = `translate(calc(${body.position.x}px - 50%), calc(${body.position.y}px - 50%))`;
+            node.style.transform = `translate3d(${body.position.x}px, ${body.position.y}px, 0) translate(-50%, -50%)`;
           }
         }
       }
-      animationFrameId = requestAnimationFrame(render);
+
+      if (!prefersReducedMotion) {
+        animationFrameId = requestAnimationFrame(render);
+      }
     };
     
-    // Initial render even if paused
-    render(performance.now());
-    
-    if (!prefersReducedMotion) {
-      animationFrameId = requestAnimationFrame(render);
-    }
+    // Exactly one single rendering loop
+    animationFrameId = requestAnimationFrame(render);
 
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -87,12 +91,24 @@ export default function HeroCanvas() {
       <canvas ref={canvasRef} className="absolute inset-0 z-10" style={{ touchAction: 'none' }} />
       <div ref={overlayRef} className="absolute inset-0 pointer-events-none z-20 origin-top-left">
         {bodies.map(body => (
-          <div key={body.id} className="absolute top-0 left-0 flex flex-col items-center will-change-transform group cursor-default">
-            {/* Monochrome icons default, accent on hover */}
-            <div className="flex items-center justify-center pointer-events-auto transition-all duration-300 hover:scale-[1.3] text-text-secondary hover:text-accent drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_15px_rgba(200,255,0,0.4)]">
-              <Icon icon={body.icon} className="w-8 h-8" />
+          <div key={body.id} className="absolute top-0 left-0 flex flex-col items-center will-change-transform group cursor-pointer pointer-events-auto">
+            {/* Natural icon shape with silhouette drop-shadow - NO square box */}
+            <div 
+              className="flex items-center justify-center transition-transform duration-200 hover:scale-[1.35] cursor-pointer"
+              style={{
+                color: body.color,
+                filter: `drop-shadow(0 0 8px ${body.color}80) drop-shadow(0 0 16px ${body.color}40)`,
+              }}
+            >
+              <Icon icon={body.icon} className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" />
             </div>
-            <span className="mt-2 text-[10px] font-mono text-text-muted bg-bg-primary/95 backdrop-blur px-2 py-0.5 border border-border-subtle pointer-events-none whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+            <span 
+              className="mt-2 text-[10px] font-mono font-medium text-text-primary bg-bg-secondary/95 backdrop-blur-md px-2.5 py-0.5 border rounded pointer-events-none whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-1 shadow-2xl z-30"
+              style={{
+                borderColor: `${body.color}88`,
+                boxShadow: `0 4px 16px ${body.color}25`,
+              }}
+            >
               {body.label}
             </span>
           </div>

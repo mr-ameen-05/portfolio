@@ -8,19 +8,19 @@ interface InfoCard {
 const infoCards: InfoCard[] = [
   {
     label: 'CURRENT FOCUS',
-    value: 'SOC Analyst',
+    value: 'Linux & container hardening, vulnerability assessment, incident response',
   },
   {
-    label: 'EDUCATION',
-    value: 'BCA — Currently Studying',
+    label: 'ROLE',
+    value: 'Cybersecurity Analyst & Systems Builder',
   },
   {
-    label: 'INTERESTS',
-    value: 'AI security, secure software, penetration testing',
+    label: 'LOCATION',
+    value: 'Kerala, India',
   },
   {
     label: 'WORKING STYLE',
-    value: 'Build · Investigate · Secure · Improve',
+    value: 'Understand the architecture. Secure the layers. Build reliably.',
   },
 ];
 
@@ -50,26 +50,23 @@ export default function AboutSection() {
         className="max-w-3xl space-y-6 text-text-secondary text-base md:text-lg leading-relaxed font-sans mb-16"
       >
         <p>
-          I'm Al Ameen N R, a cybersecurity, software and AI engineer currently pursuing a BCA.
-        </p>
-        <p>
-          My interests sit at the intersection of secure systems, software engineering, intelligent automation, and practical security research.
-        </p>
-        <p>
-          I enjoy understanding how systems work beneath the surface, building useful solutions, testing how they behave under unexpected conditions, and investigating where security or reliability can be improved.
-        </p>
-        <div className="pt-2">
-          <p className="text-text-primary font-mono text-xs uppercase tracking-widest mb-4">
-            My approach is simple:
-          </p>
-          <div className="space-y-2 border-l border-border-subtle pl-4 font-mono text-sm md:text-base text-text-primary">
-            <p>Understand the problem.</p>
-            <p>Build the system.</p>
-            <p>Test the assumptions.</p>
-            <p>Investigate the failures.</p>
-            <p>Improve the result.</p>
-          </div>
-        </div>
+I work across both sides of security—testing defenses, hardening infrastructure, and building software that doesn't cut corners on security. Most of my day is spent digging into Linux systems, configuring reliable container setups, auditing networks, and shipping clean code for practical business platforms.
+</p>
+<p>
+My daily work balances offensive and defensive operations: running vulnerability assessments, locking down infrastructure, and setting up monitoring that actually alerts on real threats instead of noise. On the engineering side, I build and maintain self-hosted systems, containerized workflows, and web services designed to run reliably under real-world conditions.
+</p>
+<div className="pt-2">
+  <p className="text-text-primary font-mono text-xs uppercase tracking-widest mb-4">
+    My approach is simple:
+  </p>
+  <div className="space-y-2 border-l border-border-subtle pl-4 font-mono text-sm md:text-base text-text-primary">
+    <p>Understand the problem.</p>
+    <p>Secure the layers.</p>
+    <p>Build reliable systems.</p>
+    <p>Audit and monitor.</p>
+    <p>Improve the result.</p>
+  </div>
+</div>
       </motion.div>
 
       {/* 2x2 Grid of Info Cards */}

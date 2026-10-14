@@ -33,6 +33,13 @@ export class Vector2D {
     return this.sub(v).magnitude();
   }
 
+  lerp(target: Vector2D, amt: number): Vector2D {
+    return new Vector2D(
+      this.x + (target.x - this.x) * amt,
+      this.y + (target.y - this.y) * amt
+    );
+  }
+
   static lerp(start: number, end: number, amt: number): number {
     return (1 - amt) * start + amt * end;
   }

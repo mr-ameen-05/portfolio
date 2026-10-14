@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 
-type ProjectCategory = 'ai' | 'software' | 'pentest' | 'labs' | 'security' | 'research';
+type ProjectCategory = 'healthcare' | 'infrastructure' | 'database' | 'observability';
 
 interface Project {
   id: string;
@@ -15,64 +15,47 @@ interface Project {
   flagship?: boolean;
 }
 
-const FILTER_BUTTONS = ['ALL', 'SECURITY', 'AI', 'SOFTWARE', 'PENTEST', 'LABS', 'RESEARCH'] as const;
+const FILTER_BUTTONS = ['ALL', 'HEALTHCARE', 'INFRASTRUCTURE', 'DATABASE', 'OBSERVABILITY'] as const;
 type FilterButton = (typeof FILTER_BUTTONS)[number];
 
 const projects: Project[] = [
   {
-    id: 'ai-soc-analyst',
-    title: 'AI-Assisted SOC Analyst',
-    category: 'ai',
-    status: 'RESEARCH',
-    access: 'Case study',
-    desc: 'Exploring how a locally hosted language model can assist security operations workflows — from alert triage to investigation.',
-    tech: ['Local LLM', 'SOC', 'Wazuh', 'Python'],
+    id: 'doctorsloom',
+    title: 'DoctorsLoom',
+    category: 'healthcare',
+    status: 'LIVE',
+    access: 'Live demo',
+    desc: 'A lightweight Progressive Web App tailored for outpatient clinics and physiotherapy centers to manage check-ins, EHR, and follow-ups.',
+    tech: ['Node.js', 'Python', 'PostgreSQL', 'NGINX', 'PWA'],
     flagship: true,
   },
   {
-    id: 'saas-application-engineering',
-    title: 'SaaS Application Engineering',
-    category: 'software',
-    status: 'IN PROGRESS',
+    id: 'banihal-orb',
+    title: 'Banihal Orb (orb.banihal.in)',
+    category: 'infrastructure',
+    status: 'LIVE',
     access: 'Live demo',
-    desc: 'Building functional applications with architecture, security controls, testing, and deployment considerations.',
-    tech: ['React', 'Node.js', 'PostgreSQL', 'Docker'],
+    desc: 'Multi-tenant business operations and client support platform combining issue ticketing, client management, and automated engineering dispatches.',
+    tech: ['Podman', 'systemd', 'NGINX', 'Python', 'Node.js', 'PostgreSQL', 'Slack Bolt'],
+    flagship: true,
   },
   {
-    id: 'security-assessment-methodology',
-    title: 'Security Assessment Methodology',
-    category: 'pentest',
+    id: 'db-replication-engine',
+    title: 'Cross-Platform DB Logical Replication Engine',
+    category: 'database',
     status: 'CASE STUDY',
-    access: 'Sanitized report',
-    desc: 'Web application and network security assessments with structured methodology, findings, and remediation.',
-    tech: ['Burp Suite', 'Nmap', 'Nuclei', 'Linux'],
+    access: 'Architecture diagram',
+    desc: 'Fault-tolerant database synchronization pipeline establishing logical replication between heterogeneous Windows Server and Rocky Linux environments with minimal downtime.',
+    tech: ['PostgreSQL', 'Windows Server', 'Rocky Linux', 'Bash', 'PowerShell'],
   },
   {
-    id: 'security-labs-ctf-research',
-    title: 'Security Labs & CTF Research',
-    category: 'labs',
-    status: 'OPEN SOURCE',
-    access: 'Write-ups',
-    desc: 'Understanding security through investigation. Failed hypotheses, evidence collection, and technical discovery.',
-    tech: ['Kali Linux', 'Wireshark', 'MITRE ATT&CK'],
-  },
-  {
-    id: 'infrastructure-deployment',
-    title: 'Infrastructure & Deployment',
-    category: 'security',
-    status: 'PRIVATE',
-    access: 'Architecture only',
-    desc: 'Configuration, deployment pipelines, monitoring, and operational reliability for production systems.',
-    tech: ['Docker', 'Linux', 'AWS', 'Git'],
-  },
-  {
-    id: 'ai-agent-security-research',
-    title: 'AI Agent Security Research',
-    category: 'research',
-    status: 'RESEARCH',
-    access: 'Field notes',
-    desc: 'Investigating AI agent permissions, tool access, prompt injection risks, and human oversight requirements.',
-    tech: ['Ollama', 'LLMs', 'Agent Tools'],
+    id: 'observability-pipeline',
+    title: 'Host & Container Observability Pipeline',
+    category: 'observability',
+    status: 'LIVE',
+    access: 'Live demo',
+    desc: 'Lightweight, self-hosted telemetry cluster providing container resource monitoring and centralized security log aggregation.',
+    tech: ['Rocky Linux', 'Prometheus', 'Grafana', 'Promtail', 'Loki', 'cAdvisor', 'Podman'],
   },
 ];
 

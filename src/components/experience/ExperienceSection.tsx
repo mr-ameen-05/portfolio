@@ -4,23 +4,23 @@ import { Shield, Server, Terminal, Lock } from 'lucide-react';
 
 const experiences = [
   {
-    role: "Senior Security Analyst",
-    company: "CyberDefend Inc.",
-    date: "2024 - Present",
-    desc: "Led the Red Team operations, discovering 30+ critical CVEs in enterprise systems."
+    role: 'Cybersecurity Analyst',
+    company: 'Self-Employed / Freelance',
+    date: '2023 - Present',
+    desc: 'Independent security analysis, Linux/container hardening, and building secure B2B web applications. Focus on vulnerability assessment, threat modeling, and infrastructure hardening for small-to-medium businesses.',
   },
   {
-    role: "Backend Systems Engineer",
-    company: "SaaS Scale",
-    date: "2022 - 2024",
-    desc: "Architected containerized microservices scaling to 1M+ DAU."
+    role: 'Systems Builder',
+    company: 'Self-Employed / Freelance',
+    date: '2022 - Present',
+    desc: 'Designed and deployed self-hosted infrastructure using Podman, systemd, and NGINX. Built reliable containerized workflows and managed multi-tenant system setups with automated SSL and restart policies.',
   },
   {
-    role: "Junior Developer",
-    company: "Tech Start",
-    date: "2020 - 2022",
-    desc: "Maintained full-stack React applications and PostgreSQL databases."
-  }
+    role: 'Junior Developer / IT Support',
+    company: 'Various B2B Clients',
+    date: '2020 - 2022',
+    desc: 'Full-stack development, PostgreSQL database management, and server administration. Gained practical experience deploying and maintaining web applications in production environments.',
+  },
 ];
 
 export default function ExperienceSection() {
