@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { SITE } from '../../config/site.config';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -9,23 +10,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
       {/* Navbar - Monochrome Minimal */}
       <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border-subtle bg-bg-primary/80 backdrop-blur-md z-50 flex items-center justify-between px-6 md:px-12">
-        <a href="#hero" className="font-mono text-sm tracking-wider font-bold hover:text-accent transition-colors">
+        <Link to="/" className="font-mono text-sm tracking-wider font-bold hover:text-accent transition-colors">
           {SITE.name.toUpperCase()}
-        </a>
+        </Link>
         
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-7">
           {SITE.nav.slice(1).map(n => (
-            <a key={n.id} href={`#${n.id}`} className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors uppercase tracking-widest">
+            <a key={n.id} href={`/#${n.id}`} className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors uppercase tracking-widest">
               {n.label}
             </a>
           ))}
+          <Link
+            to="/courses/teaming"
+            className="text-xs font-mono px-3 py-1.5 rounded-full border border-accent/40 bg-accent/10 text-accent hover:bg-accent hover:text-black transition-all uppercase tracking-wider font-semibold"
+          >
+            🛡️ Security Course
+          </Link>
         </div>
 
         {/* Mobile Nav Toggle */}
         <button 
           className="md:hidden flex flex-col justify-center gap-1.5 w-6 h-6 z-50"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle navigation menu"
         >
           <span className={`block w-6 h-0.5 bg-text-primary transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
           <span className={`block w-6 h-0.5 bg-text-primary transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
@@ -39,13 +47,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {SITE.nav.slice(1).map(n => (
             <a 
               key={n.id} 
-              href={`#${n.id}`} 
+              href={`/#${n.id}`} 
               onClick={() => setMobileMenuOpen(false)}
               className="text-lg font-mono text-text-secondary hover:text-text-primary transition-colors uppercase tracking-widest"
             >
               {n.label}
             </a>
           ))}
+          <Link
+            to="/courses/teaming"
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-lg font-mono text-accent hover:underline uppercase tracking-widest font-bold"
+          >
+            🛡️ Security Course (11 Modules)
+          </Link>
         </div>
       )}
 
@@ -63,10 +78,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex flex-wrap justify-center gap-6">
           {SITE.nav.slice(1).map(n => (
-            <a key={n.id} href={`#${n.id}`} className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors">
+            <a key={n.id} href={`/#${n.id}`} className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors">
               {n.label}
             </a>
           ))}
+          <Link to="/courses/teaming" className="text-xs font-mono text-accent hover:underline font-semibold">
+            Security Course
+          </Link>
         </div>
         <p className="text-xs font-mono text-text-muted">© {new Date().getFullYear()} {SITE.name}</p>
       </footer>
