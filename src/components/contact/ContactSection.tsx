@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Mail } from 'lucide-react';
 
+const CONTACT_ENDPOINT: string =
+  import.meta.env.VITE_CONTACT_ENDPOINT || '/api/contact.php';
+
 export default function ContactSection() {
   const subjects = ['Technical collaboration', 'Cybersecurity and research', 'Community and workshops', 'Something else'];
   
@@ -26,14 +29,29 @@ export default function ContactSection() {
       return;
     }
 
-    // Simulate form submission - no backend API call
-    // In a real deployment, you'd replace this with your own form submission logic
-    setStatus('success');
-    setFeedback('Message sent successfully. I will get back to you soon!');
-    setName('');
-    setEmail('');
-    setMessage('');
-    setSubject(subjects[0]);
+    try {
+      const res = await fetch(CONTACT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject, message }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && (data.success || data.message)) {
+        setStatus('success');
+        setFeedback(data.message || 'Message sent successfully. I will get back to you soon!');
+        setName('');
+        setEmail('');
+        setMessage('');
+        setSubject(subjects[0]);
+      } else {
+        setStatus('error');
+        setFeedback(data.error || 'Something went wrong. Please try again or email me directly.');
+      }
+    } catch {
+      setStatus('error');
+      setFeedback('Could not reach the server. Please email me directly at 26alameen2005@gmail.com.');
+    }
   };
 
   return (

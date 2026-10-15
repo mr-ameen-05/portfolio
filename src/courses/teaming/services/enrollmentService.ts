@@ -7,6 +7,16 @@ const LEGACY_NAME_KEY = 'course_learner_name';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Enrollment endpoint. Point this at your external API service with the
+ * VITE_ENROLL_ENDPOINT environment variable, e.g.
+ *   VITE_ENROLL_ENDPOINT=https://api.aiameen.online/enroll
+ * When unset it falls back to a same-origin /api path. If the request fails,
+ * the enrollment is stored on the device so learners are never blocked.
+ */
+const ENROLL_ENDPOINT: string =
+  import.meta.env.VITE_ENROLL_ENDPOINT || '/api/course-enroll.php';
+
 export interface EnrollResult {
   profile: LearnerProfile;
   /** true when the record reached the backend; false when saved device-locally. */
@@ -90,7 +100,7 @@ export class EnrollmentService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-      const res = await fetch('/api/course-enroll.php', {
+      const res = await fetch(ENROLL_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

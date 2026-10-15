@@ -1,0 +1,59 @@
+# ── dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+
+# ── environment / secrets ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.*.example
+deploy/deploy.env
+api/.env
+
+# ── keys, certificates & credentials ─────────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.csr
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+id_ecdsa
+known_hosts
+.netrc
+.npmrc
+.yarnrc
+.envrc
+credentials.json
+service-account*.json
+secrets.yaml
+secrets.yml
+
+# ── database dumps / local databases ─────────────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+dump.sql
+*.sql.gz
+
+# ── infrastructure state ─────────────────────────────────────────────────────
+*.tfstate
+*.tfstate.*
+
+# ── php / composer ───────────────────────────────────────────────────────────
+api/vendor/
+api/tmp-logs/
+api/*.jsonl
+api/*_log.txt
+composer.phar
+
+# ── editor / OS ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+*.tsbuildinfo
+
+# ── scratch ──────────────────────────────────────────────────────────────────
+scratch.ts

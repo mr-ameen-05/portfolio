@@ -1,0 +1,105 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  aiameen.online — nginx site (rendered by deploy.sh)
+#  deploy.sh substitutes the deployment values into this template.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ─────────────────────────────── HTTP :80 ───────────────────────────────
+# Serves ACME challenges for Let's Encrypt, then redirects everything to HTTPS.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name __DOMAIN__ __WWW_DOMAIN__;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        default_type "text/plain";
+        allow all;
+    }
+
+    location / {
+        return 301 https://__DOMAIN__$request_uri;
+    }
+}
+
+# >>> WWW_REDIRECT
+# ─────────────────────── HTTPS :443 (www -> apex) ───────────────────────
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name __WWW_DOMAIN__;
+
+    ssl_certificate     /etc/letsencrypt/live/__CERT_NAME__/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/__CERT_NAME__/privkey.pem;
+
+    return 301 https://__DOMAIN__$request_uri;
+}
+# <<< WWW_REDIRECT
+
+# ─────────────────────────── HTTPS :443 (site) ───────────────────────────
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name __DOMAIN__;
+
+    ssl_certificate     /etc/letsencrypt/live/__CERT_NAME__/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/__CERT_NAME__/privkey.pem;
+
+    # Modern TLS (self-contained; no certbot snippets required)
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    root __APP_ROOT__/public;
+    index index.html;
+
+    # ── security headers ──
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    client_max_body_size 2m;
+
+    # ── static single-page app ──
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # never cache the app shell / SEO files
+    # (use `expires`, not add_header, so the security headers above stay inherited)
+    location = /index.html { expires -1; }
+    location = /sitemap.xml { expires -1; }
+    location = /robots.txt  { expires -1; }
+
+    # long-cache hashed assets
+    location ~* \.(?:css|js|mjs|woff2?|ttf|otf|svg|png|jpe?g|gif|webp|avif|ico)$ {
+        expires 1y;
+        access_log off;
+    }
+
+    # ── PHP API (mailing system) : /api/<name>.php -> php-fpm ──
+    location ~ ^/api/([A-Za-z0-9_-]+)\.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME __APP_ROOT__/api/$1.php;
+        fastcgi_param SCRIPT_NAME     /api/$1.php;
+        fastcgi_param DOCUMENT_ROOT   __APP_ROOT__/public;
+        fastcgi_pass unix:__PHP_SOCK__;
+        fastcgi_read_timeout 30s;
+        fastcgi_buffer_size 32k;
+        fastcgi_buffers 8 32k;
+    }
+
+    # block everything else under /api (lib/, vendor/, .env, logs).
+    # NOTE: no `^~` here — the PHP regex above must get a chance to match first.
+    location /api/ {
+        return 404;
+    }
+
+    # deny hidden files (except the ACME dir)
+    location ~ /\.(?!well-known) {
+        deny all;
+    }
+}

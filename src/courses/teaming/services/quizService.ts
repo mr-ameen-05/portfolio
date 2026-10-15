@@ -1,6 +1,16 @@
 import { QuizData } from '../types/course.types';
 import { progressService } from './progressService';
 
+/**
+ * Quiz evaluation endpoint. Point this at your external API service with the
+ * VITE_QUIZ_ENDPOINT environment variable, e.g.
+ *   VITE_QUIZ_ENDPOINT=https://api.aiameen.online/quiz
+ * When unset it falls back to a same-origin /api path. If the request fails,
+ * quizzes are graded on the device.
+ */
+const QUIZ_ENDPOINT: string =
+  import.meta.env.VITE_QUIZ_ENDPOINT || '/api/course-quiz.php';
+
 export interface QuizEvaluationResult {
   quizId: string;
   score: number;
@@ -43,7 +53,7 @@ export class QuizService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-      const res = await fetch('/api/course-quiz.php', {
+      const res = await fetch(QUIZ_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

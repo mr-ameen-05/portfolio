@@ -1,0 +1,16 @@
+{
+    "name": "aiameen/portfolio-api",
+    "description": "Mailing + course API for aiameen.online (nginx + php-fpm + MySQL).",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo": "*",
+        "ext-json": "*",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
