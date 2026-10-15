@@ -1,14 +1,13 @@
 import { QuizData } from '../types/course.types';
 import { progressService } from './progressService';
+import { post, ApiError } from '../../../platform/api/client';
 
 /**
- * Quiz evaluation endpoint. Point this at your external API service with the
- * VITE_QUIZ_ENDPOINT environment variable, e.g.
- *   VITE_QUIZ_ENDPOINT=https://api.aiameen.online/quiz
- * When unset it falls back to a same-origin /api path. If the request fails,
- * quizzes are graded on the device.
+ * Quiz evaluation service. Supports:
+ *  - Server-side grading via /api/content-quiz-submit.php (requires quiz.scope + quiz.scopeId + auth)
+ *  - Device-local fallback (for offline / local content / public quizzes)
  */
-const QUIZ_ENDPOINT: string =
+const LOCAL_QUIZ_ENDPOINT: string =
   import.meta.env.VITE_QUIZ_ENDPOINT || '/api/course-quiz.php';
 
 export interface QuizEvaluationResult {
@@ -29,6 +28,7 @@ export interface QuizEvaluationResult {
 
 export class QuizService {
   private static instance: QuizService;
+  private authConfig: { csrf: string | null } = { csrf: null };
 
   static getInstance(): QuizService {
     if (!QuizService.instance) {
@@ -37,71 +37,84 @@ export class QuizService {
     return QuizService.instance;
   }
 
+  /** Configure with current CSRF token for server writes. */
+  configure(cfg: { csrf: string | null }): void {
+    this.authConfig = cfg;
+  }
+
   async submitQuiz(
     quiz: QuizData,
     answers: Record<string, number>
   ): Promise<QuizEvaluationResult> {
     const progress = progressService.getProgress();
-    const payload = {
-      quiz_id: quiz.id,
-      answers,
-      learner_id: progress.learnerId
-    };
 
-    // 1. Try server-side validation endpoint
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+    // If quiz has API scope/scopeId and we have CSRF (authenticated), use server grading
+    const isApiQuiz = quiz.scope && quiz.scopeId;
+    if (isApiQuiz && this.authConfig.csrf) {
+      try {
+        const res = await post<{
+          success: boolean;
+          scope: string;
+          scope_id: string;
+          recorded: boolean;
+          verification_token: string;
+          score: number;
+          passed: boolean;
+          safety_failed: boolean;
+          total_questions: number;
+          correct_count: number;
+          results: { key: string; correct: boolean; submitted: number; correct_index: number; explanation: string }[];
+        }>('content-quiz-submit.php', {
+          scope: quiz.scope,
+          scope_id: quiz.scopeId,
+          answers,
+        }, this.authConfig.csrf);
 
-      const res = await fetch(QUIZ_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          const feedbackMap: Record<string, { isCorrect: boolean; explanation: string }> = {};
-          if (data.feedback) {
-            for (const [qId, f] of Object.entries(data.feedback as Record<string, { is_correct: boolean; explanation: string }>)) {
-              feedbackMap[qId] = {
-                isCorrect: f.is_correct,
-                explanation: f.explanation
-              };
-            }
-          }
-
-          const result: QuizEvaluationResult = {
-            quizId: quiz.id,
-            score: data.score,
-            passed: data.passed,
-            safetyFailed: data.safety_failed || false,
-            totalQuestions: data.total_questions,
-            correctCount: data.correct_count,
-            feedback: feedbackMap,
-            verificationToken: data.verification_token,
-            storageMode: 'server_verified'
-          };
-
-          // Record in progress
-          progressService.recordQuizAttempt(quiz.id, {
-            score: result.score,
-            passed: result.passed,
-            verificationToken: result.verificationToken
-          });
-
-          return result;
+        const feedbackMap: Record<string, { isCorrect: boolean; explanation: string }> = {};
+        for (const r of res.results) {
+          feedbackMap[r.key] = { isCorrect: r.correct, explanation: r.explanation };
         }
+
+        const result: QuizEvaluationResult = {
+          quizId: quiz.id,
+          score: res.score,
+          passed: res.passed,
+          safetyFailed: res.safety_failed,
+          totalQuestions: res.total_questions,
+          correctCount: res.correct_count,
+          feedback: feedbackMap,
+          verificationToken: res.verification_token,
+          storageMode: 'server_verified',
+        };
+
+        progressService.recordQuizAttempt(quiz.id, {
+          score: result.score,
+          passed: result.passed,
+          verificationToken: result.verificationToken,
+        });
+
+        return result;
+      } catch (e) {
+        const err = e as Error | ApiError;
+        if (!(err instanceof ApiError && err.isNetwork)) {
+          // Non-network error (e.g. 403 locked, 401 auth) -> return error
+          return {
+            quizId: quiz.id,
+            score: 0,
+            passed: false,
+            safetyFailed: false,
+            totalQuestions: quiz.questions.length,
+            correctCount: 0,
+            feedback: {},
+            storageMode: 'device_local',
+            error: err instanceof Error ? err.message : 'Quiz submission failed',
+          };
+        }
+        // Network error -> fall through to local grading
       }
-    } catch {
-      // Server unreachable, fallback transparently to device-local evaluation
     }
 
-    // 2. Client-side fallback evaluation
+    // Fallback: local grading (works for local content, public quizzes, offline)
     return this.evaluateLocally(quiz, answers);
   }
 

@@ -1,18 +1,16 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useLearner } from '../../context/LearnerContext';
-import { CourseGate } from './CourseGate';
+import { CourseContentProvider } from '../../../../platform/course/CourseContentContext';
 
 /**
- * Blocks every course route until the visitor has enrolled with
- * a name + email. Must be rendered inside a <LearnerProvider>.
+ * Course shell: loads the API bundle (or falls back to local content),
+ * hydrates progress, and then renders child routes.
+ * Access control is handled per-page based on the entitlement tier.
  */
 export const CourseAccessGuard: React.FC = () => {
-  const { isEnrolled } = useLearner();
-
-  if (!isEnrolled) {
-    return <CourseGate />;
-  }
-
-  return <Outlet />;
+  return (
+    <CourseContentProvider>
+      <Outlet />
+    </CourseContentProvider>
+  );
 };

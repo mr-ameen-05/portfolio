@@ -1,5 +1,6 @@
 import { LearnerProgress } from '../types/course.types';
 import { ALL_MODULES, getAllLessons } from '../data/modulesManifest';
+import { getModuleBySlug } from '../data/modulesManifest';
 
 const STORAGE_KEY = 'portfolio_teaming_progress_v1';
 const LEARNER_ID_KEY = 'portfolio_teaming_learner_id';
@@ -76,6 +77,17 @@ export class ProgressService {
     }
     progress.completedLessonIds = Array.from(set);
     this.saveProgress(progress);
+
+    // Server write-through
+    if (this.authConfig.enabled && this.authConfig.csrf) {
+      // Find the lesson slug (for API content, lessonId === slug; for local, look it up)
+      const lesson = getAllLessons().find(l => l.id === lessonId);
+      const slug = lesson?.slug ?? lessonId;
+      import('../../../platform/api/client').then(({ post }) => {
+        post('progress-lesson.php', { lesson_slug: slug, completed }, this.authConfig.csrf).catch(() => {});
+      });
+    }
+
     return progress;
   }
 
@@ -111,6 +123,14 @@ export class ProgressService {
       userDraft
     };
     this.saveProgress(progress);
+
+    // Server write-through
+    if (this.authConfig.enabled && this.authConfig.csrf) {
+      import('../../../platform/api/client').then(({ post }) => {
+        post('progress-lab.php', { lab_id: labId, completed, draft: userDraft }, this.authConfig.csrf).catch(() => {});
+      });
+    }
+
     return progress;
   }
 
@@ -127,6 +147,40 @@ export class ProgressService {
     };
     this.saveProgress(fresh);
     return fresh;
+  }
+
+  /** Check if the learner passed the module quiz for a given module. */
+  isModuleQuizPassed(moduleId: string): boolean {
+    const mod = getModuleBySlug(moduleId);
+    if (!mod?.moduleQuiz) return false;
+    const progress = this.getProgress();
+    const attempt = progress.quizAttempts[mod.moduleQuiz.id];
+    return Boolean(attempt?.passed);
+  }
+
+  /** Configure server write-through (called once the API bundle is loaded). */
+  private authConfig: { enabled: boolean; csrf: string | null; courseSlug: string } = {
+    enabled: false,
+    csrf: null,
+    courseSlug: 'teaming',
+  };
+
+  configure(cfg: { enabled: boolean; csrf: string | null; courseSlug: string }): void {
+    this.authConfig = cfg;
+  }
+
+  /** Replace local progress with server-authoritative data (used on bundle load). */
+  hydrate(serverProgress: LearnerProgress): void {
+    const local = this.getProgress();
+    // Merge: server wins for keys it knows, keep local for anything else
+    const merged: LearnerProgress = {
+      ...local,
+      ...serverProgress,
+      // Ensure local learnerId persists if server didn't provide one
+      learnerId: serverProgress.learnerId || local.learnerId,
+      isServerSynced: true,
+    };
+    this.saveProgress(merged);
   }
 
   getCourseCompletionStats(): {

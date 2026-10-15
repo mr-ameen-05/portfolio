@@ -1,6 +1,7 @@
 import { GlossaryItem } from '../types/course.types';
 
-export const GLOSSARY_ITEMS: GlossaryItem[] = [
+/** Build-time authoring source / offline fallback for the glossary. */
+export const LOCAL_GLOSSARY_ITEMS: GlossaryItem[] = [
   {
     id: 'glossary-adversary-emulation',
     term: 'Adversary Emulation',
@@ -300,3 +301,13 @@ export const GLOSSARY_ITEMS: GlossaryItem[] = [
     relatedLessonSlugs: ['input-handling-output-encoding-secure-defaults']
   }
 ];
+
+let active: GlossaryItem[] = LOCAL_GLOSSARY_ITEMS;
+
+/** Live binding: database-served glossary once hydrated, else the build copy. */
+export let GLOSSARY_ITEMS: GlossaryItem[] = active;
+
+export function setGlossaryItems(next: GlossaryItem[] | null | undefined): void {
+  active = next && next.length > 0 ? next : LOCAL_GLOSSARY_ITEMS;
+  GLOSSARY_ITEMS = active;
+}

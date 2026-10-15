@@ -11,7 +11,6 @@ import AboutSection from './components/about/AboutSection';
 import ContactSection from './components/contact/ContactSection';
 
 // Practical Cybersecurity Course Section
-import { LearnerProvider } from './courses/teaming/context/LearnerContext';
 import { CourseAccessGuard } from './courses/teaming/components/layout/CourseAccessGuard';
 import { TeamingLandingPage } from './courses/teaming/pages/TeamingLandingPage';
 import { ModuleOverviewPage } from './courses/teaming/pages/ModuleOverviewPage';
@@ -20,6 +19,18 @@ import { CourseResourcesPage } from './courses/teaming/pages/CourseResourcesPage
 import { CourseGlossaryPage } from './courses/teaming/pages/CourseGlossaryPage';
 import { LearnerProgressPage } from './courses/teaming/pages/LearnerProgressPage';
 import { CapstonePage } from './courses/teaming/pages/CapstonePage';
+
+// Platform: accounts, access tiers, learner dashboard
+import { AuthProvider } from './platform/auth/AuthContext';
+import { RequireAuth } from './platform/auth/RequireAuth';
+import {
+  LoginPage,
+  RegisterPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
+  VerifyEmailPage,
+} from './platform/pages/AuthPages';
+import { DashboardPage } from './platform/pages/DashboardPage';
 
 function PortfolioHome() {
   return (
@@ -42,18 +53,30 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <AuthProvider>
         <Routes>
           {/* Main Portfolio Single-Page Experience */}
           <Route path="/" element={<PortfolioHome />} />
 
+          {/* Accounts & Learner Dashboard */}
+          <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+          <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+          <Route path="/forgot-password" element={<Layout><ForgotPasswordPage /></Layout>} />
+          <Route path="/reset-password" element={<Layout><ResetPasswordPage /></Layout>} />
+          <Route path="/verify-email" element={<Layout><VerifyEmailPage /></Layout>} />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Layout><DashboardPage /></Layout>
+              </RequireAuth>
+            }
+          />
+
           {/* Practical Cybersecurity Course Section Routes */}
           <Route
             path="/courses/teaming"
-            element={
-              <LearnerProvider>
-                <CourseAccessGuard />
-              </LearnerProvider>
-            }
+            element={<CourseAccessGuard />}
           >
             <Route index element={<TeamingLandingPage />} />
             <Route path="modules/:moduleId" element={<ModuleOverviewPage />} />
@@ -72,6 +95,7 @@ function App() {
           {/* Catch-all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
   );

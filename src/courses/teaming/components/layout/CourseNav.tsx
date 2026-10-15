@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Navigate } from 'react-router-dom';
 import { Search, Shield, BookOpen, FileText, Bookmark, Award, Menu, X, ArrowLeft, LogOut, User } from 'lucide-react';
 import { StorageBadge } from './StorageBadge';
 import { CourseSearchModal } from '../search/CourseSearchModal';
 import { progressService } from '../../services/progressService';
-import { useLearner } from '../../context/LearnerContext';
+import { useAuth } from '../../../../platform/auth/AuthContext';
+import { useCourseContent } from '../../../../platform/course/CourseContentContext';
 
 export const CourseNav: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { profile, signOut } = useLearner();
+  const { user, signOut, unavailable } = useAuth();
+  const { usingLocalContent } = useCourseContent();
 
   const stats = progressService.getCourseCompletionStats();
+  const isServerSynced = !usingLocalContent && !!user && progressService.getProgress().isServerSynced;
 
   const navLinks = [
     { label: 'Overview', path: '/courses/teaming', icon: BookOpen },
@@ -125,17 +128,17 @@ export const CourseNav: React.FC = () => {
             </button>
 
             {/* Learner identity + sign out */}
-            {profile && (
+            {user && (
               <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-bg-secondary border border-border-subtle text-[11px] font-mono">
                 <User className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-text-secondary max-w-[140px] truncate" title={profile.name}>
-                  {profile.name}
+                <span className="text-text-secondary max-w-[140px] truncate" title={user.name}>
+                  {user.name}
                 </span>
                 <button
                   onClick={signOut}
                   className="p-1 -mr-1 rounded hover:bg-white/5 text-text-muted hover:text-text-primary transition-colors"
-                  title="Sign out / switch learner"
-                  aria-label="Sign out or switch learner"
+                  title="Sign out"
+                  aria-label="Sign out"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -143,7 +146,7 @@ export const CourseNav: React.FC = () => {
             )}
 
             {/* Storage status badge */}
-            <StorageBadge isServerSynced={profile?.source === 'server'} className="hidden md:inline-flex" />
+            <StorageBadge isServerSynced={isServerSynced} className="hidden md:inline-flex" />
 
             {/* Mobile Menu Toggle */}
             <button
@@ -175,16 +178,16 @@ export const CourseNav: React.FC = () => {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-bg-primary border-b border-border-subtle px-6 py-4 space-y-3">
             <div className="flex flex-col gap-2 pb-3 border-b border-border-subtle">
-              {profile && (
+              {user && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] font-mono text-text-secondary">
                     <User className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="max-w-[180px] truncate">{profile.name}</span>
+                    <span className="max-w-[180px] truncate">{user.name}</span>
                   </div>
                   <button
                     onClick={signOut}
                     className="p-1 rounded hover:bg-white/5 text-text-muted hover:text-text-primary transition-colors"
-                    title="Sign out / switch learner"
+                    title="Sign out"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                   </button>
@@ -194,7 +197,7 @@ export const CourseNav: React.FC = () => {
                 <span className="text-xs font-mono text-text-muted">
                   Progress: {stats.completedRequired}/{stats.totalRequired} Lessons ({stats.percentage}%)
                 </span>
-                <StorageBadge isServerSynced={profile?.source === 'server'} />
+                <StorageBadge isServerSynced={isServerSynced} />
               </div>
             </div>
             {navLinks.map((link) => (

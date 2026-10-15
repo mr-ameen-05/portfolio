@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { COURSE_METADATA } from '../data/courseMetadata';
 import { ALL_MODULES } from '../data/modulesManifest';
 import { progressService } from '../services/progressService';
 import { CourseNav } from '../components/layout/CourseNav';
 import { CourseBreadcrumb } from '../components/layout/CourseBreadcrumb';
-import { Track } from '../types/course.types';
+import { Track, AccessTier } from '../types/course.types';
 
 export const TeamingLandingPage: React.FC = () => {
   const [stats, setStats] = useState(() => progressService.getCourseCompletionStats());
@@ -45,6 +46,9 @@ export const TeamingLandingPage: React.FC = () => {
   const resumeTarget = lastVisitedSlug
     ? `/courses/teaming/lessons/${lastVisitedSlug}`
     : `/courses/teaming/lessons/${ALL_MODULES[0]?.lessons[0]?.slug || 'how-to-use-this-course'}`;
+
+  const tierOrder: Record<AccessTier, number> = { public: 0, registered: 1, enrolled: 2 };
+  const getTierRank = (tier?: AccessTier) => tier ? tierOrder[tier] : 0;
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
@@ -217,11 +221,15 @@ export const TeamingLandingPage: React.FC = () => {
                 progressService.isLessonCompleted(l.id)
               ).length;
               const isModuleComplete = completedCount === module.lessons.length;
+              const isLocked = module.locked === true;
+              const moduleTier = module.accessTier as AccessTier | undefined;
 
               return (
                 <div
                   key={module.id}
-                  className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-5 hover:border-accent/40 transition-colors space-y-4"
+                  className={`rounded-xl border border-border-subtle bg-bg-secondary/30 p-5 hover:border-accent/40 transition-colors space-y-4 ${
+                    isLocked ? 'opacity-75 border-amber-500/30' : ''
+                  }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-subtle/50 pb-3">
                     <div className="flex items-center gap-3">
@@ -231,6 +239,12 @@ export const TeamingLandingPage: React.FC = () => {
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase font-bold ${trackInfo.color}`}>
                         {module.track}
                       </span>
+                      {isLocked && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-mono">
+                          <Lock className="w-3 h-3" aria-hidden="true" />
+                          {moduleTier ? moduleTier.charAt(0).toUpperCase() + moduleTier.slice(1) : 'Locked'}
+                        </span>
+                      )}
                       <h3 className="text-base font-bold text-text-primary font-sans">
                         {module.title}
                       </h3>
@@ -259,16 +273,23 @@ export const TeamingLandingPage: React.FC = () => {
                       const isCompleted = progressService.isLessonCompleted(lesson.id);
                       const hasLab = lesson.sections.some(s => s.type === 'lab');
                       const hasQuiz = lesson.sections.some(s => s.type === 'quiz');
+                      const lessonLocked = lesson.locked === true;
 
                       return (
                         <Link
                           key={lesson.slug}
                           to={`/courses/teaming/lessons/${lesson.slug}`}
-                          className="flex items-center justify-between p-2 rounded bg-bg-primary/50 hover:bg-bg-primary border border-border-subtle text-xs transition-colors group"
+                          className={`flex items-center justify-between p-2 rounded bg-bg-primary/50 hover:bg-bg-primary border border-border-subtle text-xs transition-colors group ${
+                            lessonLocked ? 'opacity-60 cursor-not-allowed' : ''
+                          }`}
+                          aria-disabled={lessonLocked}
                         >
                           <div className="flex items-center gap-2 min-w-0">
+                            {lessonLocked && (
+                              <Lock className="w-3 h-3 text-amber-500 flex-shrink-0" aria-hidden="true" />
+                            )}
                             <span className={isCompleted ? 'text-emerald-400 font-bold' : 'text-text-muted'}>
-                              {isCompleted ? '✓' : '○'}
+                              {isCompleted ? '✓' : lessonLocked ? '🔒' : '○'}
                             </span>
                             <span className="text-text-secondary group-hover:text-text-primary truncate">
                               {lesson.title}

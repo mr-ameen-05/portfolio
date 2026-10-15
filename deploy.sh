@@ -28,15 +28,18 @@
 
 set -Eeuo pipefail
 
+# ── Target Server Static IP ──────────────────────────────────────────────────
+EXPECTED_EC2_IP="3.214.240.115"
+
 # ── pretty output ────────────────────────────────────────────────────────────
 if [[ -t 1 ]]; then
   C_RESET='\033[0m'; C_BOLD='\033[1m'; C_BLUE='\033[34m'; C_GREEN='\033[32m'; C_YELLOW='\033[33m'; C_RED='\033[31m'
 else
   C_RESET=''; C_BOLD=''; C_BLUE=''; C_GREEN=''; C_YELLOW=''; C_RED=''
 fi
-log()  { printf "${C_BLUE}${C_BOLD}▸${C_RESET} %s\n" "$*"; }
-ok()   { printf "${C_GREEN}✓${C_RESET} %s\n" "$*"; }
-warn() { printf "${C_YELLOW}!${C_RESET} %s\n" "$*" >&2; }
+log()  { printf "${C_BLUE}${C_BOLD}▸${C_RESET} \%s\n" "$*"; }
+ok()   { printf "${C_GREEN}✓${C_RESET} \%s\n" "$*"; }
+warn() { printf "${C_YELLOW}!${C_RESET} \%s\n" "$*" >&2; }
 die()  { printf "${C_RED}✗ %s${C_RESET}\n" "$*" >&2; exit 1; }
 step() { printf "\n${C_BOLD}${C_BLUE}══ %s ══${C_RESET}\n" "$*"; }
 
@@ -48,7 +51,7 @@ CONFIG="$ROOT/deploy/deploy.env"
 require_root() { [[ "${EUID}" -eq 0 ]] || die "run as root:  sudo ./deploy.sh $COMMAND"; }
 
 load_config() {
-  [[ -f "$CONFIG" ]] || die "missing $CONFIG — run:  cp deploy/deploy.env.example deploy/deploy.env  and edit it"
+  [[ -f "$CONFIG" ]] \vert{}\vert{} die "missing $CONFIG — run:  cp deploy/deploy.env.example deploy/deploy.env  and edit it"
   set -a
   # shellcheck disable=SC1090
   source "$CONFIG"
@@ -79,14 +82,19 @@ load_config() {
   NPM_AUDIT_FIX_FORCE="${NPM_AUDIT_FIX_FORCE:-false}"
 }
 
-# ── helpers ──────────────────────────────────────────────────────────────────
+# ── helpers ───────────────────────────────────────────────────────────────
 detect_php_socket() {
-  if [[ -n "$PHP_VERSION" ]]; then
-    PHP_SOCK="/run/php/php${PHP_VERSION}-fpm.sock"
+  if [[ -S "/run/php/php8.5-fpm.sock" ]]; then
+    PHP_SOCK="/run/php/php8.5-fpm.sock"
+    PHP_VERSION="8.5"
+  elif [[ -S "/run/php/php-fpm.sock" ]]; then
+    PHP_SOCK="/run/php/php-fpm.sock"
+    PHP_VERSION="8.5"
   else
-    PHP_SOCK="$(ls /run/php/php*-fpm.sock 2>/dev/null | head -n1 || true)"
+    PHP_SOCK="$(ls -1 /run/php/php[0-9]*-fpm.sock 2>/dev/null | head -n1 || true)"
     [[ -n "$PHP_SOCK" ]] && PHP_VERSION="$(basename "$PHP_SOCK" | sed -E 's/php([0-9.]+)-fpm.sock/\1/')"
   fi
+
   [[ -n "${PHP_SOCK:-}" && -S "$PHP_SOCK" ]] || die "php-fpm socket not found (tried $PHP_SOCK). Is php-fpm installed/running?"
 }
 
@@ -101,9 +109,9 @@ mysql_root() {
 check() { # check <label> <command...>
   local label="$1"; shift
   if "$@" >/dev/null 2>&1; then
-    printf "  ${C_GREEN}✓${C_RESET} %s\n" "$label"; return 0
+    printf "  ${C_GREEN}✓${C_RESET} \%s\n" "$label"; return 0
   fi
-  printf "  ${C_RED}✗${C_RESET} %s\n" "$label"; return 1
+  printf "  ${C_RED}✗${C_RESET} \%s\n" "$label"; return 1
 }
 
 render() { # render <template> <destination>
@@ -126,7 +134,7 @@ install_nginx_site() { # install_nginx_site [auto|full]
   local mode="${1:-auto}"
   detect_php_socket
   local avail="/etc/nginx/sites-available/$DOMAIN"
-  if [[ "$mode" == "full" ]] || { [[ "$mode" == "auto" ]] && cert_exists; }; then
+  if [[ "$mode" == "full" ]] \vert{}\vert{} { [[ "$mode" == "auto" ]] && cert_exists; }; then
     render "$ROOT/deploy/nginx/aiameen.online.conf.template" "$avail"
     log "installed full HTTPS nginx config"
   else
@@ -181,8 +189,8 @@ cmd_provision() {
   apt-get update -y
   apt-get install -y \
     nginx mysql-server ca-certificates curl git rsync unzip jq openssl ufw \
-    php-fpm php-cli php-mysql php-mbstring php-curl php-xml php-zip php-opcache \
-    certbot
+    php-fpm php-cli php-mysql php-mbstring php-curl php-xml php-zip \
+    certbot dnsutils
 
   if [[ "$CREATE_SWAP" == "true" ]] && ! swapon --show | grep -q .; then
     log "creating 2G swapfile (safer builds on small instances)"
@@ -208,7 +216,6 @@ cmd_provision() {
 
   systemctl enable --now nginx >/dev/null 2>&1 || true
   systemctl enable --now mysql >/dev/null 2>&1 || systemctl enable --now mysqld >/dev/null 2>&1 || true
-  # enable whichever php-fpm service exists
   for svc in /lib/systemd/system/php*-fpm.service; do
     [[ -e "$svc" ]] && systemctl enable --now "$(basename "$svc")" >/dev/null 2>&1 || true
   done
@@ -229,9 +236,11 @@ cmd_config() {
   detect_php_socket
 
   mkdir -p "/etc/aiameen" /var/log/aiameen "$APP_ROOT/public" "$APP_ROOT/api" /var/www/certbot
+  chown -R "$SITE_USER":"$SITE_USER" /var/www/certbot
+  chmod 755 /var/www/certbot
+
   write_api_env
 
-  # PHP hardening/limits
   for sapi in /etc/php/*/fpm/conf.d /etc/php/*/cli/conf.d; do
     [[ -d "$sapi" ]] && cp "$ROOT/deploy/php/99-aiameen.ini" "$sapi/99-aiameen.ini"
   done
@@ -272,8 +281,6 @@ cmd_build() {
   cd "$ROOT"
   if [[ -f package-lock.json ]]; then npm ci; else npm install; fi
 
-  # Auto-patch npm vulnerabilities. `npm audit fix` only applies fixes allowed
-  # by the semver ranges in package.json (non-breaking). --force is opt-in.
   if [[ "$NPM_AUDIT_FIX" == "true" ]]; then
     log "npm audit fix (non-breaking security patches)"
     npm audit fix --audit-level=high || warn "npm audit fix could not resolve everything (run: sudo ./deploy.sh audit)"
@@ -319,12 +326,30 @@ cmd_tls() {
   require_root
   step "Obtaining TLS certificate (Let's Encrypt)"
   mkdir -p /var/www/certbot
+  chown -R "$SITE_USER":"$SITE_USER" /var/www/certbot
+  chmod 755 /var/www/certbot
 
-  # ensure nginx is serving :80 for the HTTP-01 challenge
+  # Ensure nginx is serving :80 for the HTTP-01 challenge
   install_nginx_site
 
   local domains=(-d "$DOMAIN")
   [[ "$INCLUDE_WWW" == "true" ]] && domains+=(-d "$WWW_DOMAIN")
+
+  # Pre-flight DNS sanity check against the expected EC2 Elastic IP
+  log "Checking DNS propagation against $EXPECTED_EC2_IP..."
+  local apex_dns www_dns
+  apex_dns="$(dig +short "$DOMAIN" @8.8.8.8 | tail -n1 || true)"
+  if [[ "$apex_dns" != "$EXPECTED_EC2_IP" ]]; then
+    die "DNS mismatch for $DOMAIN: resolves to '$apex_dns', but expected EC2 IP is '$EXPECTED_EC2_IP'. Wait for Hostinger DNS to finish propagating."
+  fi
+
+  if [[ "$INCLUDE_WWW" == "true" ]]; then
+    www_dns="$(dig +short "$WWW_DOMAIN" @8.8.8.8 | tail -n1 || true)"
+    if [[ "$www_dns" != "$EXPECTED_EC2_IP" ]]; then
+      die "DNS mismatch for $WWW_DOMAIN: resolves to '$www_dns', but expected EC2 IP is '$EXPECTED_EC2_IP'. Wait for Hostinger DNS to finish propagating."
+    fi
+  fi
+  ok "DNS check passed ($DOMAIN & $WWW_DOMAIN point to$EXPECTED_EC2_IP)"
 
   if cert_exists; then
     log "certificate already present — checking for renewal"
@@ -348,7 +373,7 @@ cmd_status() {
     printf "  %-12s %s\n" "$svc" "$(systemctl is-active "$svc" 2>/dev/null || echo unknown)"
   done
   for sock in /run/php/php*-fpm.sock; do
-    [[ -S "$sock" ]] && printf "  %-12s %s\n" "php-fpm" "active ($sock)"
+    [[ -S "$sock" ]] && printf "  \%-12s \%s\n" "php-fpm" "active ($sock)"
   done
   echo
   command -v certbot >/dev/null && certbot certificates 2>/dev/null | grep -E "Certificate Name|Domains|Expiry" || warn "certbot not installed"
@@ -402,21 +427,21 @@ cmd_verify() {
 
   # ── php extensions required by the API / mailer ──
   for ext in pdo_mysql openssl mbstring curl dom zip opcache; do
-    check "php extension: $ext" php -r "exit(extension_loaded('$ext') ? 0 : 1);" || failures=$((failures + 1))
+    check "php extension: $ext" php -r "exit(extension_loaded('$ext') ? 0 : 1);" \vert{}\vert{} failures=$((failures + 1))
   done
 
   # ── configuration ──
-  check "api env exists with 640 perms" bash -c '[[ "$(stat -c %a /etc/aiameen/api.env)" == "640" ]]' || failures=$((failures + 1))
+  check "api env exists with 640 perms" bash -c '[[ "$(stat -c \%a /etc/aiameen/api.env)" == "640" ]]' \vert{}\vert{} failures=$((failures + 1))
   check "nginx config test passes" nginx -t || failures=$((failures + 1))
   if [[ "$CREATE_SWAP" == "true" ]]; then
     check "swap is active" bash -c 'swapon --show | grep -q .' || failures=$((failures + 1))
   fi
 
   # ── HTTP behaviour ──
-  code="$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $DOMAIN" "http://127.0.0.1/" || echo 000)"
-  check "HTTP :80 redirects to HTTPS (301)" bash -c "[[ '$code' == 301 ]]" || failures=$((failures + 1))
-  code="$(curl -sk -o /dev/null -w '%{http_code}' -H "Host: $DOMAIN" "https://127.0.0.1/" || echo 000)"
-  check "HTTPS site responds 200" bash -c "[[ '$code' == 200 ]]" || failures=$((failures + 1))
+  code="$(curl -s -o /dev/null -w '\%{http_code}' -H "Host: $DOMAIN" "http://127.0.0.1/" || echo 000)"
+  check "HTTP :80 redirects to HTTPS (301)" bash -c "[[ '$code' == 301 ]]" \vert{}\vert{} failures=$((failures + 1))
+  code="$(curl -sk -o /dev/null -w '\%{http_code}' -H "Host: $DOMAIN" "https://127.0.0.1/" || echo 000)"
+  check "HTTPS site responds 200" bash -c "[[ '$code' == 200 ]]" \vert{}\vert{} failures=$((failures + 1))
 
   # ── API + database ──
   health="$(curl -sk -H "Host: $DOMAIN" "https://127.0.0.1/api/health.php" 2>/dev/null || true)"

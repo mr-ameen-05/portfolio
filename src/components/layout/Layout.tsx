@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SITE } from '../../config/site.config';
+import { useAuth } from '../../platform/auth/AuthContext';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <div className="relative min-h-screen bg-bg-primary text-text-primary overflow-x-hidden selection:bg-accent selection:text-black">
@@ -26,6 +28,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="text-xs font-mono px-3 py-1.5 rounded-full border border-accent/40 bg-accent/10 text-accent hover:bg-accent hover:text-black transition-all uppercase tracking-wider font-semibold"
           >
             🛡️ Security Course
+          </Link>
+          <Link
+            to={isAuthenticated ? '/dashboard' : '/login'}
+            className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors uppercase tracking-widest"
+          >
+            {isAuthenticated ? (user?.name?.split(' ')[0] || 'Dashboard') : 'Sign in'}
           </Link>
         </div>
 
@@ -60,6 +68,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="text-lg font-mono text-accent hover:underline uppercase tracking-widest font-bold"
           >
             🛡️ Security Course (11 Modules)
+          </Link>
+          <Link
+            to={isAuthenticated ? '/dashboard' : '/login'}
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-lg font-mono text-text-secondary hover:text-text-primary transition-colors uppercase tracking-widest"
+          >
+            {isAuthenticated ? 'Dashboard' : 'Sign in'}
           </Link>
         </div>
       )}

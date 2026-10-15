@@ -1,6 +1,7 @@
 import { CourseMetadata } from '../types/course.types';
 
-export const COURSE_METADATA: CourseMetadata = {
+/** Build-time authoring source / offline fallback. */
+export const LOCAL_COURSE_METADATA: CourseMetadata = {
   id: 'practical-cybersecurity-teaming',
   slug: 'teaming',
   title: 'Practical Cybersecurity: Red Teaming, Blue Teaming, and Purple Teaming',
@@ -35,3 +36,13 @@ export const COURSE_METADATA: CourseMetadata = {
   publishedAt: '2026-03-01',
   lastUpdated: '2026-10-14'
 };
+
+let active: CourseMetadata = LOCAL_COURSE_METADATA;
+
+/** Live binding: database-served metadata once hydrated, else the build copy. */
+export let COURSE_METADATA: CourseMetadata = active;
+
+export function setCourseMetadata(next: CourseMetadata | null | undefined): void {
+  active = next ?? LOCAL_COURSE_METADATA;
+  COURSE_METADATA = active;
+}

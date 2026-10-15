@@ -11,7 +11,13 @@ import { MODULE_8 } from './modules/module8';
 import { MODULE_9 } from './modules/module9';
 import { MODULE_10 } from './modules/module10';
 
-export const ALL_MODULES: ModuleData[] = [
+/**
+ * Build-time authoring source. Also the offline / pre-hydration fallback: the
+ * course shell replaces the active set with database-served content once the
+ * API bundle arrives (see src/platform/course). Keeping the local copy means the
+ * course still renders (and stays SEO-visible) if the API is unreachable.
+ */
+const LOCAL_MODULES: ModuleData[] = [
   MODULE_0,
   MODULE_1,
   MODULE_2,
@@ -24,6 +30,25 @@ export const ALL_MODULES: ModuleData[] = [
   MODULE_9,
   MODULE_10,
 ];
+
+let active: ModuleData[] = LOCAL_MODULES;
+
+/**
+ * The currently active module set. Exported as a live binding: importers that
+ * read `ALL_MODULES` observe the new value after {@link setCourseModules} runs.
+ */
+export let ALL_MODULES: ModuleData[] = active;
+
+/** Swap in database-served modules, or pass null to fall back to the build. */
+export function setCourseModules(next: ModuleData[] | null | undefined): void {
+  active = next && next.length > 0 ? next : LOCAL_MODULES;
+  ALL_MODULES = active;
+}
+
+/** True while the build-time content is active (API unavailable/not deployed). */
+export function isUsingLocalContent(): boolean {
+  return active === LOCAL_MODULES;
+}
 
 export function getAllModules(): ModuleData[] {
   return ALL_MODULES;

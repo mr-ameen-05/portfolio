@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { getLessonBySlug } from '../data/modulesManifest';
 import { progressService } from '../services/progressService';
 import { CourseNav } from '../components/layout/CourseNav';
@@ -7,6 +8,8 @@ import { CourseBreadcrumb } from '../components/layout/CourseBreadcrumb';
 import { LessonSidebar } from '../components/player/LessonSidebar';
 import { LessonContent } from '../components/player/LessonContent';
 import { StateError, StateLocked, StateLoading } from '../components/common/CourseStates';
+import { CourseLockNotice } from '../components/layout/CourseLockNotice';
+import { AccessTier } from '../types/course.types';
 
 export const LessonPlayerPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -59,10 +62,33 @@ export const LessonPlayerPage: React.FC = () => {
     );
   }
 
+  // Show lock notice if lesson is gated
+  if (lesson.locked === true) {
+    const tierLabel = lesson.accessTier === 'enrolled' ? 'Full Enrollment' : 'Free Account';
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary">
+        <CourseNav />
+        <main className="max-w-4xl mx-auto px-4 py-12">
+          <CourseBreadcrumb
+            items={[
+              { label: `M${currentModule.orderIndex}`, path: `/courses/teaming/modules/${currentModule.slug}` },
+              { label: lesson.title },
+            ]}
+          />
+          <CourseLockNotice
+            requiredTier={(lesson.accessTier === 'public' ? 'registered' : lesson.accessTier) ?? 'enrolled'}
+            title={`${tierLabel} Required: ${lesson.title}`}
+            message={lesson.whyThisMatters}
+            fallbackLink={{ label: 'View module overview', href: `/courses/teaming/modules/${currentModule.slug}` }}
+          />
+        </main>
+      </div>
+    );
+  }
+
   // Safety gate check: If this is an offensive module (e.g. Module 4 or 5) and learner has not completed Module 0 safety check
   const isOffensiveTrack = currentModule.track === 'red';
-  const safetyQuizResult = progressService.getProgress().quizAttempts['quiz-mod-00'];
-  const isSafetyLocked = isOffensiveTrack && (!safetyQuizResult || !safetyQuizResult.passed);
+  const isSafetyLocked = isOffensiveTrack && !progressService.isModuleQuizPassed(currentModule.id);
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">

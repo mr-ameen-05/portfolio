@@ -110,6 +110,19 @@ function require_post(): void
     }
 }
 
+function require_get(): void
+{
+    $method = $_SERVER['REQUEST_METHOD'] ?? '';
+    if ($method !== 'GET' && $method !== 'HEAD') {
+        json_out(405, ['error' => 'Method not allowed']);
+    }
+}
+
+function request_method(): string
+{
+    return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+}
+
 function client_ip(): string
 {
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
@@ -131,8 +144,8 @@ $allowedOrigins = array_filter(array_map('trim', explode(',', (string) env('ALLO
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if ($origin !== '' && (in_array('*', $allowedOrigins, true) || in_array($origin, $allowedOrigins, true))) {
     header("Access-Control-Allow-Origin: $origin");
-    header('Access-Control-Allow-Methods: POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
     header('Access-Control-Max-Age: 86400');
 }
 
@@ -148,3 +161,8 @@ require_once API_ROOT . '/lib/Database.php';
 require_once API_ROOT . '/lib/EmailTemplate.php';
 require_once API_ROOT . '/lib/Mailer.php';
 require_once API_ROOT . '/lib/RateLimiter.php';
+require_once API_ROOT . '/lib/Validator.php';
+require_once API_ROOT . '/lib/Auth.php';
+require_once API_ROOT . '/lib/Migrator.php';
+require_once API_ROOT . '/lib/Accounts.php';
+require_once API_ROOT . '/lib/Content.php';
