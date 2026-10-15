@@ -301,7 +301,7 @@ cmd_provision() {
   apt-get update -y
   apt-get install -y \
     nginx mysql-server ca-certificates curl git rsync unzip jq openssl ufw \
-    php-fpm php-cli php-mysql php-mbstring php-curl php-xml php-zip php-opcache \
+    php-fpm php-cli php-mysql php-mbstring php-curl php-xml php-zip \
     certbot
 
   if [[ "$CREATE_SWAP" == "true" ]] && ! swapon --show | grep -q .; then
