@@ -259,6 +259,24 @@ SQL
 
   mysql_root "$DB_NAME" < "$ROOT/deploy/mysql/schema.sql"
   ok "database '$DB_NAME' ready (user '$DB_USER')"
+
+  # Apply incremental migrations. --force keeps re-runs safe by continuing past
+  # "already applied" DDL errors (e.g. duplicate column on a guarded ALTER).
+  if compgen -G "$ROOT/deploy/mysql/migrations/*.sql" >/dev/null; then
+    for migration in "$ROOT"/deploy/mysql/migrations/*.sql; do
+      mysql_root --force "$DB_NAME" < "$migration" >/dev/null 2>&1 || true
+    done
+    ok "migrations applied"
+  fi
+
+  # Seed structured course content when the API env + PHP are available.
+  if [[ -f /etc/aiameen/api.env ]] && command -v php >/dev/null 2>&1; then
+    php "$ROOT/api/tools/seed_content.php" >/dev/null 2>&1 \
+      && ok "course content seeded" \
+      || warn "course content seed skipped (run: sudo php api/tools/seed_content.php)"
+  else
+    warn "content seed skipped — run 'sudo ./deploy.sh config' then 'php api/tools/seed_content.php'"
+  fi
 }
 
 cmd_build() {
