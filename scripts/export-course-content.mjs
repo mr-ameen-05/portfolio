@@ -128,7 +128,6 @@ function mapQuiz(quiz, scope, scopeId) {
 }
 
 const snapshot = {
-  generated_at: new Date().toISOString(),
   course: {
     slug: COURSE_METADATA.slug,
     title: COURSE_METADATA.title,
