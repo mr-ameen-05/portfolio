@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { ALL_MODULES } from '../../data/modulesManifest';
 import { progressService } from '../../services/progressService';
 import { Track } from '../../types/course.types';
@@ -181,6 +182,9 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
                       >
                         {module.track}
                       </span>
+                      {module.locked === true && (
+                        <Lock className="w-2.5 h-2.5 text-amber-500" aria-hidden="true" />
+                      )}
                     </div>
                     <div className="text-xs font-semibold text-text-primary group-hover:text-accent truncate transition-colors">
                       {module.title}
@@ -226,6 +230,7 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
                     const isCompleted = completedMap.get(lesson.slug);
                     const hasLab = lesson.sections.some(s => s.type === 'lab');
                     const hasQuiz = lesson.sections.some(s => s.type === 'quiz');
+                    const lessonLocked = lesson.locked === true;
 
                     return (
                       <Link
@@ -235,23 +240,33 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
                         className={`group flex items-start gap-2 p-1.5 rounded text-xs transition-colors ${
                           isActive
                             ? 'bg-accent/15 text-accent font-semibold border-l-2 border-accent'
+                            : lessonLocked
+                            ? 'opacity-50 cursor-not-allowed'
                             : 'text-text-secondary hover:text-text-primary hover:bg-bg-primary/50'
                         }`}
+                        aria-disabled={lessonLocked}
                       >
-                        {/* Checkbox icon */}
+                        {/* Checkbox/lock icon */}
                         <span
                           className={`mt-0.5 flex-shrink-0 w-3.5 h-3.5 rounded border flex items-center justify-center text-[9px] ${
                             isCompleted
                               ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
+                              : lessonLocked
+                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
                               : 'border-border-subtle text-transparent group-hover:border-text-muted'
                           }`}
-                          title={isCompleted ? 'Completed' : 'Not completed'}
+                          title={isCompleted ? 'Completed' : lessonLocked ? 'Locked' : 'Not completed'}
                         >
-                          ✓
+                          {isCompleted ? '✓' : lessonLocked ? (
+                            <Lock className="w-3 h-3" aria-hidden="true" />
+                          ) : ''}
                         </span>
 
                         <div className="flex-1 min-w-0">
-                          <div className="truncate leading-snug">{lesson.title}</div>
+                          <div className="flex items-center gap-1.5 truncate">
+                            {lessonLocked && <Lock className="w-3 h-3 text-amber-500 flex-shrink-0" aria-hidden="true" />}
+                            <span>{lesson.title}</span>
+                          </div>
                           <div className="flex items-center gap-2 mt-0.5 text-[10px] font-mono text-text-muted">
                             <span>{lesson.estimatedMinutes.total}m</span>
                             {hasLab && (

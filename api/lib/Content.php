@@ -66,7 +66,7 @@ final class Content
 
         $stmt = self::pdo()->prepare(
             'SELECT m.id, m.slug, m.title, m.summary, m.objectives, m.track,
-                    m.access_tier, m.sort_order,
+                    m.access_tier, m.sort_order, m.required, m.one_page_cheat_sheet,
                     (SELECT COUNT(*) FROM lessons l WHERE l.module_id = m.id) AS lesson_count,
                     (SELECT COALESCE(SUM(l.estimated_minutes), 0) FROM lessons l WHERE l.module_id = m.id) AS total_minutes
                FROM modules m
@@ -76,12 +76,52 @@ final class Content
         $stmt->execute([':c' => $course['id']]);
 
         $modules = [];
+        $indexBySlug = [];
         foreach ($stmt->fetchAll() as $m) {
+            $unlocked = Auth::has_tier($userId, $slug, (string) $m['access_tier']);
             $m['objectives'] = self::json($m['objectives']);
             $m['lesson_count'] = (int) $m['lesson_count'];
             $m['total_minutes'] = (int) $m['total_minutes'];
-            $m['locked'] = !Auth::has_tier($userId, $slug, (string) $m['access_tier']);
+            $m['required'] = (bool) $m['required'];
+            $m['locked'] = !$unlocked;
+            // Body-level material stays hidden until the tier is met.
+            $m['one_page_cheat_sheet'] = $unlocked ? (string) ($m['one_page_cheat_sheet'] ?? '') : null;
+            $m['lessons'] = [];
+            $indexBySlug[(string) $m['slug']] = count($modules);
             $modules[] = $m;
+        }
+
+        // Attach a lightweight lesson index (titles/teasers only — no bodies).
+        $ls = self::pdo()->prepare(
+            'SELECT l.slug, l.title, l.sort_order, l.required, l.estimated_minutes,
+                    l.minutes_reading, l.minutes_practice, l.level, l.access_tier,
+                    l.why_this_matters, l.sections, m.slug AS module_slug
+               FROM lessons l
+               JOIN modules m ON m.id = l.module_id
+              WHERE m.course_id = :c
+              ORDER BY m.sort_order, l.sort_order'
+        );
+        $ls->execute([':c' => $course['id']]);
+        foreach ($ls->fetchAll() as $l) {
+            $idx = $indexBySlug[(string) $l['module_slug']] ?? null;
+            if ($idx === null) {
+                continue;
+            }
+            $modules[$idx]['lessons'][] = [
+                'slug'              => (string) $l['slug'],
+                'title'             => (string) $l['title'],
+                'sort_order'        => (int) $l['sort_order'],
+                'required'          => (bool) $l['required'],
+                'estimated_minutes' => (int) $l['estimated_minutes'],
+                'minutes_reading'   => (int) $l['minutes_reading'],
+                'minutes_practice'  => (int) $l['minutes_practice'],
+                'level'             => (string) $l['level'],
+                'access_tier'       => (string) $l['access_tier'],
+                'why_this_matters'  => (string) ($l['why_this_matters'] ?? ''),
+                'has_lab'           => self::sections_have($l['sections'], 'lab'),
+                'has_quiz'          => self::sections_have($l['sections'], 'quiz'),
+                'locked'            => !Auth::has_tier($userId, $slug, (string) $l['access_tier']),
+            ];
         }
 
         return [
@@ -95,12 +135,83 @@ final class Content
             'audience'           => (string) $course['audience'],
             'estimated_weeks'    => (string) $course['estimated_weeks'],
             'hours_per_week'     => (string) $course['hours_per_week'],
+            'total_estimated_minutes' => (int) ($course['total_estimated_minutes'] ?? 0),
+            'author'             => [
+                'name'        => (string) ($course['author_name'] ?? ''),
+                'role'        => (string) ($course['author_role'] ?? ''),
+                'credentials' => (string) ($course['author_credentials'] ?? ''),
+            ],
+            'last_updated'       => $course['last_updated'] ?? null,
             'prerequisites'      => self::json($course['prerequisites']),
             'outcomes'           => self::json($course['outcomes']),
             'safety_statement'   => (string) $course['safety_statement'],
             'published_at'       => $course['published_at'],
             'modules'            => $modules,
             'access'             => $tier ?? 'guest',
+        ];
+    }
+
+    /**
+     * Full course payload for the SPA: course + modules whose lessons carry
+     * their complete bodies when the viewer's tier allows, or metadata-only
+     * stubs (locked: true) when it does not. Includes resources + glossary.
+     */
+    public static function course_bundle(array $course, ?int $userId): array
+    {
+        $slug = (string) $course['slug'];
+
+        $stmt = self::pdo()->prepare(
+            'SELECT l.*, m.slug AS module_slug, m.title AS module_title, m.track AS module_track,
+                    m.sort_order AS module_order, c.slug AS course_slug, c.title AS course_title
+               FROM lessons l
+               JOIN modules m ON m.id = l.module_id
+               JOIN courses c ON c.id = m.course_id
+              WHERE m.course_id = :c
+              ORDER BY m.sort_order, l.sort_order'
+        );
+        $stmt->execute([':c' => $course['id']]);
+
+        $byModule = [];
+        foreach ($stmt->fetchAll() as $row) {
+            if (Auth::has_tier($userId, $slug, (string) $row['access_tier'])) {
+                $lesson = self::lesson_public($row);
+                $lesson['locked'] = false;
+            } else {
+                $lesson = self::lesson_meta($row);
+                $lesson['locked'] = true;
+            }
+            $byModule[(string) $row['module_slug']][] = $lesson;
+        }
+
+        $overview = self::course_overview($course, $userId);
+        foreach ($overview['modules'] as &$m) {
+            $m['lessons'] = $byModule[(string) $m['slug']] ?? [];
+        }
+        unset($m);
+
+        $overview['resources'] = self::resources_for_course((int) $course['id'], $userId, $slug);
+        $overview['glossary']  = self::glossary();
+        return $overview;
+    }
+
+    /** Metadata-only lesson projection used for locked lessons. */
+    public static function lesson_meta(array $lesson): array
+    {
+        return [
+            'slug'              => (string) $lesson['slug'],
+            'title'             => (string) $lesson['title'],
+            'sort_order'        => (int) $lesson['sort_order'],
+            'required'          => (bool) $lesson['required'],
+            'estimated_minutes' => (int) $lesson['estimated_minutes'],
+            'minutes_reading'   => (int) ($lesson['minutes_reading'] ?? 0),
+            'minutes_practice'  => (int) ($lesson['minutes_practice'] ?? 0),
+            'access_tier'       => (string) $lesson['access_tier'],
+            'level'             => (string) $lesson['level'],
+            'version'           => (string) $lesson['version'],
+            'why_this_matters'  => (string) ($lesson['why_this_matters'] ?? ''),
+            'objectives'        => self::json($lesson['objectives']),
+            'has_lab'           => self::sections_have($lesson['sections'] ?? null, 'lab'),
+            'has_quiz'          => self::sections_have($lesson['sections'] ?? null, 'quiz'),
         ];
     }
 
@@ -138,6 +249,8 @@ final class Content
             'module_order'      => (int) $lesson['module_order'],
             'required'          => (bool) $lesson['required'],
             'estimated_minutes' => (int) $lesson['estimated_minutes'],
+            'minutes_reading'   => (int) ($lesson['minutes_reading'] ?? 0),
+            'minutes_practice'  => (int) ($lesson['minutes_practice'] ?? 0),
             'access_tier'       => (string) $lesson['access_tier'],
             'level'             => (string) $lesson['level'],
             'version'           => (string) $lesson['version'],
@@ -145,10 +258,25 @@ final class Content
             'objectives'        => self::json($lesson['objectives']),
             'key_terms'         => self::json($lesson['key_terms']),
             'sections'          => self::json($lesson['sections']),
+            'summary_takeaways' => self::json($lesson['summary_takeaways'] ?? null),
+            'prerequisites'     => self::json($lesson['prerequisites'] ?? null),
             'references'        => self::json($lesson['refs']),
+            'has_lab'           => self::sections_have($lesson['sections'] ?? null, 'lab'),
+            'has_quiz'          => self::sections_have($lesson['sections'] ?? null, 'quiz'),
             'last_reviewed_at'  => $lesson['last_reviewed_at'],
             'published_at'      => $lesson['published_at'],
         ];
+    }
+
+    /** True when a raw `sections` JSON column contains a block of the given type. */
+    private static function sections_have(mixed $raw, string $type): bool
+    {
+        foreach (self::json($raw) as $section) {
+            if (is_array($section) && ($section['type'] ?? null) === $type) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ─────────────────────────────── quizzes ───────────────────────────────

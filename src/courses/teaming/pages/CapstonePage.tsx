@@ -1,10 +1,39 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Lock, ShieldCheck } from 'lucide-react';
 import { CourseNav } from '../components/layout/CourseNav';
 import { CourseBreadcrumb } from '../components/layout/CourseBreadcrumb';
 import { COURSE_RESOURCES } from '../data/resourcesData';
+import { useAuth } from '../../../platform/auth/AuthContext';
+import { useCourseContent } from '../../../platform/course/CourseContentContext';
+import { CourseLockNotice } from '../components/layout/CourseLockNotice';
 
 export const CapstonePage: React.FC = () => {
+  const { user, entitlements } = useAuth();
+  const { usingLocalContent } = useCourseContent();
+
+  // Require enrolled tier for capstone
+  const isEnrolled = entitlements?.tier === 'enrolled';
+  if (!isEnrolled && !usingLocalContent) {
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary">
+        <CourseNav />
+        <main className="max-w-4xl mx-auto px-4 py-12">
+          <CourseBreadcrumb
+            items={[
+              { label: 'Module 10 Capstone Scenario' },
+            ]}
+          />
+          <CourseLockNotice
+            requiredTier="enrolled"
+            title="Full Enrollment Required: Capstone"
+            message="The capstone project requires full course enrollment to access the assessment rubric and submission workflow."
+          />
+        </main>
+      </div>
+    );
+  }
+
   // Rubric self-evaluation criteria
   const rubricSections = [
     {

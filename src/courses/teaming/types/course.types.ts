@@ -1,6 +1,9 @@
 export type TrackType = 'core' | 'red' | 'blue' | 'purple';
 export type Track = TrackType;
 
+/** Access tier required to view a piece of course content. */
+export type AccessTier = 'public' | 'registered' | 'enrolled';
+
 export interface CourseMetadata {
   id: string;
   slug: string;
@@ -53,6 +56,10 @@ export interface QuizData {
   passingScore: number; // e.g. 70
   requiresSafetyPass?: boolean;
   questions: QuizQuestion[];
+  /** API grading scope (when content is served from the database). */
+  scope?: 'lesson' | 'module';
+  scopeId?: string;
+  locked?: boolean;
 }
 
 export interface WorkedExample {
@@ -111,6 +118,11 @@ export interface Lesson {
   references: LessonReference[];
   publishedAt: string;
   version: string;
+  /** Access metadata (present when content is served from the database). */
+  locked?: boolean;
+  accessTier?: AccessTier;
+  hasLab?: boolean;
+  hasQuiz?: boolean;
 }
 
 export interface ModuleData {
@@ -126,6 +138,9 @@ export interface ModuleData {
   lessons: Lesson[];
   moduleQuiz?: QuizData;
   onePageCheatSheet: string;
+  /** Access metadata (present when content is served from the database). */
+  locked?: boolean;
+  accessTier?: AccessTier;
 }
 
 export interface GlossaryItem {
@@ -150,6 +165,9 @@ export interface ResourceItem {
   accessibilityNotes: string;
   downloadFileName: string;
   contentMarkdown: string;
+  /** Access metadata (present when content is served from the database). */
+  locked?: boolean;
+  accessTier?: AccessTier;
 }
 
 export interface LearnerProfile {

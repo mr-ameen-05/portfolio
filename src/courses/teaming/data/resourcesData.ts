@@ -1,6 +1,7 @@
 import { ResourceItem } from '../types/course.types';
 
-export const COURSE_RESOURCES: ResourceItem[] = [
+/** Build-time authoring source / offline fallback for the resource library. */
+export const LOCAL_COURSE_RESOURCES: ResourceItem[] = [
   {
     id: 'res-roe-checklist',
     title: 'Scope & Rules of Engagement (ROE) Pre-Flight Checklist',
@@ -278,3 +279,13 @@ Comprehensive vocabulary reference covering Core, Red, Blue, and Purple Teaming 
 [Refer to the interactive Glossary section at /courses/teaming/glossary for full searchable terms.]`
   }
 ];
+
+let active: ResourceItem[] = LOCAL_COURSE_RESOURCES;
+
+/** Live binding: database-served resources once hydrated, else the build copy. */
+export let COURSE_RESOURCES: ResourceItem[] = active;
+
+export function setCourseResources(next: ResourceItem[] | null | undefined): void {
+  active = next && next.length > 0 ? next : LOCAL_COURSE_RESOURCES;
+  COURSE_RESOURCES = active;
+}

@@ -11,7 +11,6 @@ import AboutSection from './components/about/AboutSection';
 import ContactSection from './components/contact/ContactSection';
 
 // Practical Cybersecurity Course Section
-import { LearnerProvider } from './courses/teaming/context/LearnerContext';
 import { CourseAccessGuard } from './courses/teaming/components/layout/CourseAccessGuard';
 import { TeamingLandingPage } from './courses/teaming/pages/TeamingLandingPage';
 import { ModuleOverviewPage } from './courses/teaming/pages/ModuleOverviewPage';
@@ -77,11 +76,7 @@ function App() {
           {/* Practical Cybersecurity Course Section Routes */}
           <Route
             path="/courses/teaming"
-            element={
-              <LearnerProvider>
-                <CourseAccessGuard />
-              </LearnerProvider>
-            }
+            element={<CourseAccessGuard />}
           >
             <Route index element={<TeamingLandingPage />} />
             <Route path="modules/:moduleId" element={<ModuleOverviewPage />} />

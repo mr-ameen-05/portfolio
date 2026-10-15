@@ -53,11 +53,13 @@ interface AuthContextValue {
   entitlements: Entitlements | null;
   isAuthenticated: boolean;
   isVerified: boolean;
+  csrf: string | null;
   hasTier: (tier: 'public' | Tier) => boolean;
   refresh: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  signOut: () => Promise<void>;
   requestReset: (email: string) => Promise<string>;
   resetPassword: (token: string, password: string) => Promise<string>;
   verifyEmail: (token: string) => Promise<string>;
@@ -167,11 +169,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       entitlements,
       isAuthenticated: user !== null,
       isVerified: Boolean(user?.email_verified),
+      csrf,
       hasTier,
       refresh,
       login,
       register,
       logout,
+      signOut: logout,
       requestReset,
       resetPassword,
       verifyEmail,
@@ -189,6 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       requestReset,
       resetPassword,
       verifyEmail,
+      csrf,
     ]
   );
 

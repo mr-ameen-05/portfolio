@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { getModuleBySlug, ALL_MODULES } from '../data/modulesManifest';
 import { progressService } from '../services/progressService';
 import { CourseNav } from '../components/layout/CourseNav';
 import { CourseBreadcrumb } from '../components/layout/CourseBreadcrumb';
 import { StateError, StateLoading } from '../components/common/CourseStates';
 import { QuizWidget } from '../components/player/QuizWidget';
-import { Track } from '../types/course.types';
+import { Track, AccessTier } from '../types/course.types';
+import { CourseLockNotice } from '../components/layout/CourseLockNotice';
 
 export const ModuleOverviewPage: React.FC = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -47,6 +49,29 @@ export const ModuleOverviewPage: React.FC = () => {
               onRetry={() => window.location.assign('/courses/teaming')}
             />
           </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show lock notice if module is gated
+  if (module.locked === true) {
+    const tierLabel = module.accessTier === 'enrolled' ? 'Full Enrollment' : 'Free Account';
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary">
+        <CourseNav />
+        <main className="max-w-4xl mx-auto px-4 py-12">
+          <CourseBreadcrumb
+            items={[
+              { label: `Module ${module.orderIndex}: ${module.title}` },
+            ]}
+          />
+          <CourseLockNotice
+            requiredTier={(module.accessTier === 'public' ? 'registered' : module.accessTier) ?? 'enrolled'}
+            title={`${tierLabel} Required: Module ${module.orderIndex}`}
+            message={module.summary}
+            fallbackLink={{ label: 'View course syllabus', href: '/courses/teaming' }}
+          />
         </main>
       </div>
     );
@@ -176,12 +201,16 @@ export const ModuleOverviewPage: React.FC = () => {
               const isDone = completedIds.has(lesson.id);
               const hasLab = lesson.sections.some(s => s.type === 'lab');
               const hasQuiz = lesson.sections.some(s => s.type === 'quiz');
+              const lessonLocked = lesson.locked === true;
 
               return (
                 <Link
                   key={lesson.slug}
                   to={`/courses/teaming/lessons/${lesson.slug}`}
-                  className="block p-4 rounded-xl border border-border-subtle bg-bg-secondary/30 hover:border-accent hover:bg-bg-secondary/60 transition-all group"
+                  className={`block p-4 rounded-xl border border-border-subtle bg-bg-secondary/30 hover:border-accent hover:bg-bg-secondary/60 transition-all group ${
+                    lessonLocked ? 'opacity-60 cursor-not-allowed' : ''
+                  }`}
+                  aria-disabled={lessonLocked}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-start gap-3">
@@ -189,15 +218,22 @@ export const ModuleOverviewPage: React.FC = () => {
                         className={`w-6 h-6 rounded flex items-center justify-center font-mono text-xs flex-shrink-0 mt-0.5 ${
                           isDone
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500'
+                            : lessonLocked
+                            ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
                             : 'bg-bg-primary text-text-muted border border-border-subtle group-hover:border-accent'
                         }`}
                       >
-                        {isDone ? '✓' : lIdx + 1}
+                        {isDone ? '✓' : lessonLocked ? '🔒' : lIdx + 1}
                       </span>
-                      <div>
-                        <h3 className="text-sm sm:text-base font-bold text-text-primary group-hover:text-accent transition-colors">
-                          {lesson.title}
-                        </h3>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm sm:text-base font-bold text-text-primary group-hover:text-accent transition-colors truncate">
+                            {lesson.title}
+                          </h3>
+                          {lessonLocked && (
+                            <Lock className="w-3 h-3 text-amber-500 flex-shrink-0" aria-hidden="true" />
+                          )}
+                        </div>
                         <p className="mt-1 text-xs text-text-secondary line-clamp-2">
                           {lesson.whyThisMatters}
                         </p>

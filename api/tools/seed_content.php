@@ -58,10 +58,12 @@ try {
         'INSERT INTO courses
             (slug, title, summary, description, version, status, audience,
              estimated_weeks, hours_per_week, prerequisites, outcomes,
-             safety_statement, published_at)
+             safety_statement, author_name, author_role, author_credentials,
+             total_estimated_minutes, last_updated, published_at)
          VALUES
             (:slug, :title, :summary, :description, :version, :status, :audience,
-             :weeks, :hours, :prereq, :outcomes, :safety, :published)
+             :weeks, :hours, :prereq, :outcomes, :safety, :author_name, :author_role,
+             :author_creds, :total_minutes, :last_updated, :published)
          ON DUPLICATE KEY UPDATE
             title = VALUES(title), summary = VALUES(summary),
             description = VALUES(description), version = VALUES(version),
@@ -70,6 +72,11 @@ try {
             hours_per_week = VALUES(hours_per_week),
             prerequisites = VALUES(prerequisites), outcomes = VALUES(outcomes),
             safety_statement = VALUES(safety_statement),
+            author_name = VALUES(author_name),
+            author_role = VALUES(author_role),
+            author_credentials = VALUES(author_credentials),
+            total_estimated_minutes = VALUES(total_estimated_minutes),
+            last_updated = VALUES(last_updated),
             published_at = VALUES(published_at)'
     );
     $stmt->execute([
@@ -85,6 +92,11 @@ try {
         ':prereq'      => jenc($c['prerequisites'] ?? []),
         ':outcomes'    => jenc($c['outcomes'] ?? []),
         ':safety'      => $c['safety_statement'],
+        ':author_name' => $c['author_name'] ?? '',
+        ':author_role' => $c['author_role'] ?? '',
+        ':author_creds' => $c['author_credentials'] ?? '',
+        ':total_minutes' => (int) ($c['total_estimated_minutes'] ?? 0),
+        ':last_updated' => ($c['last_updated'] ?? null) ?: null,
         ':published'   => $c['published_at'] ?: null,
     ]);
 
@@ -95,32 +107,42 @@ try {
     // ── modules + lessons ──────────────────────────────────────────────────
     $moduleUpsert = $pdo->prepare(
         'INSERT INTO modules
-            (course_id, phase_id, sort_order, slug, title, summary, objectives, track, access_tier)
+            (course_id, phase_id, sort_order, slug, title, summary, objectives, track,
+             access_tier, required, one_page_cheat_sheet)
          VALUES
-            (:course, NULL, :order, :slug, :title, :summary, :objectives, :track, :tier)
+            (:course, NULL, :order, :slug, :title, :summary, :objectives, :track,
+             :tier, :required, :cheat)
          ON DUPLICATE KEY UPDATE
             course_id = VALUES(course_id), sort_order = VALUES(sort_order),
             title = VALUES(title), summary = VALUES(summary),
             objectives = VALUES(objectives), track = VALUES(track),
-            access_tier = VALUES(access_tier)'
+            access_tier = VALUES(access_tier), required = VALUES(required),
+            one_page_cheat_sheet = VALUES(one_page_cheat_sheet)'
     );
 
     $lessonUpsert = $pdo->prepare(
         'INSERT INTO lessons
-            (module_id, sort_order, slug, title, required, estimated_minutes, access_tier,
+            (module_id, sort_order, slug, title, required, estimated_minutes,
+             minutes_reading, minutes_practice, access_tier,
              why_this_matters, level, version, objectives, key_terms, sections, refs,
-             last_reviewed_at, published_at)
+             summary_takeaways, prerequisites, last_reviewed_at, published_at)
          VALUES
-            (:module, :order, :slug, :title, :required, :minutes, :tier,
+            (:module, :order, :slug, :title, :required, :minutes,
+             :minutes_reading, :minutes_practice, :tier,
              :why, :level, :version, :objectives, :key_terms, :sections, :refs,
-             :reviewed, :published)
+             :takeaways, :prerequisites, :reviewed, :published)
          ON DUPLICATE KEY UPDATE
             module_id = VALUES(module_id), sort_order = VALUES(sort_order),
             title = VALUES(title), required = VALUES(required),
-            estimated_minutes = VALUES(estimated_minutes), access_tier = VALUES(access_tier),
+            estimated_minutes = VALUES(estimated_minutes),
+            minutes_reading = VALUES(minutes_reading),
+            minutes_practice = VALUES(minutes_practice),
+            access_tier = VALUES(access_tier),
             why_this_matters = VALUES(why_this_matters), level = VALUES(level),
             version = VALUES(version), objectives = VALUES(objectives),
             key_terms = VALUES(key_terms), sections = VALUES(sections), refs = VALUES(refs),
+            summary_takeaways = VALUES(summary_takeaways),
+            prerequisites = VALUES(prerequisites),
             last_reviewed_at = VALUES(last_reviewed_at), published_at = VALUES(published_at)'
     );
 
@@ -139,6 +161,8 @@ try {
             ':objectives' => jenc($m['objectives'] ?? []),
             ':track'      => $m['track'],
             ':tier'       => $m['access_tier'],
+            ':required'   => !empty($m['required']) ? 1 : 0,
+            ':cheat'      => $m['one_page_cheat_sheet'] ?? '',
         ]);
 
         $ms = $pdo->prepare('SELECT id FROM modules WHERE slug = :slug');
@@ -155,6 +179,8 @@ try {
                 ':title'     => $lesson['title'],
                 ':required'  => !empty($lesson['required']) ? 1 : 0,
                 ':minutes'   => (int) $lesson['estimated_minutes'],
+                ':minutes_reading'  => (int) ($lesson['minutes_reading'] ?? 0),
+                ':minutes_practice' => (int) ($lesson['minutes_practice'] ?? 0),
                 ':tier'      => $lesson['access_tier'],
                 ':why'       => $lesson['why_this_matters'] ?? '',
                 ':level'     => ($lesson['level'] ?? 'beginner') === 'intermediate' ? 'intermediate' : 'beginner',
@@ -163,6 +189,8 @@ try {
                 ':key_terms' => jenc($lesson['key_terms'] ?? []),
                 ':sections'  => jenc($lesson['sections'] ?? []),
                 ':refs'      => jenc($lesson['refs'] ?? []),
+                ':takeaways' => jenc($lesson['summary_takeaways'] ?? []),
+                ':prerequisites' => jenc($lesson['prerequisites'] ?? []),
                 ':reviewed'  => $lesson['last_reviewed_at'] ?: null,
                 ':published' => $lesson['published_at'] ?: null,
             ]);

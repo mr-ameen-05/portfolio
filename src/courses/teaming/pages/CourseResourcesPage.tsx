@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Lock, Download, Copy, Eye } from 'lucide-react';
 import { COURSE_RESOURCES } from '../data/resourcesData';
 import { CourseNav } from '../components/layout/CourseNav';
 import { CourseBreadcrumb } from '../components/layout/CourseBreadcrumb';
@@ -129,16 +130,19 @@ export const CourseResourcesPage: React.FC = () => {
             {filteredResources.map(res => (
               <div
                 key={res.id}
-                className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-5 flex flex-col justify-between hover:border-accent/40 transition-colors space-y-4"
+                className={`rounded-xl border border-border-subtle bg-bg-secondary/30 p-5 flex flex-col justify-between hover:border-accent/40 transition-colors space-y-4 ${
+                  res.locked ? 'opacity-60 cursor-not-allowed' : ''
+                }`}
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-accent/10 text-accent border border-accent/30 font-semibold">
                       {res.type}
                     </span>
-                    <span className="text-[11px] font-mono text-text-muted">
-                      {res.fileFormat} • {res.fileSize}
-                    </span>
+                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-text-muted">
+                      {res.locked && <Lock className="w-3 h-3 text-amber-500" aria-hidden="true" />}
+                      <span>{res.fileFormat} • {res.fileSize}</span>
+                    </div>
                   </div>
 
                   <h3 className="text-base font-bold font-sans text-text-primary">
@@ -153,24 +157,34 @@ export const CourseResourcesPage: React.FC = () => {
                 {/* Card Action Buttons */}
                 <div className="flex items-center gap-2 pt-2 border-t border-border-subtle/50 font-mono text-xs">
                   <button
-                    onClick={() => setPreviewResource(res)}
-                    className="flex-1 py-1.5 px-3 rounded bg-bg-primary hover:bg-bg-primary/80 border border-border-subtle hover:border-accent text-text-secondary hover:text-text-primary text-center transition-colors"
+                    onClick={() => res.locked ? null : setPreviewResource(res)}
+                    disabled={res.locked}
+                    className={`flex-1 py-1.5 px-3 rounded bg-bg-primary border border-border-subtle text-text-secondary text-center transition-colors ${
+                      res.locked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-bg-primary/80 hover:border-accent hover:text-text-primary'
+                    }`}
                   >
-                    👁 Preview
+                    <Eye className="w-3 h-3 mr-1" aria-hidden="true" />
+                    {res.locked ? 'Locked' : 'Preview'}
                   </button>
                   <button
-                    onClick={() => handleCopy(res)}
-                    className="py-1.5 px-3 rounded bg-bg-primary hover:bg-bg-primary/80 border border-border-subtle hover:border-accent text-text-secondary hover:text-accent transition-colors"
-                    title="Copy to clipboard"
+                    onClick={() => res.locked ? null : handleCopy(res)}
+                    disabled={res.locked}
+                    className={`py-1.5 px-3 rounded bg-bg-primary border border-border-subtle text-text-secondary transition-colors ${
+                      res.locked ? 'opacity-40 cursor-not-allowed' : 'hover:border-accent hover:text-accent'
+                    }`}
+                    title={res.locked ? 'Requires enrollment' : 'Copy to clipboard'}
                   >
-                    {copiedId === res.id ? '✓ Copied' : '📋 Copy'}
+                    {copiedId === res.id ? <span>✓ Copied</span> : <><Copy className="w-3 h-3 mr-1" aria-hidden="true" />Copy</>}
                   </button>
                   <button
-                    onClick={() => handleDownload(res)}
-                    className="py-1.5 px-3 rounded bg-accent/15 hover:bg-accent/25 border border-accent/40 text-accent font-semibold transition-colors"
-                    title="Download document file"
+                    onClick={() => res.locked ? null : handleDownload(res)}
+                    disabled={res.locked}
+                    className={`py-1.5 px-3 rounded bg-accent/15 border border-accent/40 text-accent font-semibold transition-colors ${
+                      res.locked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-accent/25'
+                    }`}
+                    title={res.locked ? 'Requires enrollment' : 'Download document file'}
                   >
-                    💾 Download
+                    {res.locked ? 'Locked' : <><Download className="w-3 h-3 mr-1" aria-hidden="true" />Download</>}
                   </button>
                 </div>
               </div>

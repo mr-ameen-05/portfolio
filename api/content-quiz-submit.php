@@ -1,8 +1,10 @@
 <?php
 /**
  * POST /api/content-quiz-submit.php
- * Grades a quiz server-side, records the attempt for the signed-in learner,
- * and returns the result with correct answers + explanations.
+ * Grades a quiz server-side. Attempts are recorded for signed-in learners.
+ * Public-tier quizzes may be graded anonymously (nothing is recorded) so the
+ * sample assessment works for visitors; gated quizzes require authentication
+ * and a sufficient entitlement.
  *
  * Request:  { "scope": "module", "scope_id": "<slug>", "answers": { "<qkey>": 2, ... } }
  * Response: { "success": true, "score", "passed", "safety_failed", "results": [...] }
@@ -13,9 +15,6 @@ declare(strict_types=1);
 require __DIR__ . '/bootstrap.php';
 
 require_post();
-
-$user = Auth::require_auth();
-Auth::require_csrf();
 RateLimiter::check('quiz_submit');
 
 $data    = read_json();
@@ -33,6 +32,10 @@ if (!is_array($answers)) {
     json_out(400, ['error' => 'Answers must be an object.']);
 }
 
+if (!Database::isAvailable()) {
+    json_out(503, ['error' => 'Content is temporarily unavailable. Please try again shortly.']);
+}
+
 try {
     $quiz = Content::quiz_row($scope, $scopeId);
     if ($quiz === null) {
@@ -40,34 +43,56 @@ try {
     }
 
     $courseSlug = Content::course_slug_for_quiz($scope, $scopeId);
-    if ($courseSlug !== null && !Auth::has_tier((int) $user['user_id'], $courseSlug, (string) $quiz['access_tier'])) {
-        json_out(403, ['error' => 'This quiz requires a higher access level.', 'code' => 'locked']);
+    $tier       = (string) $quiz['access_tier'];
+    $user       = Auth::user();
+    $userId     = $user ? (int) $user['user_id'] : null;
+
+    // Public quizzes may be graded anonymously; everything else is gated.
+    if ($tier !== 'public') {
+        if ($user === null) {
+            json_out(401, ['error' => 'Authentication required.', 'code' => 'unauthenticated']);
+        }
+        if ($courseSlug !== null && !Auth::has_tier($userId, $courseSlug, $tier)) {
+            json_out(403, [
+                'error'    => 'This quiz requires a higher access level.',
+                'code'     => 'locked',
+                'requires' => $tier,
+            ]);
+        }
+    }
+
+    // Authenticated submissions are a state-changing request → CSRF required.
+    if ($user !== null) {
+        Auth::require_csrf();
     }
 
     $result = Content::grade($quiz, $answers);
 
     $token = bin2hex(random_bytes(32));
-    $stmt = Database::pdo()->prepare(
-        'INSERT INTO quiz_attempts
-            (user_id, learner_id, quiz_id, score, passed, safety_failed, verification_token, ip)
-         VALUES (:uid, :learner, :quiz, :score, :passed, :safety, :token, :ip)'
-    );
-    $stmt->execute([
-        ':uid'     => (int) $user['user_id'],
-        ':learner' => 'user:' . (int) $user['user_id'],
-        ':quiz'    => $scopeId,
-        ':score'   => $result['score'],
-        ':passed'  => $result['passed'] ? 1 : 0,
-        ':safety'  => $result['safety_failed'] ? 1 : 0,
-        ':token'   => $token,
-        ':ip'      => client_ip(),
-    ]);
+    if ($user !== null) {
+        $stmt = Database::pdo()->prepare(
+            'INSERT INTO quiz_attempts
+                (user_id, learner_id, quiz_id, score, passed, safety_failed, verification_token, ip)
+             VALUES (:uid, :learner, :quiz, :score, :passed, :safety, :token, :ip)'
+        );
+        $stmt->execute([
+            ':uid'     => $userId,
+            ':learner' => 'user:' . $userId,
+            ':quiz'    => $scopeId,
+            ':score'   => $result['score'],
+            ':passed'  => $result['passed'] ? 1 : 0,
+            ':safety'  => $result['safety_failed'] ? 1 : 0,
+            ':token'   => $token,
+            ':ip'      => client_ip(),
+        ]);
+    }
 
     json_out(200, array_merge(
         [
-            'success'          => true,
-            'scope'            => $scope,
-            'scope_id'         => $scopeId,
+            'success'            => true,
+            'scope'              => $scope,
+            'scope_id'           => $scopeId,
+            'recorded'           => $user !== null,
             'verification_token' => $token,
         ],
         $result

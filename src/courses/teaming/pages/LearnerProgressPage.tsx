@@ -1,26 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Lock, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { ALL_MODULES } from '../data/modulesManifest';
 import { progressService } from '../services/progressService';
 import { CourseNav } from '../components/layout/CourseNav';
 import { CourseBreadcrumb } from '../components/layout/CourseBreadcrumb';
 import { StorageBadge } from '../components/layout/StorageBadge';
 import { COURSE_METADATA } from '../data/courseMetadata';
-import { useLearner } from '../context/LearnerContext';
+import { useAuth } from '../../../platform/auth/AuthContext';
+import { useCourseContent } from '../../../platform/course/CourseContentContext';
 
 export const LearnerProgressPage: React.FC = () => {
-  const { profile } = useLearner();
+  const { user, entitlements, unavailable } = useAuth();
+  const { usingLocalContent } = useCourseContent();
   const [stats, setStats] = useState(() => progressService.getCourseCompletionStats());
   const [learnerName, setLearnerName] = useState('Security Practitioner');
   const [showCertificate, setShowCertificate] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetConfirmInput, setResetConfirmInput] = useState('');
 
+  const isServerSynced = !usingLocalContent && !!user && progressService.getProgress().isServerSynced;
+  const accessTier = entitlements?.tier;
+
   useEffect(() => {
     setStats(progressService.getCourseCompletionStats());
-    const savedName = profile?.name || localStorage.getItem('course_learner_name') || 'Security Practitioner';
+    const savedName = user?.name || localStorage.getItem('course_learner_name') || 'Security Practitioner';
     setLearnerName(savedName);
-  }, [profile]);
+  }, [user, accessTier]);
 
   const handleNameChange = (name: string) => {
     setLearnerName(name);
@@ -49,6 +55,37 @@ export const LearnerProgressPage: React.FC = () => {
           ]}
         />
 
+        {/* Not authenticated - show sign-in prompt */}
+        {!user && (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center">
+              <Lock className="w-8 h-8 text-amber-500" aria-hidden="true" />
+            </div>
+            <h2 className="text-2xl font-semibold text-text-primary mb-2">Sign In to View Your Progress</h2>
+            <p className="text-text-muted mb-6 max-w-md mx-auto">
+              Your lesson completions, quiz scores, and lab progress are tied to your account.
+              Sign in to sync across devices and access your full learning dashboard.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/login"
+                className="px-5 py-2.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition font-medium flex items-center gap-2"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                className="px-5 py-2.5 bg-bg-tertiary border border-border-subtle text-text-primary rounded-lg hover:border-cyan-500/30 transition font-medium"
+              >
+                Create Free Account
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {user && (
+          <>
+
         {/* Dashboard Header */}
         <section className="rounded-2xl border border-border-subtle bg-bg-secondary/40 p-6 md:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -57,7 +94,7 @@ export const LearnerProgressPage: React.FC = () => {
                 <span className="text-xs font-mono uppercase tracking-wider text-accent font-bold">
                   Learner Dashboard
                 </span>
-                <StorageBadge isServerSynced={profile?.source === 'server'} />
+                <StorageBadge isServerSynced={isServerSynced} />
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold font-sans text-text-primary">
                 Your Course Progress
@@ -362,6 +399,7 @@ export const LearnerProgressPage: React.FC = () => {
             </div>
           </div>
         )}
+        </>)}
       </main>
     </div>
   );

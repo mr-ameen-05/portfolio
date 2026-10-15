@@ -23,10 +23,123 @@
 #  Usage (run from your laptop, pushes the repo over SSH then deploys):
 #      ./deploy.sh sync
 #
-#  All settings live in deploy/deploy.env (copy deploy/deploy.env.example).
+#  Auto-generates secure passwords/tokens on first run and writes them to
+#  deploy/deploy.env. Re-runs preserve existing values.
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -Eeuo pipefail
+
+# ── password/token generators ────────────────────────────────────────────────
+generate_password() {
+  # 32-char URL-safe password (no special chars that break shell/.env)
+  openssl rand -base64 32 | tr -d '/+=' | cut -c1-32
+}
+
+generate_token() {
+  # 64-char hex token for API/CSRF secrets
+  openssl rand -hex 32
+}
+
+ensure_deploy_env() {
+  local env_file="$ROOT/deploy/deploy.env"
+  local example_file="$ROOT/deploy/deploy.env.example"
+
+  # If deploy.env already exists, keep it (user may have customized)
+  if [[ -f "$env_file" ]]; then
+    return 0
+  fi
+
+  # If example doesn't exist, create minimal one
+  if [[ ! -f "$example_file" ]]; then
+    cat > "$example_file" <<'EXAMPLE'
+# aiameen.online deployment configuration
+# Copy to deploy.env and edit values as needed.
+# This file is auto-populated with secure secrets on first run.
+
+# Domain & TLS
+DOMAIN=aiameen.online
+LETSENCRYPT_EMAIL=admin@aiameen.online
+INCLUDE_WWW=true
+
+# Application paths
+APP_ROOT=/var/www/aiameen.online
+SITE_USER=www-data
+PHP_VERSION=
+
+# Database (auto-generated on first deploy)
+DB_NAME=portfolio
+DB_USER=portfolio_user
+DB_PASS=CHANGE_ME
+
+# MySQL root auth (socket = passwordless via unix_socket; password = with root password)
+MYSQL_ROOT_AUTH=socket
+MYSQL_ROOT_PASSWORD=
+
+# Mail configuration
+MAIL_TO=admin@aiameen.online
+MAIL_FROM_EMAIL=no-reply@aiameen.online
+MAIL_FROM_NAME=aiameen.online
+MAIL_TRANSPORT=mail
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_ENCRYPTION=tls
+SMTP_DEBUG=0
+
+# Security secrets (auto-generated)
+QUIZ_SECRET=CHANGE_ME
+RATE_LIMIT_PER_MINUTE=20
+ALLOWED_ORIGINS=https://aiameen.online
+
+# Operational
+ENABLE_UFW=true
+CREATE_SWAP=true
+SKIP_BUILD=false
+SSH_PORT=22
+
+# npm audit
+NPM_AUDIT_FIX=true
+NPM_AUDIT_FIX_FORCE=false
+
+# Remote sync (for laptop → server deploy)
+DEPLOY_HOST=
+DEPLOY_PATH=
+DEPLOY_SSH_KEY=
+EXAMPLE
+    log "created $example_file template"
+  fi
+
+  # Copy example to deploy.env
+  cp "$example_file" "$env_file"
+
+  # Generate secure values
+  local db_pass quiz_secret quiz_token
+  db_pass="$(generate_password)"
+  quiz_secret="$(generate_token)"
+  quiz_token="$(generate_token)"
+
+  # Replace placeholders in deploy.env
+  sed -i \
+    -e "s/^DB_PASS=.*/DB_PASS=$db_pass/" \
+    -e "s/^QUIZ_SECRET=.*/QUIZ_SECRET=$quiz_secret/" \
+    -e "s/^DB_NAME=.*/DB_NAME=portfolio/" \
+    -e "s/^DB_USER=.*/DB_USER=portfolio_user/" \
+    "$env_file"
+
+  # Also create a separate API token file for the PHP app
+  local api_token_file="/etc/aiameen/api_token"
+  mkdir -p /etc/aiameen
+  echo "$quiz_token" > "$api_token_file"
+  chmod 600 "$api_token_file"
+  chown root:www-data "$api_token_file" 2>/dev/null || true
+
+  log "generated deploy.env with secure passwords:"
+  log "  DB_PASS=$db_pass"
+  log "  QUIZ_SECRET=$quiz_secret"
+  log "  API_TOKEN written to $api_token_file"
+  log "  (edit deploy/deploy.env to customize)"
+}
 
 # ── pretty output ────────────────────────────────────────────────────────────
 if [[ -t 1 ]]; then
@@ -48,6 +161,7 @@ CONFIG="$ROOT/deploy/deploy.env"
 require_root() { [[ "${EUID}" -eq 0 ]] || die "run as root:  sudo ./deploy.sh $COMMAND"; }
 
 load_config() {
+  ensure_deploy_env
   [[ -f "$CONFIG" ]] || die "missing $CONFIG — run:  cp deploy/deploy.env.example deploy/deploy.env  and edit it"
   set -a
   # shellcheck disable=SC1090
@@ -142,6 +256,11 @@ install_nginx_site() { # install_nginx_site [auto|full]
 write_api_env() {
   local dir="/etc/aiameen"
   mkdir -p "$dir" /var/log/aiameen
+
+  # Read API token if generated
+  local api_token=""
+  [[ -f "$dir/api_token" ]] && api_token="$(cat "$dir/api_token")"
+
   cat > "$dir/api.env" <<ENV
 # Managed by deploy.sh — do not edit by hand.
 DB_HOST=$DB_HOST
@@ -162,6 +281,7 @@ SMTP_ENCRYPTION=$SMTP_ENCRYPTION
 SMTP_DEBUG=$SMTP_DEBUG
 
 QUIZ_SECRET=$QUIZ_SECRET
+API_TOKEN=$api_token
 RATE_LIMIT_PER_MINUTE=$RATE_LIMIT_PER_MINUTE
 ALLOWED_ORIGINS=$ALLOWED_ORIGINS
 LOG_DIR=/var/log/aiameen
@@ -229,6 +349,15 @@ cmd_config() {
   detect_php_socket
 
   mkdir -p "/etc/aiameen" /var/log/aiameen "$APP_ROOT/public" "$APP_ROOT/api" /var/www/certbot
+
+  # Ensure API token exists (created by ensure_deploy_env on first run)
+  if [[ ! -f /etc/aiameen/api_token ]]; then
+    generate_token > /etc/aiameen/api_token
+    chmod 600 /etc/aiameen/api_token
+    chown root:"$SITE_USER" /etc/aiameen/api_token 2>/dev/null || true
+    ok "generated API token"
+  fi
+
   write_api_env
 
   # PHP hardening/limits
@@ -245,6 +374,14 @@ cmd_db() {
   require_root
   step "Configuring MySQL"
   [[ "$DB_PASS" != *"'"* && "$DB_PASS" != *"\\"* ]] || die "DB_PASS must not contain single quotes or backslashes"
+
+  # Generate MySQL root password if using password auth and not set
+  if [[ "${MYSQL_ROOT_AUTH:-socket}" == "password" && -z "${MYSQL_ROOT_PASSWORD:-}" ]]; then
+    MYSQL_ROOT_PASSWORD="$(generate_password)"
+    log "generated MySQL root password: $MYSQL_ROOT_PASSWORD"
+    # Save it to deploy.env for future runs
+    sed -i "s/^MYSQL_ROOT_PASSWORD=.*/MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD/" "$CONFIG"
+  fi
 
   mysql_root <<SQL
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -463,6 +600,26 @@ cmd_verify() {
   fi
 }
 
+print_credentials() {
+  echo
+  step "Generated Credentials (save these securely!)"
+  printf "  ${C_BOLD}Database:${C_RESET}\n"
+  printf "    Name:     %s\n" "$DB_NAME"
+  printf "    User:     %s\n" "$DB_USER"
+  printf "    Password: %s\n" "$DB_PASS"
+  if [[ "${MYSQL_ROOT_AUTH:-socket}" == "password" && -n "${MYSQL_ROOT_PASSWORD:-}" ]]; then
+    printf "    Root PW:  %s\n" "$MYSQL_ROOT_PASSWORD"
+  fi
+  printf "\n"
+  printf "  ${C_BOLD}API / App:${C_RESET}\n"
+  printf "    QUIZ_SECRET: %s\n" "$QUIZ_SECRET"
+  [[ -f /etc/aiameen/api_token ]] && printf "    API_TOKEN:   %s\n" "$(cat /etc/aiameen/api_token)"
+  printf "\n"
+  printf "  ${C_YELLOW}These values are stored in deploy/deploy.env and /etc/aiameen/api.env${C_RESET}\n"
+  printf "  ${C_YELLOW}Copy them to your password manager now!${C_RESET}\n"
+  echo
+}
+
 cmd_deploy() {
   require_root
   cmd_provision
@@ -472,8 +629,10 @@ cmd_deploy() {
   cmd_release
   cmd_tls
   if cmd_verify; then
+    print_credentials
     echo; ok "Deployment complete → https://$DOMAIN"
   else
+    print_credentials
     echo; warn "Deployment completed with warnings — review the checklist above"
   fi
 }
@@ -498,6 +657,45 @@ cmd_sync() {
   ok "remote deployment finished"
 }
 
+cmd_rotate_secrets() {
+  require_root
+  step "Rotating secrets (generates new passwords/tokens)"
+  local env_file="$ROOT/deploy/deploy.env"
+
+  # Backup old
+  cp "$env_file" "$env_file.bak.$(date +%s)"
+
+  # Generate new
+  local db_pass quiz_secret api_token
+  db_pass="$(generate_password)"
+  quiz_secret="$(generate_token)"
+  api_token="$(generate_token)"
+
+  # Update deploy.env
+  sed -i \
+    -e "s/^DB_PASS=.*/DB_PASS=$db_pass/" \
+    -e "s/^QUIZ_SECRET=.*/QUIZ_SECRET=$quiz_secret/" \
+    "$env_file"
+
+  # Update MySQL user password
+  mysql_root "$DB_NAME" -e "ALTER USER '$DB_USER'@'localhost' IDENTIFIED BY '$db_pass'; ALTER USER '$DB_USER'@'127.0.0.1' IDENTIFIED BY '$db_pass'; FLUSH PRIVILEGES;"
+  ok "rotated database password"
+
+  # Update API token
+  echo "$api_token" > /etc/aiameen/api_token
+  chmod 600 /etc/aiameen/api_token
+  chown root:"$SITE_USER" /etc/aiameen/api_token 2>/dev/null || true
+  ok "rotated API token"
+
+  # Reload configs
+  write_api_env
+  systemctl reload php*-fpm 2>/dev/null || true
+  systemctl reload nginx 2>/dev/null || true
+
+  log "Secrets rotated. Update any external services using the old credentials."
+  print_credentials
+}
+
 usage() {
   cat <<'USAGE'
 aiameen.online deployment (nginx + php-fpm + MySQL on EC2)
@@ -514,11 +712,13 @@ aiameen.online deployment (nginx + php-fpm + MySQL on EC2)
     sudo ./deploy.sh verify       run the post-deploy checklist
     sudo ./deploy.sh status       service + certificate status
     sudo ./deploy.sh logs         tail application logs
+    sudo ./deploy.sh rotate-secrets  rotate DB password, QUIZ_SECRET, API token
 
   Run FROM your laptop (pushes the repo over SSH, then deploys):
     ./deploy.sh sync
 
   Configuration: copy deploy/deploy.env.example → deploy/deploy.env and edit.
+  On first run, secure passwords/tokens are auto-generated and saved to deploy/deploy.env.
 USAGE
   exit 0
 }
@@ -543,6 +743,7 @@ main() {
     status)    cmd_status ;;
     logs)      cmd_logs ;;
     sync)      cmd_sync ;;
+    rotate-secrets) cmd_rotate_secrets ;;
     *)         die "unknown command '$COMMAND' (try: ./deploy.sh help)" ;;
   esac
 }

@@ -24,6 +24,11 @@
       "Collaborate across red and blue team roles to design, test, and tune defensive controls and telemetry coverage."
     ],
     "safety_statement": "CRITICAL ETHICAL COMMITMENT: This course teaches security concepts strictly for defensive understanding, authorized evaluation, and systems hardening. All practice exercises utilize synthetic data, isolated course-provided sandboxes, and offline scenarios. Attacking public systems, unauthorized networks, or third-party devices is strictly illegal and violates the core ethics of cybersecurity engineering.",
+    "author_name": "Al Ameen N R",
+    "author_role": "Cybersecurity Analyst & Systems Builder",
+    "author_credentials": "Linux & Container Security Specialist · Blue Team Operations · Full-Stack Builder",
+    "total_estimated_minutes": 1840,
+    "last_updated": "2026-10-14",
     "published_at": "2026-03-01"
   },
   "modules": [
@@ -40,6 +45,8 @@
         "Understand how synthetic datasets and isolated sandboxes protect real systems and privacy.",
         "Pass the mandatory Safety and Rules of Engagement verification check."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 0 Cheat Sheet: Rules of Engagement & Ethics\n- **Golden Rule:** Authorization must be explicit, documented, and current. Assumptions are not permission.\n- **Scope Documents:** Always specify IP ranges, domains, allowed methods, exclusions, testing windows, and escalation contacts.\n- **Stop Conditions:** Immediately halt testing if you observe: out-of-scope systems, data destruction, service degradation, production customer data, or suspected active real intrusions.\n- **Evidence Handling:** Practice data minimization. Hash sensitive artifacts, store logs securely, and never share client findings on public platforms.",
       "lessons": [
         {
           "slug": "how-to-use-this-course",
@@ -47,6 +54,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 25,
+          "minutes_reading": 10,
+          "minutes_practice": 15,
           "access_tier": "public",
           "objectives": [
             "Understand the structure of the 11 course modules across Core, Red, Blue, and Purple tracks.",
@@ -88,6 +97,12 @@
               "lastReviewed": "2026-01-15"
             }
           ],
+          "summary_takeaways": [
+            "Cybersecurity requires dual-perspective literacy: understanding both how controls are built and how they are challenged.",
+            "Pacing is self-directed; 4–6 hours per week allows deep exploration of the hands-on labs.",
+            "All technical exercises are sandboxed and offline."
+          ],
+          "prerequisites": [],
           "last_reviewed_at": null,
           "why_this_matters": "Security is not a collection of disjointed tricks; it is a discipline combining deep foundational computing, adversarial hypothesis testing, and operational defense. Setting clear expectations ensures you progress safely and effectively.",
           "level": "beginner",
@@ -100,6 +115,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "public",
           "objectives": [
             "Distinguish between in-scope, out-of-scope, and gray-area assets in a security contract.",
@@ -185,6 +202,14 @@
               "lastReviewed": "2026-02-10"
             }
           ],
+          "summary_takeaways": [
+            "Written authorization signed by authorized stakeholders is required before any technical assessment begins.",
+            "Exclusions and testing windows must be honored as strictly as target boundaries.",
+            "Stop conditions protect business continuity and preserve legal integrity."
+          ],
+          "prerequisites": [
+            "lesson-00-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "The sole boundary separating a cybersecurity analyst from a cybercriminal is legal, explicit, and written authorization. Understanding rules of engagement protects both you and the organizations you assess.",
           "level": "beginner",
@@ -197,6 +222,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "public",
           "objectives": [
             "Explain why synthetic data is mandated for all educational demonstrations.",
@@ -232,6 +259,14 @@
               "lastReviewed": "2026-01-20"
             }
           ],
+          "summary_takeaways": [
+            "Isolated sandboxes eliminate accidental damage to real infrastructure.",
+            "Synthetic data preserves privacy while providing realistic learning fidelity.",
+            "Vulnerability reporting requires private, professional, coordinated disclosure."
+          ],
+          "prerequisites": [
+            "lesson-00-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Practicing on real systems or with real personal data exposes learners and organizations to severe risks. Utilizing synthetic datasets, mock environments, and standard disclosure workflows provides realistic learning with zero collateral risk.",
           "level": "beginner",
@@ -244,6 +279,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "public",
           "objectives": [
             "Apply the principle of data minimization when documenting security observations.",
@@ -275,6 +312,14 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Collect only the minimal evidence required to demonstrate impact.",
+            "Maintain integrity via cryptographic hashing and secure storage.",
+            "State findings objectively with verified technical evidence."
+          ],
+          "prerequisites": [
+            "lesson-00-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Security findings are only as valuable as the evidence supporting them and the clarity with which they are communicated. Sloppy evidence handling compromises investigations and damages trust.",
           "level": "beginner",
@@ -296,6 +341,8 @@
         "Deconstruct HTTP request/response headers, status codes, and TLS cryptographic guarantees.",
         "Use standard shell pipelines to inspect and filter synthetic network traffic logs."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 1 Cheat Sheet: Networking & CLI Fundamentals\n- **Permissions:** `rwx` (Read=4, Write=2, Execute=1). `chmod 750 file` -> Owner: rwx, Group: r-x, Others: none.\n- **TCP 3-Way Handshake:** Client SYN -> Server SYN-ACK -> Client ACK.\n- **Common Ports:** 22 (SSH), 53 (DNS), 80 (HTTP), 443 (HTTPS), 3306 (MySQL), 5432 (PostgreSQL).\n- **HTTP Methods:** GET (retrieve), POST (submit), PUT/PATCH (update), DELETE (remove).\n- **Core Shell Tools:** `grep -iE` (search pattern), `awk '{print $1}'` (extract column), `sort | uniq -c` (frequency count).",
       "lessons": [
         {
           "slug": "files-processes-permissions-services",
@@ -303,6 +350,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "registered",
           "objectives": [
             "Differentiate between user IDs (UIDs), group IDs (GIDs), and the superuser (root).",
@@ -338,6 +387,14 @@
               "lastReviewed": "2026-01-15"
             }
           ],
+          "summary_takeaways": [
+            "Processes inherit the permissions of the executing user.",
+            "File permissions govern read, write, and directory traversal rights.",
+            "Never run network-facing application servers as the root user."
+          ],
+          "prerequisites": [
+            "lesson-00-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Both security hardening and exploit containment rely on operating system privilege boundaries. Misconfigured permissions or unconstrained services create immediate lateral movement vectors.",
           "level": "beginner",
@@ -350,6 +407,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "registered",
           "objectives": [
             "Distinguish between IPv4, IPv6, CIDR notation, and private subnet ranges (RFC 1918).",
@@ -386,6 +445,14 @@
               "lastReviewed": "2026-01-05"
             }
           ],
+          "summary_takeaways": [
+            "Ports allow a single IP address to route traffic to thousands of distinct services.",
+            "TCP guarantees order and delivery; UDP provides lightweight, connectionless transmission.",
+            "DNS resolution precedes almost all modern network connections."
+          ],
+          "prerequisites": [
+            "lesson-01-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Network packets are the lifeblood of distributed systems. Understanding address routing, DNS lookups, and TCP/UDP communication is required to analyze firewall alerts, packet captures, and attack paths.",
           "level": "beginner",
@@ -398,6 +465,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "registered",
           "objectives": [
             "Read and construct raw HTTP/1.1 request and response headers.",
@@ -429,6 +498,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "HTTP is stateless; cookies and authorization headers manage session continuity.",
+            "Security headers (HSTS, CSP, SameSite) guide browser defense behavior.",
+            "TLS secures the pipe; application logic must secure the data inside."
+          ],
+          "prerequisites": [
+            "lesson-01-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "The web is the primary attack and defense surface for software engineering. Comprehending raw HTTP message syntax and TLS encryption enables you to inspect security headers, cookies, and API payloads.",
           "level": "beginner",
@@ -441,6 +518,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 32,
+          "minutes_reading": 12,
+          "minutes_practice": 20,
           "access_tier": "registered",
           "objectives": [
             "Compose multi-stage Unix command pipelines using pipes (`|`) and redirection (`>`, `>>`).",
@@ -515,6 +594,14 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Shell pipelines are the universal baseline tool for security operations.",
+            "Combining `grep`, `awk`, and `uniq -c` reveals volumetric and pattern anomalies.",
+            "Analyzing status codes immediately isolates unauthorized discovery attempts."
+          ],
+          "prerequisites": [
+            "lesson-01-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Security analysts triage millions of log lines. Mastering command-line text pipelines (`grep`, `awk`, `sed`, `sort`, `cut`) allows rapid log aggregation and anomaly detection without heavy GUI tools.",
           "level": "beginner",
@@ -537,6 +624,8 @@
         "Classify security controls into preventive, detective, and corrective categories.",
         "Build a structured threat model for a web application using STRIDE methodology."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 2 Cheat Sheet: Threat Modeling & Controls\n- **CIA Triad:**\n  - Confidentiality: Only authorized entities read data (encryption, access controls).\n  - Integrity: Data cannot be altered without detection (hashing, digital signatures).\n  - Availability: Systems and data remain accessible when needed (redundancy, DDoS mitigation).\n- **Risk Equation:** Risk = (Threat x Vulnerability x Likelihood) x Impact.\n- **Control Types:**\n  - Preventive: Stops attack before occurrence (input validation, firewalls).\n  - Detective: Identifies attack in progress or after fact (SIEM, audit logs).\n  - Corrective: Restores safe state post-incident (backups, automated isolation).\n- **STRIDE:** Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege.",
       "lessons": [
         {
           "slug": "cia-assets-trust-boundaries",
@@ -544,6 +633,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "registered",
           "objectives": [
             "Map real-world security failure modes to Confidentiality, Integrity, or Availability breaches.",
@@ -575,6 +666,14 @@
               "lastReviewed": "2026-01-12"
             }
           ],
+          "summary_takeaways": [
+            "Security decisions trace back to protecting Confidentiality, Integrity, or Availability.",
+            "Trust boundaries dictate where verification and sanitization must occur.",
+            "Never trust client-side claims without server-side validation."
+          ],
+          "prerequisites": [
+            "lesson-01-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Every security control exists to protect one or more facets of the CIA triad across defined trust boundaries. Without clear boundaries, security investments are unfocused.",
           "level": "beginner",
@@ -587,6 +686,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 29,
+          "minutes_reading": 14,
+          "minutes_practice": 15,
           "access_tier": "registered",
           "objectives": [
             "Differentiate between threats (actors/events), vulnerabilities (flaws), and risks (probable loss).",
@@ -622,6 +723,14 @@
               "lastReviewed": "2026-01-20"
             }
           ],
+          "summary_takeaways": [
+            "A bug is not automatically a critical risk without verified likelihood and impact.",
+            "Threat actors exploit vulnerabilities to create risk.",
+            "Security resources must be allocated to where risk is highest."
+          ],
+          "prerequisites": [
+            "lesson-02-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Vulnerabilities alone do not determine priority. Understanding business likelihood and real impact prevents panic over theoretical flaws and focuses engineering on high-risk exposures.",
           "level": "beginner",
@@ -634,6 +743,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 29,
+          "minutes_reading": 14,
+          "minutes_practice": 15,
           "access_tier": "registered",
           "objectives": [
             "Distinguish Authentication (identity verification) from Authorization (permission enforcement).",
@@ -669,6 +780,14 @@
               "lastReviewed": "2026-01-25"
             }
           ],
+          "summary_takeaways": [
+            "Authentication answers \"Who are you?\"; Authorization answers \"What can you access?\".",
+            "Valid credentials do not grant universal access.",
+            "Every object access requires an explicit ownership or role check."
+          ],
+          "prerequisites": [
+            "lesson-02-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Confusing who a user is (AuthN) with what they are allowed to do (AuthZ) is among the most prolific sources of critical web vulnerabilities, leading directly to Broken Object Level Authorization (BOLA).",
           "level": "beginner",
@@ -681,6 +800,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "registered",
           "objectives": [
             "Classify security measures into preventive, detective, and corrective categories.",
@@ -713,6 +834,14 @@
               "lastReviewed": "2026-02-05"
             }
           ],
+          "summary_takeaways": [
+            "Preventive controls reduce likelihood.",
+            "Detective controls reduce dwell time and enable rapid triage.",
+            "Corrective controls restore normal operations and limit impact."
+          ],
+          "prerequisites": [
+            "lesson-02-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "No single control prevents every attack. Defense-in-depth requires layered controls across preventive barriers, detective telemetry, and corrective recovery procedures.",
           "level": "beginner",
@@ -725,6 +854,8 @@
           "sort_order": 5,
           "required": true,
           "estimated_minutes": 40,
+          "minutes_reading": 15,
+          "minutes_practice": 25,
           "access_tier": "registered",
           "objectives": [
             "Apply the STRIDE threat mnemonic (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege).",
@@ -799,6 +930,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Threat modeling proactively identifies flaws before deployment.",
+            "STRIDE provides comprehensive coverage across six major failure categories.",
+            "Every identified threat requires an associated, testable control."
+          ],
+          "prerequisites": [
+            "lesson-02-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Threat modeling allows engineers to identify security design flaws during design before writing code, systematically testing assumptions using frameworks like STRIDE.",
           "level": "beginner",
@@ -820,6 +959,8 @@
         "Evaluate cryptographic password hashing functions (Argon2id, bcrypt) versus obsolete algorithms (MD5, SHA1).",
         "Review code snippets to identify hardcoded secrets, insecure direct object references, and vulnerable dependencies."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 3 Cheat Sheet: Application Security Best Practices\n- **Password Hashing:** Always use slow, salted cryptographic functions: **Argon2id** (modern gold standard) or **bcrypt** (work factor >= 12). Never use fast general hashes (MD5, SHA-256).\n- **SQL Injection Defense:** Use **Parameterized Queries / Prepared Statements** exclusively. Never concatenate strings into SQL queries.\n- **XSS Defense:** Apply **context-aware output encoding** (HTML entity encoding, attribute encoding) and modern framework auto-escaping (React JSX). Deploy Content Security Policy (CSP).\n- **Secrets Management:** Never commit API keys, database passwords, or JWT signing secrets into source control. Inject via environment variables or secret vaults at runtime.",
       "lessons": [
         {
           "slug": "browsers-servers-apis-databases",
@@ -827,6 +968,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Diagram multi-tier web architectures including Reverse Proxies, API Gateways, App Servers, and Databases.",
@@ -858,6 +1001,15 @@
               "lastReviewed": "2026-01-20"
             }
           ],
+          "summary_takeaways": [
+            "Client-side code can always be inspected, modified, or bypassed by a user.",
+            "Every backend API endpoint must authenticate and authorize requests independently.",
+            "Databases should never be exposed directly to the public internet."
+          ],
+          "prerequisites": [
+            "lesson-01-03",
+            "lesson-02-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Web applications are distributed systems. Flaws rarely exist in isolation; they manifest when one tier makes unsafe assumptions about the data formatting or authorization validation done by another tier.",
           "level": "beginner",
@@ -870,6 +1022,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Distinguish allowlist input validation from blocklist filtering.",
@@ -901,6 +1055,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Use parameterized queries for all database queries without exception.",
+            "Validate inputs against strict allowlists (types, lengths, character sets).",
+            "Encode outputs according to destination context (HTML body, attributes, JSON)."
+          ],
+          "prerequisites": [
+            "lesson-03-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Injection flaws (SQLi, Command Injection, XSS) occur when untrusted data is inadvertently interpreted as executable code or commands by an interpreter. Strict separation of code and data prevents these vulnerabilities.",
           "level": "beginner",
@@ -913,6 +1075,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 29,
+          "minutes_reading": 14,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Explain why cryptographic salts and slow adaptive hashing functions (Argon2id, bcrypt) resist GPU cracking.",
@@ -944,6 +1108,14 @@
               "lastReviewed": "2026-01-25"
             }
           ],
+          "summary_takeaways": [
+            "Never store plaintext passwords or use fast hashes (MD5, SHA-1, bare SHA-256).",
+            "Use unique per-user salts and adaptive functions (Argon2id or bcrypt).",
+            "MFA adds essential resilience against credential stuffing and credential theft."
+          ],
+          "prerequisites": [
+            "lesson-03-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Breached password hashes can be cracked in minutes if outdated algorithms are used. Understanding adaptive, salted hash functions and modern session tokens protects user identities even if databases leak.",
           "level": "beginner",
@@ -956,6 +1128,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Summarize the core categories of the OWASP Top 10 (Broken Access Control, Cryptographic Failures, Injection, Insecure Design, Security Misconfiguration).",
@@ -987,6 +1161,14 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Broken access control has overtaken injection as the #1 web security vulnerability.",
+            "Security misconfigurations often stem from default installation settings and debug modes.",
+            "Standard taxonomies (OWASP, CWE) align development and security teams."
+          ],
+          "prerequisites": [
+            "lesson-03-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Familiarity with the OWASP Top 10 weakness taxonomy provides a common language for identifying, classifying, and mitigating security defects across modern web applications.",
           "level": "beginner",
@@ -999,6 +1181,8 @@
           "sort_order": 5,
           "required": true,
           "estimated_minutes": 32,
+          "minutes_reading": 12,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Audit third-party dependencies for known Common Vulnerabilities and Exposures (CVEs) using automated scanning tools.",
@@ -1071,6 +1255,14 @@
               "lastReviewed": "2026-01-15"
             }
           ],
+          "summary_takeaways": [
+            "Never commit secrets or credentials into version control.",
+            "Maintain an active dependency audit process (`npm audit`, `cargo audit`, Snyk).",
+            "Defense in depth requires safe code, safe dependencies, and hardened configurations."
+          ],
+          "prerequisites": [
+            "lesson-03-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Over 80% of modern application code comes from open-source third-party dependencies. Vulnerabilities in dependencies (like Log4Shell) or leaked cloud credentials in git repositories can instantly compromise otherwise secure applications.",
           "level": "beginner",
@@ -1092,6 +1284,8 @@
         "Perform passive reconnaissance concepts using synthetic corporate personas and public records datasets.",
         "Map simulated threat actor techniques to the MITRE ATT&CK Enterprise matrix as a communication aid."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 4 Cheat Sheet: Red Team Methodology\n- **Vulnerability Assessment vs. Pentest vs. Red Team:**\n  - Vulnerability Assessment: Breadth-first inventory of known flaws (automated scanners).\n  - Penetration Test: Depth-first proof of exploitability against specific scoped targets.\n  - Red Team Simulation: Adversary-emulation testing people, processes, and tech to achieve a specific objective (e.g., access customer DB) while evaluating Blue Team detection.\n- **Hypothesis-Driven Testing:** State: \"Given [observed asset/state], if we [safe test action], then we expect [specific indicator] to occur.\"\n- **MITRE ATT&CK:** Use ATT&CK as a common taxonomy (Tactic = Goal, Technique = How), never as a checkbox compliance tool.",
       "lessons": [
         {
           "slug": "red-team-pentest-vuln-assessment-simulation",
@@ -1099,6 +1293,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Compare the scope, duration, and deliverables of Vulnerability Scanning, Pentesting, and Red Teaming.",
@@ -1130,6 +1326,15 @@
               "lastReviewed": "2026-01-18"
             }
           ],
+          "summary_takeaways": [
+            "Vulnerability assessments find known bugs; penetration tests exploit them; red teams test operational defense.",
+            "Red teaming evaluates detection and response times, not just technical exploits.",
+            "A trusted agent (White Cell) maintains exercise safety and prevents blue team escalations from panicking leadership."
+          ],
+          "prerequisites": [
+            "lesson-00-02",
+            "lesson-02-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Using the wrong assessment type wastes organizational resources. Knowing whether a client needs a wide vulnerability scan, an application penetration test, or a multi-week adversary simulation ensures expectations and outcomes match.",
           "level": "intermediate",
@@ -1142,6 +1347,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 34,
+          "minutes_reading": 14,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Draft a \"Crown Jewels\" objective statement for a simulated engagement.",
@@ -1173,6 +1380,14 @@
               "lastReviewed": "2026-01-22"
             }
           ],
+          "summary_takeaways": [
+            "Objectives must tie directly to realistic business risk.",
+            "Deconfliction protocols prevent wasted emergency incident response cycles.",
+            "Always establish a code-word and immediate phone communication path."
+          ],
+          "prerequisites": [
+            "lesson-04-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Vague red team objectives result in chaotic engagements that fail to produce defensive value. Clear objectives ensure both red and blue teams learn concrete lessons about system resilience.",
           "level": "intermediate",
@@ -1185,6 +1400,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Distinguish Passive Reconnaissance (third-party sources) from Active Reconnaissance (direct network probes).",
@@ -1227,6 +1444,14 @@
               "lastReviewed": "2026-01-30"
             }
           ],
+          "summary_takeaways": [
+            "Passive reconnaissance leaves zero footprint in the target's perimeter logs.",
+            "DNS records, certificate transparency logs, and code repos frequently reveal staging systems.",
+            "Intelligence gathered during recon informs structured test hypotheses."
+          ],
+          "prerequisites": [
+            "lesson-04-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Reconnaissance gathers intelligence about target infrastructure, technologies, and email naming conventions without making intrusive direct network connections that alert defenders.",
           "level": "intermediate",
@@ -1239,6 +1464,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Structure technical tests as testable hypotheses with explicit preconditions and expected observables.",
@@ -1270,6 +1497,14 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Formulate hypotheses before sending test traffic.",
+            "Minimize data collection to only what proves the vulnerability.",
+            "Keep precise operator logs with UTC timestamps."
+          ],
+          "prerequisites": [
+            "lesson-04-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Aimless probing creates noise, crashes servers, and frustrates engineering teams. Formulating structured hypotheses ensures every technical action has a clear rationale and predictable outcome.",
           "level": "intermediate",
@@ -1282,6 +1517,8 @@
           "sort_order": 5,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Navigate the MITRE ATT&CK Enterprise Matrix across Tactics (goals) and Techniques (actions).",
@@ -1344,6 +1581,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "ATT&CK provides a common taxonomy for cross-team collaboration.",
+            "Tactics describe \"Why\" an attacker acts; Techniques describe \"How\".",
+            "Do not treat ATT&CK as a linear checklist; adversaries combine techniques fluidly."
+          ],
+          "prerequisites": [
+            "lesson-04-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Describing an attack using proprietary or vendor-specific jargon makes it difficult for defenders to respond. MITRE ATT&CK provides a universal language linking offensive behaviors to defensive detections.",
           "level": "intermediate",
@@ -1366,6 +1611,8 @@
         "Capture cryptographically verified evidence using data minimization principles.",
         "Draft a production-grade Finding Card with severity rationale, reproduction steps, and remediation advice."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 5 Cheat Sheet: Contained Lab Validation & Finding Cards\n- **Pre-Flight Verification:** Confirm you are connected to the isolated synthetic sandbox (`*.sandbox.internal`). Stop if any external IP is contacted.\n- **Scan Result Analysis:** Do not blindly trust automated scanner outputs. Always verify:\n  1. Is the port/endpoint actually reachable?\n  2. Is the reported vulnerability a true positive or false positive?\n  3. Does real business impact exist?\n- **Finding Card Anatomy:**\n  - Title: Clear, concise vulnerability description + affected component.\n  - Severity: CVSS 3.1 Base Score + environmental impact context.\n  - Evidence: Timestamped HTTP request/response with sensitive PII redacted.\n  - Remediation: Practical code fix and architectural recommendation.",
       "lessons": [
         {
           "slug": "enter-isolated-target-verify-boundary",
@@ -1373,6 +1620,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Perform target verification steps (checking IP range, banner hashes, and sandbox tokens).",
@@ -1404,6 +1653,15 @@
               "lastReviewed": "2026-01-15"
             }
           ],
+          "summary_takeaways": [
+            "Never send exploit payloads until target identity is cryptographically or contextually proven.",
+            "Egress filtering guarantees no packets escape into production or the internet.",
+            "Use the sandbox reset button whenever an experiment produces unpredictable state."
+          ],
+          "prerequisites": [
+            "lesson-00-02",
+            "lesson-04-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Before executing any technical test, a professional operator verifies that the environment in front of them is the designated authorized target. Accidentally testing the wrong host is a catastrophic operational failure.",
           "level": "intermediate",
@@ -1416,6 +1674,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Parse an asset inventory spreadsheet containing hosts, operating systems, and listening services.",
@@ -1457,6 +1717,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "An asset inventory provides the map of the assessment terrain.",
+            "Look for boundary transitions between DMZ proxies and internal APIs.",
+            "Prioritize testing where sensitive business data intersects with user input."
+          ],
+          "prerequisites": [
+            "lesson-05-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Scanning blindly wastes bandwidth and time. Reviewing the customer's asset inventory, architecture diagrams, and service listings allows testers to pinpoint high-probability exposure vectors.",
           "level": "intermediate",
@@ -1469,6 +1737,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 34,
+          "minutes_reading": 14,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Interpret synthetic vulnerability scanner reports (Nessus/OpenVAS style).",
@@ -1500,6 +1770,14 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Scanners produce hypotheses, not confirmed facts.",
+            "Backported Linux patches frequently trick banner-based scanners into false positives.",
+            "Manual verification confirms real exploitability and true business impact."
+          ],
+          "prerequisites": [
+            "lesson-05-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Automated vulnerability scanners produce vast quantities of output filled with false positives, informational noise, and minor version banners. Analysts must filter scanner noise to isolate actionable weaknesses.",
           "level": "intermediate",
@@ -1512,6 +1790,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 40,
+          "minutes_reading": 15,
+          "minutes_practice": 25,
           "access_tier": "enrolled",
           "objectives": [
             "Execute a safe proof-of-concept validation for Broken Object Level Authorization (BOLA).",
@@ -1554,6 +1834,14 @@
               "lastReviewed": "2026-01-28"
             }
           ],
+          "summary_takeaways": [
+            "Always validate authorization flaws using two controlled test accounts.",
+            "Capture the exact HTTP request and response as unassailable proof.",
+            "Stop after confirming the first record; do not exfiltrate bulk datasets."
+          ],
+          "prerequisites": [
+            "lesson-05-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Proving that a vulnerability exists must be done cleanly, reproducibly, and safely without crashing services, corrupting databases, or leaking unneeded data.",
           "level": "intermediate",
@@ -1566,6 +1854,8 @@
           "sort_order": 5,
           "required": true,
           "estimated_minutes": 40,
+          "minutes_reading": 15,
+          "minutes_practice": 25,
           "access_tier": "enrolled",
           "objectives": [
             "Draft a Finding Card adhering to the standard 6-part template.",
@@ -1623,6 +1913,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "A finding card must be reproducible by a developer without additional explanation.",
+            "State impact objectively without inflating or minimizing risk.",
+            "Provide actionable code remediations, not just \"sanitize inputs\"."
+          ],
+          "prerequisites": [
+            "lesson-05-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Finding cards are the executive and technical summary units of security assessments. A well-written finding card gives developers everything needed to fix the root cause and provides leadership with clear risk context.",
           "level": "intermediate",
@@ -1644,6 +1942,8 @@
         "Facilitate constructive finding debriefs that foster collaboration rather than adversarial antagonism.",
         "Execute formal retesting workflows to verify developer remediations."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 6 Cheat Sheet: Professional Reporting & Debriefs\n- **Audience Separation:**\n  - Executive Summary: Business impact, overall security posture, strategic themes, top 3 priorities. No jargon.\n  - Technical Findings: Exact URLs, payloads, reproduction steps, evidence hashes, root-cause fixes.\n- **Tone:** Professional, objective, and constructive. Never mock developers or exaggerate theoretical risk.\n- **Retest Verification:** Always retest the exact original reproduction steps plus adjacent boundary conditions to ensure the fix is thorough, not just a surface-level filter.",
       "lessons": [
         {
           "slug": "finding-quality-title-severity-evidence-reproduction",
@@ -1651,6 +1951,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Apply the standard 6-part finding structure to any confirmed security weakness.",
@@ -1682,6 +1984,14 @@
               "lastReviewed": "2026-01-20"
             }
           ],
+          "summary_takeaways": [
+            "Developers should be able to reproduce the bug in 5 minutes using your steps.",
+            "Avoid vague titles like \"Security Bug in Website\".",
+            "Always provide a concrete code fix alongside the problem description."
+          ],
+          "prerequisites": [
+            "lesson-05-05"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "A brilliant exploit is useless if the engineering team cannot reproduce the issue or understand how to fix it. High-quality documentation accelerates remediation and builds engineering trust.",
           "level": "intermediate",
@@ -1694,6 +2004,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Distinguish between Base, Temporal, and Environmental CVSS metrics.",
@@ -1725,6 +2037,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Calibrate ratings with environmental reality and mitigating controls.",
+            "Inflating severities leads to alert fatigue and dismissive developers.",
+            "Be transparent about what was verified versus what was theoretically possible."
+          ],
+          "prerequisites": [
+            "lesson-06-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Inflating minor flaws into \"Critical\" emergencies destroys your credibility with engineering teams. Calibrated risk scoring reflects real operational context and builds long-term authority.",
           "level": "intermediate",
@@ -1737,6 +2057,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 29,
+          "minutes_reading": 14,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Lead an empathetic finding debrief meeting with software engineers.",
@@ -1768,6 +2090,14 @@
               "lastReviewed": "2026-01-15"
             }
           ],
+          "summary_takeaways": [
+            "Security testing is a partnership to protect the organization, not a competition.",
+            "Retesting must probe for patch bypasses, not just repeat the original payload.",
+            "Celebrate defensive victories and hardened controls."
+          ],
+          "prerequisites": [
+            "lesson-06-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Finding bugs is only half the job; helping organizations remediate them is the real objective. Conducting respectful debriefs and rigorous retesting ensures fixes are resilient.",
           "level": "intermediate",
@@ -1780,6 +2110,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 32,
+          "minutes_reading": 12,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Identify missing evidence, vague reproduction steps, and exaggerated claims in flawed reports.",
@@ -1832,6 +2164,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "A report represents your professional reputation.",
+            "Peer review (QA) catches omissions before the client reads the document.",
+            "Purge client data and evidence copies securely following agreed retention schedules."
+          ],
+          "prerequisites": [
+            "lesson-06-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Reviewing and improving weak reports develops critical editorial skills, ensuring that every finding delivered to clients meets the highest standards of evidence and professional ethics.",
           "level": "intermediate",
@@ -1854,6 +2194,8 @@
         "Analyze synthetic event timelines to reconstruct adversary activity sequences.",
         "Assess detection engineering coverage gaps using ATT&CK data sources."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 7 Cheat Sheet: Telemetry & Detection Engineering\n- **Telemetry Hierarchy:**\n  - Endpoint (EDR/Sysmon): Process creation (Parent/Child), command-line arguments, network connections, file modifications.\n  - Identity (IdP/AD): Auth attempts, MFA prompt responses, token grants, group membership changes.\n  - Network (NetFlow/Zeek): Connection duration, bytes in/out, DNS lookups, TLS certificate metadata.\n- **Detection Engineering Principle:** Detect behaviors and techniques, not brittle static indicators (IPs, hashes). Adversaries change IPs in seconds; changing their process execution technique requires engineering redesign.\n- **Fidelity vs. Noise:** High-signal alerts = rare, high-confidence events with immediate operational context. Low-signal = high-volume generic events that trigger analyst burnout.",
       "lessons": [
         {
           "slug": "secops-roles-alert-lifecycle",
@@ -1861,6 +2203,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Differentiate Tier 1 (Triage), Tier 2 (Investigation), and Tier 3 (Threat Hunting/IR) responsibilities.",
@@ -1892,6 +2236,14 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Alert triage requires rapid classification to protect analyst attention.",
+            "Automation (SOAR) handles repetitive enrichment so humans can focus on critical reasoning.",
+            "Detection engineers continually tune rules to eliminate false-positive fatigue."
+          ],
+          "prerequisites": [
+            "lesson-02-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Security operations is a 24/7 team discipline. Understanding tiered roles, escalation paths, and the lifecycle of an alert prevents alerts from falling through cracks during high-pressure incidents.",
           "level": "intermediate",
@@ -1904,6 +2256,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 34,
+          "minutes_reading": 14,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Explain why UTC synchronization (NTP) is mandatory across all enterprise logging infrastructure.",
@@ -1935,6 +2289,14 @@
               "lastReviewed": "2026-01-25"
             }
           ],
+          "summary_takeaways": [
+            "Time synchronization (NTP) is a non-negotiable prerequisite for log correlation.",
+            "Standardized schemas (OCSF, ECS) allow cross-platform querying.",
+            "High-quality logs retain source IP, destination IP, user identity, and process hierarchy."
+          ],
+          "prerequisites": [
+            "lesson-07-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "A SIEM is only as good as its raw data. Unsynchronized system clocks, missing fields, and unparsed logs make it impossible to correlate events across systems during an active investigation.",
           "level": "intermediate",
@@ -1947,6 +2309,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Analyze Windows Event Logs (Security 4624/4688, Sysmon Event ID 1) and Linux Auditd process telemetry.",
@@ -1979,6 +2343,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Web servers should never spawn interactive command shells (`/bin/sh`, `powershell.exe`).",
+            "Process parentage is one of the highest-fidelity detection signals on endpoints.",
+            "NetFlow provides long-term communication records even when traffic is encrypted."
+          ],
+          "prerequisites": [
+            "lesson-07-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Adversaries operate across multiple technical planes. Relying solely on network firewalls leaves you blind to endpoint process injection; relying solely on endpoints leaves you blind to cloud API abuse.",
           "level": "intermediate",
@@ -1991,6 +2363,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 34,
+          "minutes_reading": 14,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Write Sigma-style detection rules combining process names, command-line arguments, and parent relationships.",
@@ -2022,6 +2396,14 @@
               "lastReviewed": "2026-01-20"
             }
           ],
+          "summary_takeaways": [
+            "Detect behaviors rather than transient IP addresses or hashes.",
+            "Always combine suspicious child processes with their parent context.",
+            "Every rule must be tagged with expected ATT&CK techniques and severity."
+          ],
+          "prerequisites": [
+            "lesson-07-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Writing a detection rule that triggers 1,000 times a day causes analysts to ignore or disable it. High-quality detection engineering crafts precise logic that provides rich investigation context.",
           "level": "intermediate",
@@ -2034,6 +2416,8 @@
           "sort_order": 5,
           "required": true,
           "estimated_minutes": 40,
+          "minutes_reading": 15,
+          "minutes_practice": 25,
           "access_tier": "enrolled",
           "objectives": [
             "Analyze a multi-source synthetic event timeline spanning web, authentication, and endpoint logs.",
@@ -2101,6 +2485,14 @@
               "lastReviewed": "2026-01-15"
             }
           ],
+          "summary_takeaways": [
+            "An incident timeline tells the complete story across network, web, and endpoint planes.",
+            "Initial access is often revealed by HTTP status codes and upload parameters.",
+            "Outbound network connections following process execution indicate command-and-control staging."
+          ],
+          "prerequisites": [
+            "lesson-07-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Reconstructing the timeline of an incident from fragmented log sources is the defining skill of a security analyst. You must correlate multi-source events into a coherent narrative of attacker behavior.",
           "level": "intermediate",
@@ -2122,6 +2514,8 @@
         "Evaluate high-stakes containment decisions balancing business operational impact against adversary lateral movement.",
         "Participate in a branching tabletop scenario based on synthetic breach logs."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 8 Cheat Sheet: Incident Response & Containment\n- **NIST SP 800-61 IR Phases:**\n  1. Preparation: Tools, backups, playbooks, communication channels.\n  2. Detection & Analysis: Validating indicators, scoping full blast radius.\n  3. Containment: Isolating systems (network quarantine, credential revocation) before attacker spreads.\n  4. Eradication: Removing root causes, wiping compromised binaries, closing vulnerability.\n  5. Recovery: Restoring from clean verified backups, monitoring for persistence.\n  6. Post-Incident Activity: Lessons learned meeting, root-cause report, detection tuning.\n- **Containment Trade-off:** Do not immediately reboot or wipe a system upon detecting an intrusion! Rebooting destroys volatile RAM evidence, unlinks running memory malware, and tips off the adversary. Coordinate network isolation first.",
       "lessons": [
         {
           "slug": "alert-triage-prioritization-escalation",
@@ -2129,6 +2523,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Classify incoming alerts into True Positive (Actionable), True Positive (Benign), and False Positive.",
@@ -2160,6 +2556,14 @@
               "lastReviewed": "2026-01-18"
             }
           ],
+          "summary_takeaways": [
+            "Triage quickly filters noise so responders focus on genuine threats.",
+            "Asset context dictates urgency: a low alert on a domain controller outranks a medium alert on a guest workstation.",
+            "Document every triage decision with verifiable technical rationale."
+          ],
+          "prerequisites": [
+            "lesson-07-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "A SOC receives thousands of alerts daily. Understanding how to triage and prioritize based on asset criticality and confirmed indicators prevents critical incidents from languishing in ticket queues.",
           "level": "intermediate",
@@ -2172,6 +2576,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Map out the six phases of the NIST SP 800-61 Incident Handling Guide.",
@@ -2204,6 +2610,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Never pull the power cord or reboot a live compromised machine (preserves RAM).",
+            "Containment must isolate the adversary before eradication begins.",
+            "Lessons Learned feeds directly back into Preparation for future resilience."
+          ],
+          "prerequisites": [
+            "lesson-08-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Responding to a live breach without a disciplined framework leads to panicked, chaotic decisions that destroy evidence and fail to eradicate adversary persistence.",
           "level": "intermediate",
@@ -2216,6 +2630,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Apply the Order of Volatility during live digital forensics.",
@@ -2247,6 +2663,14 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Follow the Order of Volatility: capture RAM before rebooting or powering down.",
+            "Hash all evidence immediately upon acquisition (SHA-256).",
+            "Record every person who handled or analyzed the evidence."
+          ],
+          "prerequisites": [
+            "lesson-08-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "If an incident leads to law enforcement action, regulatory reporting, or insurance claims, digital evidence must be legally defensible. Mishandled evidence is inadmissible in court.",
           "level": "intermediate",
@@ -2259,6 +2683,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 29,
+          "minutes_reading": 14,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Evaluate tactical containment strategies: Host Isolation, Network Segmentation, Account Disabling, and Null-Routing.",
@@ -2290,6 +2716,14 @@
               "lastReviewed": "2026-01-25"
             }
           ],
+          "summary_takeaways": [
+            "Containment requires weighing business disruption against security exposure.",
+            "EDR host isolation is preferred over physical disconnects because management channels stay active.",
+            "Always communicate via out-of-band channels during suspected enterprise compromise."
+          ],
+          "prerequisites": [
+            "lesson-08-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Shutting down an entire e-commerce infrastructure during an alert costs millions of dollars per hour. Responders must balance risk containment against operational business impact.",
           "level": "intermediate",
@@ -2302,6 +2736,8 @@
           "sort_order": 5,
           "required": true,
           "estimated_minutes": 40,
+          "minutes_reading": 15,
+          "minutes_practice": 25,
           "access_tier": "enrolled",
           "objectives": [
             "Evaluate operational decisions in an interactive branching tabletop scenario.",
@@ -2355,6 +2791,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Tabletops expose operational friction before real emergencies.",
+            "Patience during scoping prevents adversaries from shifting to unmonitored backdoors.",
+            "Document all lessons learned to harden baseline defenses."
+          ],
+          "prerequisites": [
+            "lesson-08-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Tabletop simulations allow teams to test playbooks and decision-making in a safe, low-stress environment before facing a real adversary at 2:00 AM on a holiday weekend.",
           "level": "intermediate",
@@ -2377,6 +2821,8 @@
         "Track operational learning metrics: coverage, time-to-triage, and recurrence rates.",
         "Design automated purple-team continuous validation feedback loops."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 9 Cheat Sheet: Hardening & Resilience\n- **Hardening Baselines:** Apply CIS Benchmarks (disable unused services, enforce SSH key-only auth, mount filesystems `noexec`).\n- **Remediation Prioritization (EPSS + CVSS):**\n  - High CVSS + High EPSS (Actively Exploited In The Wild) = Immediate Emergency Patch.\n  - High CVSS + Low EPSS (Internal isolated target) = Scheduled sprint cycle.\n- **Backups: 3-2-1 Rule:** 3 copies of data, 2 different media types, 1 stored offsite/immutable (air-gapped against ransomware).\n- **Purple Loop:** Red Team emulates technique -> Blue verifies detection telemetry -> If gap found, tune rule -> Retest to confirm detection -> Document in shared matrix.",
       "lessons": [
         {
           "slug": "secure-configuration-patching-backups",
@@ -2384,6 +2830,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Apply CIS Benchmarks to Linux servers and Docker container runtimes.",
@@ -2415,6 +2863,15 @@
               "lastReviewed": "2026-01-15"
             }
           ],
+          "summary_takeaways": [
+            "Hardening removes the low-hanging fruit exploited by commodity threat actors.",
+            "Backups are worthless unless regularly tested for restoration speed and integrity.",
+            "Automated golden images (Infrastructure as Code) prevent configuration drift."
+          ],
+          "prerequisites": [
+            "lesson-01-01",
+            "lesson-08-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Over 90% of breaches exploit known misconfigurations or missing patches with existing fixes. Proactive configuration hygiene closes doors before adversaries arrive.",
           "level": "intermediate",
@@ -2427,6 +2884,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 29,
+          "minutes_reading": 14,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Compare MFA factors: SMS OTP vs. Mobile Push vs. FIDO2/WebAuthn hardware tokens.",
@@ -2458,6 +2917,14 @@
               "lastReviewed": "2026-01-20"
             }
           ],
+          "summary_takeaways": [
+            "Deploy phishing-resistant MFA (FIDO2 / Passkeys) on all administrative and developer accounts.",
+            "Implement number matching on mobile push prompts to defeat MFA fatigue.",
+            "Revoke dormant accounts and conduct quarterly permission audits."
+          ],
+          "prerequisites": [
+            "lesson-03-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Identity is the modern perimeter. Attackers no longer \"hack in\"; they log in using stolen credentials or session tokens. Hardening identity controls blunts initial access.",
           "level": "intermediate",
@@ -2470,6 +2937,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Utilize CISA's Known Exploited Vulnerabilities (KEV) catalog.",
@@ -2511,6 +2980,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Prioritize vulnerabilities listed on the CISA KEV catalog first.",
+            "Use EPSS to identify high-probability emerging threats before mass exploitation.",
+            "Factor in network exposure (internet-facing vs. internal isolated)."
+          ],
+          "prerequisites": [
+            "lesson-09-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Organizations have thousands of unpatched vulnerabilities. Blindly patching by CVSS score alone wastes effort on theoretical bugs; using exploit intelligence (EPSS, KEV) focuses effort on real threats.",
           "level": "intermediate",
@@ -2523,6 +3000,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 27,
+          "minutes_reading": 12,
+          "minutes_practice": 15,
           "access_tier": "enrolled",
           "objectives": [
             "Calculate actionable security operational metrics: MTTD, MTTR, False Positive Rate, and Flaw Recurrence.",
@@ -2554,6 +3033,14 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Measure speed of detection, speed of remediation, and defect recurrence.",
+            "Avoid vanity statistics that measure internet noise rather than internal health.",
+            "Use recurrence data to upgrade development libraries and frameworks."
+          ],
+          "prerequisites": [
+            "lesson-09-03"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Vanity metrics (e.g., \"number of blocked attacks\") show activity, not effectiveness. Meaningful security metrics measure dwell time, coverage gaps, and whether the same mistakes recur.",
           "level": "intermediate",
@@ -2566,6 +3053,8 @@
           "sort_order": 5,
           "required": true,
           "estimated_minutes": 40,
+          "minutes_reading": 15,
+          "minutes_practice": 25,
           "access_tier": "enrolled",
           "objectives": [
             "Establish an iterative Purple Team cycle (Emulate -> Observe -> Tune -> Validate).",
@@ -2628,6 +3117,14 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Purple teaming replaces finger-pointing with shared technical collaboration.",
+            "Continuous testing validates that security controls survive software updates.",
+            "A tuned detection rule provides high fidelity, low noise, and rich investigation context."
+          ],
+          "prerequisites": [
+            "lesson-09-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Defenses degrade over time as infrastructure changes. Establishing regular purple-team feedback loops continuously verifies whether defensive rules fire as expected when techniques are tested.",
           "level": "intermediate",
@@ -2651,6 +3148,8 @@
         "Execute Part E: Produce an Executive Summary, Technical Finding Card, and Limitations Reflection.",
         "Meet the Capstone Rubric requirements, including a mandatory 100% passing score on the Safety & Scope component."
       ],
+      "required": true,
+      "one_page_cheat_sheet": "### Module 10 Cheat Sheet: Purple Team Capstone Rubric & Deliverables\n- **Mandatory Gate:** Scope & Safety compliance must score 100% to pass the capstone regardless of other scores.\n- **Part A (Scope):** Explicitly verify sandbox boundaries (`10.200.0.0/24`). Discard out-of-scope third-party vendor targets.\n- **Part B (Offense):** Validate the seeded Broken Object Level Authorization (BOLA) weakness using synthetic test credentials. Record clean, minimized HTTP request/response evidence.\n- **Part C (Defense):** Correlate the attack timestamp against the synthetic web and EDR logs. Identify why the existing rule failed to alert. Author a new Sigma detection rule.\n- **Part D (Remediation):** Propose parameterized ORM query logic with ownership checks. Write an automated retest script specification.\n- **Part E (Communication):** Author an Executive Summary for the C-suite and a Technical Finding for the engineering team.",
       "lessons": [
         {
           "slug": "capstone-scenario-scope-part-a",
@@ -2658,6 +3157,8 @@
           "sort_order": 1,
           "required": true,
           "estimated_minutes": 35,
+          "minutes_reading": 15,
+          "minutes_practice": 20,
           "access_tier": "enrolled",
           "objectives": [
             "Analyze the fictional engagement brief for \"Meridian Health Logistics\".",
@@ -2689,6 +3190,16 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Confirm scope boundaries in writing before touching the lab.",
+            "Excluded third-party systems are strictly off-limits.",
+            "Safety compliance is a mandatory pass requirement for the capstone certificate."
+          ],
+          "prerequisites": [
+            "lesson-00-02",
+            "lesson-04-02",
+            "lesson-05-01"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Before executing any assessment steps, the purple team lead confirms all legal scopes and boundaries. Real assessments begin with verified scope confirmation.",
           "level": "intermediate",
@@ -2701,6 +3212,8 @@
           "sort_order": 2,
           "required": true,
           "estimated_minutes": 45,
+          "minutes_reading": 15,
+          "minutes_practice": 30,
           "access_tier": "enrolled",
           "objectives": [
             "Authenticate as synthetic user `dispatcher_dan` on the sandbox portal.",
@@ -2737,6 +3250,15 @@
               "lastReviewed": "2026-01-20"
             }
           ],
+          "summary_takeaways": [
+            "Document the exact timestamp of execution in UTC for blue team correlation.",
+            "Stop after confirming the first record; do not iterate across the database.",
+            "Mask sensitive synthetic tokens and credentials in report drafts."
+          ],
+          "prerequisites": [
+            "lesson-10-01",
+            "lesson-05-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Executing the offensive phase safely in a contained sandbox models realistic adversary behavior while capturing precise, timestamped proof-of-concept evidence.",
           "level": "intermediate",
@@ -2749,6 +3271,8 @@
           "sort_order": 3,
           "required": true,
           "estimated_minutes": 45,
+          "minutes_reading": 15,
+          "minutes_practice": 30,
           "access_tier": "enrolled",
           "objectives": [
             "Inspect the synthetic web server and application access logs during the Part B attack window.",
@@ -2776,6 +3300,15 @@
               "lastReviewed": "2026-01-10"
             }
           ],
+          "summary_takeaways": [
+            "Attackers exploiting business logic flaws often generate legitimate HTTP 200 OK status codes.",
+            "Network status codes are insufficient; application-level telemetry is required.",
+            "Detection logic must account for user identity context."
+          ],
+          "prerequisites": [
+            "lesson-10-02",
+            "lesson-07-04"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Switching to the defender perspective, you analyze what the SIEM saw during the attack, explain why existing rules remained silent, and engineer high-fidelity detection logic.",
           "level": "intermediate",
@@ -2788,6 +3321,8 @@
           "sort_order": 4,
           "required": true,
           "estimated_minutes": 40,
+          "minutes_reading": 15,
+          "minutes_practice": 25,
           "access_tier": "enrolled",
           "objectives": [
             "Refactor the vulnerable endpoint code to include tenancy ownership validation.",
@@ -2815,6 +3350,15 @@
               "lastReviewed": "2026-02-01"
             }
           ],
+          "summary_takeaways": [
+            "Enforce authorization directly in the database query layer.",
+            "Return 404 Not Found rather than 403 Forbidden to prevent object ID enumeration.",
+            "Automated regression tests ensure future code releases do not reintroduce the flaw."
+          ],
+          "prerequisites": [
+            "lesson-10-03",
+            "lesson-03-02"
+          ],
           "last_reviewed_at": null,
           "why_this_matters": "Proposing a realistic fix requires software engineering empathy. You must provide a clean code patch that enforces authorization in the database query layer, plus a test to prove it works.",
           "level": "intermediate",
@@ -2827,6 +3371,8 @@
           "sort_order": 5,
           "required": true,
           "estimated_minutes": 60,
+          "minutes_reading": 20,
+          "minutes_practice": 40,
           "access_tier": "enrolled",
           "objectives": [
             "Author an Executive Summary explaining technical findings in terms of business risk.",
@@ -2879,6 +3425,15 @@
               "url": "https://aiameen.online/",
               "lastReviewed": "2026-03-01"
             }
+          ],
+          "summary_takeaways": [
+            "Security professionals must translate technical weaknesses into strategic business priorities.",
+            "Purple team collaboration strengthens defenses faster than siloed teams.",
+            "Ethical commitment and continuous learning define long-term career success."
+          ],
+          "prerequisites": [
+            "lesson-10-04",
+            "lesson-06-01"
           ],
           "last_reviewed_at": null,
           "why_this_matters": "The final capstone deliverable brings together your offensive proof, defensive telemetry, remediation plan, and executive communication. This is your portfolio demonstration of full-spectrum cybersecurity proficiency.",

@@ -22,6 +22,56 @@ $enrolledUnix = isset($data['enrolled_at']) && is_numeric($data['enrolled_at'])
     ? (int) $data['enrolled_at']
     : time();
 
+// ── Authenticated learner: enroll = grant the full course entitlement ────────
+// Payments are deferred to a later release; until checkout exists this is the
+// grant path that turns a free "registered" account into an "enrolled" one.
+$user = Auth::user();
+if ($user !== null) {
+    Auth::require_csrf();
+
+    try {
+        Auth::grant_entitlement((int) $user['user_id'], Accounts::PRODUCT_ID, 'enrolled', 'grant');
+    } catch (Throwable $e) {
+        app_log('error', ['where' => 'enroll.grant', 'msg' => $e->getMessage()]);
+        json_out(500, ['error' => 'Could not enroll you right now. Please try again.']);
+    }
+
+    if (Database::isAvailable()) {
+        try {
+            $stmt = Database::pdo()->prepare(
+                'INSERT INTO course_enrollments (learner_id, name, email, ip, user_agent, enrolled_at, created_at)
+                 VALUES (:learner, :name, :email, :ip, :ua, FROM_UNIXTIME(:enrolled_at), NOW())
+                 ON DUPLICATE KEY UPDATE
+                    learner_id = VALUES(learner_id), name = VALUES(name),
+                    ip = VALUES(ip), user_agent = VALUES(user_agent),
+                    enrolled_at = VALUES(enrolled_at)'
+            );
+            $stmt->execute([
+                ':learner'     => 'user:' . (int) $user['user_id'],
+                ':name'        => (string) ($user['name'] ?? ''),
+                ':email'       => (string) ($user['email'] ?? ''),
+                ':ip'          => client_ip(),
+                ':ua'          => user_agent(),
+                ':enrolled_at' => $enrolledUnix,
+            ]);
+        } catch (Throwable $e) {
+            app_log('error', ['where' => 'enroll.auth_row', 'msg' => $e->getMessage()]);
+        }
+    }
+
+    json_out(200, [
+        'success'      => true,
+        'message'      => 'You now have full access to the course.',
+        'tier'         => 'enrolled',
+        'entitlements' => [
+            'course' => Accounts::PRODUCT_ID,
+            'tier'   => 'enrolled',
+            'access' => 'enrolled',
+        ],
+    ]);
+}
+
+// ── Anonymous legacy path: record the enrollment + notify the owner ─────────
 if ($name === '' || $email === '') {
     json_out(400, ['error' => 'Name and email are required.']);
 }
