@@ -21,6 +21,18 @@ import { CourseGlossaryPage } from './courses/teaming/pages/CourseGlossaryPage';
 import { LearnerProgressPage } from './courses/teaming/pages/LearnerProgressPage';
 import { CapstonePage } from './courses/teaming/pages/CapstonePage';
 
+// Platform: accounts, access tiers, learner dashboard
+import { AuthProvider } from './platform/auth/AuthContext';
+import { RequireAuth } from './platform/auth/RequireAuth';
+import {
+  LoginPage,
+  RegisterPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
+  VerifyEmailPage,
+} from './platform/pages/AuthPages';
+import { DashboardPage } from './platform/pages/DashboardPage';
+
 function PortfolioHome() {
   return (
     <Layout>
@@ -42,9 +54,25 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <AuthProvider>
         <Routes>
           {/* Main Portfolio Single-Page Experience */}
           <Route path="/" element={<PortfolioHome />} />
+
+          {/* Accounts & Learner Dashboard */}
+          <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+          <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+          <Route path="/forgot-password" element={<Layout><ForgotPasswordPage /></Layout>} />
+          <Route path="/reset-password" element={<Layout><ResetPasswordPage /></Layout>} />
+          <Route path="/verify-email" element={<Layout><VerifyEmailPage /></Layout>} />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Layout><DashboardPage /></Layout>
+              </RequireAuth>
+            }
+          />
 
           {/* Practical Cybersecurity Course Section Routes */}
           <Route
@@ -72,6 +100,7 @@ function App() {
           {/* Catch-all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
   );
