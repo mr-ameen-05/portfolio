@@ -6,6 +6,7 @@ import ProjectsSection from './components/projects/ProjectsSection';
 import JournalSection from './components/journal/JournalSection';
 import JourneySection from './components/journey/JourneySection';
 import CommunitySection from './components/community/CommunitySection';
+import PracticePlatformsSection from './components/platforms/PracticePlatformsSection';
 import AboutSection from './components/about/AboutSection';
 import ContactSection from './components/contact/ContactSection';
 
@@ -29,6 +30,7 @@ function PortfolioHome() {
         <JournalSection />
         <JourneySection />
         <CommunitySection />
+        <PracticePlatformsSection />
         <AboutSection />
         <ContactSection />
       </main>

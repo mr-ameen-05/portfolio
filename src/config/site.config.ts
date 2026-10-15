@@ -17,6 +17,7 @@ export const SITE = {
     { id: 'field-notes', label: 'Field Notes' },
     { id: 'journey', label: 'Journey' },
     { id: 'community', label: 'Community' },
+    { id: 'platforms', label: 'Practice' },
     { id: 'about', label: 'About' },
     { id: 'contact', label: 'Contact' },
   ],
