@@ -7,7 +7,7 @@
         "php": ">=8.1",
         "ext-pdo": "*",
         "ext-json": "*",
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^7.1"
     },
     "config": {
         "optimize-autoloader": true,
