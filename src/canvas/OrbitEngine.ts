@@ -88,28 +88,28 @@ export class OrbitEngine {
 
   resize(width: number, height: number) {
     if (width >= 1280) {
-      // Large screens: place clearly in left and right wings with generous margin
-      this.leftCenter = new Vector2D(Math.max(210, width * 0.18), height * 0.52);
-      this.rightCenter = new Vector2D(Math.min(width - 210, width * 0.82), height * 0.52);
-      this.scaleOrbits(0.95);
+      // Large screens: Distinct left and right galaxy wings flanking the center
+      this.leftCenter = new Vector2D(Math.max(160, width * 0.14), height * 0.50);
+      this.rightCenter = new Vector2D(Math.min(width - 160, width * 0.86), height * 0.50);
+      this.scaleOrbits(0.88);
     } else if (width >= 1024) {
-      // Standard desktop: keep well inside margins
-      this.leftCenter = new Vector2D(Math.max(190, width * 0.19), height * 0.52);
-      this.rightCenter = new Vector2D(Math.min(width - 190, width * 0.81), height * 0.52);
-      this.scaleOrbits(0.78);
+      // Standard desktop
+      this.leftCenter = new Vector2D(Math.max(140, width * 0.15), height * 0.50);
+      this.rightCenter = new Vector2D(Math.min(width - 140, width * 0.85), height * 0.50);
+      this.scaleOrbits(0.74);
     } else if (width >= 768) {
       // Tablet: tighter margins
-      this.leftCenter = new Vector2D(width * 0.16, height * 0.52);
-      this.rightCenter = new Vector2D(width * 0.84, height * 0.52);
-      this.scaleOrbits(0.68);
+      this.leftCenter = new Vector2D(width * 0.13, height * 0.50);
+      this.rightCenter = new Vector2D(width * 0.87, height * 0.50);
+      this.scaleOrbits(0.62);
     } else {
-      // Mobile: compact wings
-      this.leftCenter = new Vector2D(width * 0.22, height * 0.48);
-      this.rightCenter = new Vector2D(width * 0.78, height * 0.56);
-      this.scaleOrbits(0.52);
+      // Mobile: subtle left and right flanking
+      this.leftCenter = new Vector2D(width * 0.15, height * 0.60);
+      this.rightCenter = new Vector2D(width * 0.85, height * 0.60);
+      this.scaleOrbits(0.48);
     }
 
-    // Immediately snap positions to centers on initial layout
+    // Immediately snap positions to respective galaxy centers on initial layout
     for (const body of this.bodies) {
       const center = body.config.galaxy === 'left' ? this.leftCenter : this.rightCenter;
       body.initPosition(center);

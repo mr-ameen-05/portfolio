@@ -148,13 +148,13 @@ export const LessonPlayerPage: React.FC = () => {
               />
 
               {/* Completion Status Card */}
-              <div className="max-w-4xl mx-auto p-4 rounded-xl border border-border-subtle bg-bg-secondary/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="max-w-4xl mx-auto p-5 sm:p-6 rounded-2xl glass-panel-glow border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm ${
                       isCompleted
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500'
-                        : 'bg-bg-primary text-text-muted border border-border-subtle'
+                        : 'glass-pill text-text-muted border border-white/10'
                     }`}
                   >
                     {isCompleted ? '✓' : '○'}
@@ -173,10 +173,10 @@ export const LessonPlayerPage: React.FC = () => {
 
                 <button
                   onClick={handleToggleComplete}
-                  className={`px-4 py-2 rounded text-xs font-mono uppercase tracking-wider transition-colors border ${
+                  className={`px-5 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border ${
                     isCompleted
-                      ? 'bg-bg-primary text-text-muted border-border-subtle hover:text-rose-400 hover:border-rose-500/40'
-                      : 'bg-accent text-black font-bold hover:bg-accent/90 border-accent'
+                      ? 'glass-pill text-text-muted hover:text-rose-400 hover:border-rose-500/40'
+                      : 'bg-accent text-black font-bold hover:bg-accent/90 border-accent shadow-md shadow-accent/20 hover:scale-105'
                   }`}
                 >
                   {isCompleted ? 'Mark as Incomplete' : 'Mark as Complete ✓'}

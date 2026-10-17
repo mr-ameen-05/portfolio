@@ -11,7 +11,7 @@ export const CourseBreadcrumb: React.FC<{ items: BreadcrumbItem[] }> = ({ items 
   return (
     <nav 
       aria-label="Breadcrumb navigation"
-      className="py-2.5 px-4 bg-bg-secondary/60 border-b border-border-subtle/60 text-xs font-mono text-text-muted flex items-center gap-2 overflow-x-auto whitespace-nowrap"
+      className="py-2.5 px-4 sm:px-6 glass-panel-subtle border-b border-white/5 text-xs font-mono text-text-muted flex items-center gap-2 overflow-x-auto whitespace-nowrap backdrop-blur-md"
     >
       <Link 
         to="/" 

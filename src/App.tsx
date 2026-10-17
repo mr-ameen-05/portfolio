@@ -31,6 +31,7 @@ import {
   VerifyEmailPage,
 } from './platform/pages/AuthPages';
 import { DashboardPage } from './platform/pages/DashboardPage';
+import { InteractiveSprite } from './components/sprite/InteractiveSprite';
 
 function PortfolioHome() {
   return (
@@ -95,6 +96,8 @@ function App() {
           {/* Catch-all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        {/* Interactive Companion Sprite for both mobile and desktop */}
+        <InteractiveSprite />
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

@@ -35,7 +35,7 @@ export const CourseNav: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-border-subtle bg-bg-primary/95 backdrop-blur-md">
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 glass-panel backdrop-blur-xl">
         {/* Top bar */}
         <div className="h-16 px-4 sm:px-8 flex items-center justify-between gap-4">
           

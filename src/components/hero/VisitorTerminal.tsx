@@ -239,19 +239,19 @@ export default function VisitorTerminal() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-6 sm:mt-7 pointer-events-auto transition-all duration-300">
-      <div className="relative rounded-xl overflow-hidden bg-bg-secondary/90 backdrop-blur-md border border-cyan-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)] group hover:border-cyan-500/40 transition-colors">
+    <div className="w-full max-w-md lg:max-w-sm pointer-events-auto transition-all duration-300">
+      <div className="relative rounded-lg overflow-hidden bg-bg-secondary/95 backdrop-blur-xl border border-border-subtle shadow-2xl hover:border-cyan-500/40 transition-colors">
         
         {/* Terminal Title Bar */}
-        <div className="px-3 sm:px-4 py-2 sm:py-2.5 bg-bg-primary/80 border-b border-border-subtle flex items-center justify-between select-none gap-2">
+        <div className="px-3 py-1.5 bg-bg-primary/90 border-b border-border-subtle flex items-center justify-between select-none gap-2">
           {/* Traffic lights */}
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500/80 inline-block shrink-0" />
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-yellow-500/80 inline-block shrink-0" />
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-green-500/80 inline-block shrink-0" />
-            <span className="ml-1 sm:ml-2 font-mono text-[10px] sm:text-[11px] text-text-muted flex items-center gap-1.5 truncate">
-              <Terminal className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400 shrink-0" />
-              <span className="truncate">guest@recon:~$ ./telemetry.sh</span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-red-500/80 inline-block shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-yellow-500/80 inline-block shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-green-500/80 inline-block shrink-0" />
+            <span className="ml-1.5 font-mono text-[10px] text-text-muted flex items-center gap-1.5 truncate">
+              <Terminal className="w-3 h-3 text-cyan-400 shrink-0" />
+              <span className="truncate">telemetry.sh</span>
             </span>
           </div>
 
@@ -289,98 +289,82 @@ export default function VisitorTerminal() {
 
         {/* Terminal Body */}
         {!collapsed && (
-          <div className="p-4 sm:p-5 font-mono text-[11px] sm:text-xs text-text-secondary leading-relaxed">
+          <div className="p-3 font-mono text-[10px] text-text-secondary leading-snug">
             {/* Command Header */}
-            <div className="flex items-center justify-between border-b border-border-subtle/50 pb-2 mb-3">
-              <div className="text-text-muted text-[10px]">
-                <span className="text-cyan-400 font-semibold">[SYS_RECON]</span> Active client session fingerprint
+            <div className="flex items-center justify-between border-b border-border-subtle/50 pb-1.5 mb-2">
+              <div className="text-text-muted text-[9px]">
+                <span className="text-cyan-400 font-semibold">[SYS_RECON]</span> client_fingerprint
               </div>
-              <div className="flex gap-2 text-[10px]">
+              <div className="flex gap-1.5 text-[9px]">
                 <button 
                   onClick={() => setActiveTab('specs')}
-                  className={`px-1.5 py-0.5 rounded transition-colors ${activeTab === 'specs' ? 'text-cyan-400 bg-cyan-500/10' : 'text-text-muted hover:text-text-primary'}`}
+                  className={`px-1 rounded transition-colors ${activeTab === 'specs' ? 'text-cyan-400 bg-cyan-500/10' : 'text-text-muted hover:text-text-primary'}`}
                 >
                   SPECS
                 </button>
                 <button 
                   onClick={() => setActiveTab('raw')}
-                  className={`px-1.5 py-0.5 rounded transition-colors ${activeTab === 'raw' ? 'text-cyan-400 bg-cyan-500/10' : 'text-text-muted hover:text-text-primary'}`}
+                  className={`px-1 rounded transition-colors ${activeTab === 'raw' ? 'text-cyan-400 bg-cyan-500/10' : 'text-text-muted hover:text-text-primary'}`}
                 >
-                  RAW_JSON
+                  JSON
                 </button>
               </div>
             </div>
 
             {activeTab === 'specs' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
+              <div className="space-y-1.5 text-[10px]">
                 {/* GPU */}
-                <div className="flex items-start gap-2">
-                  <Monitor className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-text-muted block text-[10px] uppercase tracking-wider">GPU / Renderer</span>
-                    <span className="text-text-primary font-medium truncate block" title={data?.gpu}>
-                      {data?.gpu || 'Detecting GPU...'}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between gap-2 bg-black/30 px-2 py-1 rounded border border-white/5">
+                  <span className="text-text-muted flex items-center gap-1.5 shrink-0">
+                    <Monitor className="w-3 h-3 text-purple-400" /> GPU
+                  </span>
+                  <span className="text-text-primary font-medium truncate max-w-[200px]" title={data?.gpu}>
+                    {data?.gpu || 'Detecting...'}
+                  </span>
                 </div>
 
                 {/* Device & OS */}
-                <div className="flex items-start gap-2">
-                  <Cpu className="w-3.5 h-3.5 text-cyan-400 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-text-muted block text-[10px] uppercase tracking-wider">Device & System</span>
-                    <span className="text-text-primary font-medium truncate block">
-                      {data ? `${data.os} · ${data.cores}` : 'Analyzing OS...'}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between gap-2 bg-black/30 px-2 py-1 rounded border border-white/5">
+                  <span className="text-text-muted flex items-center gap-1.5 shrink-0">
+                    <Cpu className="w-3 h-3 text-cyan-400" /> OS / Cores
+                  </span>
+                  <span className="text-text-primary font-medium truncate max-w-[200px]">
+                    {data ? `${data.os} (${data.cores})` : 'Scanning...'}
+                  </span>
                 </div>
 
                 {/* Browser & Display */}
-                <div className="flex items-start gap-2">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-text-muted block text-[10px] uppercase tracking-wider">Browser & Display</span>
-                    <span className="text-text-primary font-medium truncate block">
-                      {data ? `${data.browser} (${data.engine}) · ${data.screen}` : 'Parsing UA...'}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between gap-2 bg-black/30 px-2 py-1 rounded border border-white/5">
+                  <span className="text-text-muted flex items-center gap-1.5 shrink-0">
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Screen
+                  </span>
+                  <span className="text-text-primary font-medium truncate max-w-[200px]">
+                    {data ? `${data.screen} · ${data.browser}` : 'Parsing...'}
+                  </span>
                 </div>
 
                 {/* Location */}
-                <div className="flex items-start gap-2">
-                  <Globe className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-text-muted block text-[10px] uppercase tracking-wider">Location / Origin</span>
-                    <span className="text-text-primary font-medium truncate block" title={data?.location}>
-                      {data?.location || 'Locating origin...'}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between gap-2 bg-black/30 px-2 py-1 rounded border border-white/5">
+                  <span className="text-text-muted flex items-center gap-1.5 shrink-0">
+                    <Globe className="w-3 h-3 text-amber-400" /> Origin
+                  </span>
+                  <span className="text-text-primary font-medium truncate max-w-[200px]" title={data?.location}>
+                    {data?.location || 'Locating...'}
+                  </span>
                 </div>
 
-                {/* Network & ISP */}
-                <div className="flex items-start gap-2">
-                  <Wifi className="w-3.5 h-3.5 text-blue-400 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-text-muted block text-[10px] uppercase tracking-wider">Network & Route</span>
-                    <span className="text-text-primary font-medium truncate block" title={`${data?.ip} - ${data?.isp}`}>
-                      {data ? `${data.ip} · ${data.isp}` : 'Establishing route...'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Local Time & Timezone */}
-                <div className="flex items-start gap-2">
-                  <Clock className="w-3.5 h-3.5 text-pink-400 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-text-muted block text-[10px] uppercase tracking-wider">Local Time & Clock</span>
-                    <span className="text-text-primary font-medium truncate block">
-                      {data ? `${data.localTime} [${data.timezone}]` : 'Syncing time...'}
-                    </span>
-                  </div>
+                {/* Local Time */}
+                <div className="flex items-center justify-between gap-2 bg-black/30 px-2 py-1 rounded border border-white/5">
+                  <span className="text-text-muted flex items-center gap-1.5 shrink-0">
+                    <Clock className="w-3 h-3 text-pink-400" /> Time
+                  </span>
+                  <span className="text-text-primary font-medium truncate max-w-[200px]">
+                    {data ? `${data.localTime} [${data.timezone}]` : 'Syncing...'}
+                  </span>
                 </div>
               </div>
             ) : (
-              <pre className="text-[10px] text-cyan-300/90 overflow-x-auto p-2 bg-black/40 rounded border border-white/5 font-mono">
+              <pre className="text-[9px] text-cyan-300/90 overflow-x-auto p-2 bg-black/50 rounded border border-white/5 font-mono max-h-40">
                 {JSON.stringify(data, null, 2)}
               </pre>
             )}

@@ -58,16 +58,19 @@ export const TeamingLandingPage: React.FC = () => {
         <CourseBreadcrumb items={[]} />
 
         {/* Hero Section */}
-        <section className="relative rounded-2xl border border-border-subtle bg-bg-secondary/40 p-6 md:p-12 overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+        <section className="relative rounded-3xl glass-panel p-6 sm:p-10 md:p-14 overflow-hidden border border-white/10 shadow-2xl">
+          {/* Ambient glassmorphic backlight glow */}
+          <div className="absolute -top-32 -right-32 w-[30rem] h-[30rem] bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+
           <div className="relative z-10 max-w-3xl space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-xs font-mono text-accent">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-pill text-xs font-mono text-accent">
               <span>🛡️ Version {COURSE_METADATA.version}</span>
-              <span>•</span>
+              <span className="text-white/20">•</span>
               <span>Production-Grade Curriculum</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-sans tracking-tight text-text-primary leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-sans tracking-tight text-text-primary leading-tight drop-shadow-sm">
               {COURSE_METADATA.title}
             </h1>
 
@@ -77,19 +80,19 @@ export const TeamingLandingPage: React.FC = () => {
 
             {/* Quick stats strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs font-mono">
-              <div className="p-3 rounded border border-border-subtle bg-bg-primary">
+              <div className="p-3 rounded-xl glass-panel-subtle hover:border-accent/40 transition-colors">
                 <div className="text-text-muted">Modules</div>
                 <div className="text-xl font-bold text-accent">{ALL_MODULES.length}</div>
               </div>
-              <div className="p-3 rounded border border-border-subtle bg-bg-primary">
+              <div className="p-3 rounded-xl glass-panel-subtle hover:border-accent/40 transition-colors">
                 <div className="text-text-muted">Lessons</div>
                 <div className="text-xl font-bold text-accent">{totalLessons}</div>
               </div>
-              <div className="p-3 rounded border border-border-subtle bg-bg-primary">
+              <div className="p-3 rounded-xl glass-panel-subtle hover:border-accent/40 transition-colors">
                 <div className="text-text-muted">Synthetic Labs</div>
                 <div className="text-xl font-bold text-accent">{totalLabs}</div>
               </div>
-              <div className="p-3 rounded border border-border-subtle bg-bg-primary">
+              <div className="p-3 rounded-xl glass-panel-subtle hover:border-accent/40 transition-colors">
                 <div className="text-text-muted">Pacing</div>
                 <div className="text-xl font-bold text-accent">{COURSE_METADATA.estimatedWeeks}</div>
               </div>
@@ -99,19 +102,19 @@ export const TeamingLandingPage: React.FC = () => {
             <div className="flex flex-wrap items-center gap-4 pt-4">
               <Link
                 to={resumeTarget}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold uppercase tracking-wider bg-accent text-black hover:bg-accent/90 transition-all shadow-lg shadow-accent/10"
+                className="px-6 py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider bg-accent text-black hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-[0.98]"
               >
                 {stats.completedLessons > 0 ? '▶ Resume Course' : '▶ Start Module 0'}
               </Link>
               <Link
                 to="/courses/teaming/progress"
-                className="px-5 py-3 rounded-lg font-mono text-xs font-bold uppercase tracking-wider border border-border-subtle hover:border-accent text-text-secondary hover:text-text-primary bg-bg-primary transition-colors"
+                className="px-5 py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider glass-pill hover:border-accent text-text-secondary hover:text-text-primary transition-all hover:scale-[1.02]"
               >
                 📊 View Progress ({stats.percentage}%)
               </Link>
               <Link
                 to="/courses/teaming/resources"
-                className="px-5 py-3 rounded-lg font-mono text-xs font-bold uppercase tracking-wider border border-border-subtle hover:border-accent text-text-secondary hover:text-text-primary bg-bg-primary transition-colors"
+                className="px-5 py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider glass-pill hover:border-accent text-text-secondary hover:text-text-primary transition-all hover:scale-[1.02]"
               >
                 📁 Download Templates
               </Link>
@@ -120,7 +123,7 @@ export const TeamingLandingPage: React.FC = () => {
         </section>
 
         {/* Safety & Ethics Banner (Mandatory Notice) */}
-        <section className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-6 space-y-3">
+        <section className="rounded-2xl border border-rose-500/25 bg-rose-950/20 backdrop-blur-xl p-6 space-y-3 shadow-lg">
           <div className="flex items-center gap-2 text-rose-400 font-mono text-sm font-bold uppercase tracking-wider">
             <span>⚠️ Safety, Authorization, and Responsible Disclosure Notice</span>
           </div>
@@ -150,7 +153,7 @@ export const TeamingLandingPage: React.FC = () => {
               return (
                 <div
                   key={t}
-                  className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-5 space-y-3 hover:border-accent/40 transition-colors"
+                  className="rounded-2xl glass-panel-subtle p-5 space-y-3 hover:border-accent/40 transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <span className={`inline-block px-2.5 py-0.5 rounded border text-xs font-mono font-bold uppercase ${trackInfo.color}`}>
                     {trackInfo.label}
@@ -182,7 +185,7 @@ export const TeamingLandingPage: React.FC = () => {
             {COURSE_METADATA.outcomes.map((outcome: string, idx: number) => (
               <div
                 key={idx}
-                className="p-4 rounded-xl border border-border-subtle bg-bg-secondary/20 flex gap-3 items-start hover:border-accent/30 transition-colors"
+                className="p-4 rounded-xl glass-panel-subtle flex gap-3 items-start hover:border-accent/40 transition-all duration-200"
               >
                 <span className="text-xs font-mono px-2 py-0.5 rounded bg-accent/10 text-accent font-bold">
                   0{idx + 1}
@@ -227,11 +230,11 @@ export const TeamingLandingPage: React.FC = () => {
               return (
                 <div
                   key={module.id}
-                  className={`rounded-xl border border-border-subtle bg-bg-secondary/30 p-5 hover:border-accent/40 transition-colors space-y-4 ${
+                  className={`rounded-2xl glass-panel p-5 sm:p-6 hover:border-cyan-400/40 transition-all duration-300 space-y-4 ${
                     isLocked ? 'opacity-75 border-amber-500/30' : ''
                   }`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-subtle/50 pb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-mono font-bold text-accent">
                         Module {module.orderIndex}
@@ -256,7 +259,7 @@ export const TeamingLandingPage: React.FC = () => {
                       </span>
                       <Link
                         to={`/courses/teaming/modules/${module.slug}`}
-                        className="px-2.5 py-1 rounded bg-bg-primary border border-border-subtle text-accent hover:border-accent text-xs font-mono transition-colors"
+                        className="px-3 py-1 rounded-lg glass-pill text-accent hover:border-accent text-xs font-mono transition-colors"
                       >
                         Overview →
                       </Link>
@@ -279,7 +282,7 @@ export const TeamingLandingPage: React.FC = () => {
                         <Link
                           key={lesson.slug}
                           to={`/courses/teaming/lessons/${lesson.slug}`}
-                          className={`flex items-center justify-between p-2 rounded bg-bg-primary/50 hover:bg-bg-primary border border-border-subtle text-xs transition-colors group ${
+                          className={`flex items-center justify-between p-2.5 rounded-xl glass-panel-subtle hover:bg-white/10 text-xs transition-colors group ${
                             lessonLocked ? 'opacity-60 cursor-not-allowed' : ''
                           }`}
                           aria-disabled={lessonLocked}
@@ -296,8 +299,8 @@ export const TeamingLandingPage: React.FC = () => {
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5 text-[10px] font-mono text-text-muted flex-shrink-0">
-                            {hasLab && <span className="text-cyan-400">LAB</span>}
-                            {hasQuiz && <span className="text-amber-400">QUIZ</span>}
+                            {hasLab && <span className="text-cyan-400 font-semibold">LAB</span>}
+                            {hasQuiz && <span className="text-amber-400 font-semibold">QUIZ</span>}
                             <span>{lesson.estimatedMinutes.total}m</span>
                           </div>
                         </Link>
@@ -312,7 +315,7 @@ export const TeamingLandingPage: React.FC = () => {
 
         {/* Prerequisites & Target Audience */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-6 space-y-3">
+          <div className="rounded-2xl glass-panel p-6 space-y-3">
             <h3 className="text-base font-bold font-sans text-text-primary">
               Prerequisites & Background
             </h3>
@@ -326,7 +329,7 @@ export const TeamingLandingPage: React.FC = () => {
             </ul>
           </div>
 
-          <div className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-6 space-y-3">
+          <div className="rounded-2xl glass-panel p-6 space-y-3">
             <h3 className="text-base font-bold font-sans text-text-primary">
               Target Audience
             </h3>
@@ -337,11 +340,11 @@ export const TeamingLandingPage: React.FC = () => {
         </section>
 
         {/* Capstone Callout */}
-        <section className="rounded-2xl border border-accent/40 bg-accent/5 p-8 text-center space-y-4">
-          <div className="inline-block px-3 py-1 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs uppercase font-bold">
+        <section className="rounded-3xl glass-panel-glow p-8 md:p-12 text-center space-y-5 border border-cyan-500/30">
+          <div className="inline-block px-3 py-1 rounded-full glass-pill text-cyan-400 font-mono text-xs uppercase font-bold">
             Culminating Experience
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold font-sans text-text-primary">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-sans text-text-primary">
             Meridian Health Logistics Purple Team Capstone
           </h2>
           <p className="text-sm text-text-secondary max-w-2xl mx-auto leading-relaxed">
@@ -350,7 +353,7 @@ export const TeamingLandingPage: React.FC = () => {
           <div className="pt-2">
             <Link
               to="/courses/teaming/capstone"
-              className="inline-block px-6 py-3 rounded-lg font-mono text-xs font-bold uppercase tracking-wider bg-accent text-black hover:bg-accent/90 transition-all"
+              className="inline-block px-6 py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider bg-accent text-black hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 hover:scale-105"
             >
               Explore Capstone Scenario & Rubric →
             </Link>

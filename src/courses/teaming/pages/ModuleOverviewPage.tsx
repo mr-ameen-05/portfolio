@@ -105,13 +105,15 @@ export const ModuleOverviewPage: React.FC = () => {
         />
 
         {/* Module Header Card */}
-        <section className="rounded-2xl border border-border-subtle bg-bg-secondary/40 p-6 md:p-8 space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <section className="rounded-3xl glass-panel p-6 sm:p-8 md:p-10 space-y-6 border border-white/10 shadow-2xl relative overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-mono font-bold text-accent">
                 MODULE {module.orderIndex}
               </span>
-              <span className={`text-xs font-mono px-2 py-0.5 rounded border uppercase font-semibold ${trackStyle.badge}`}>
+              <span className={`text-xs font-mono px-2.5 py-0.5 rounded-full border uppercase font-semibold ${trackStyle.badge}`}>
                 {module.track} track
               </span>
             </div>
@@ -123,7 +125,7 @@ export const ModuleOverviewPage: React.FC = () => {
             </div>
           </div>
 
-          <div>
+          <div className="relative z-10">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-sans text-text-primary">
               {module.title}
             </h1>
@@ -133,18 +135,18 @@ export const ModuleOverviewPage: React.FC = () => {
           </div>
 
           {/* Action Row */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="relative z-10 flex flex-wrap items-center gap-3 pt-2">
             {module.lessons.length > 0 && (
               <Link
                 to={`/courses/teaming/lessons/${module.lessons[0].slug}`}
-                className="px-5 py-2.5 rounded-lg font-mono text-xs font-bold uppercase tracking-wider bg-accent text-black hover:bg-accent/90 transition-all shadow-md shadow-accent/10"
+                className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wider bg-accent text-black hover:bg-accent/90 transition-all shadow-md shadow-accent/20 hover:scale-[1.02]"
               >
                 ▶ Start Lesson 1
               </Link>
             )}
             <button
               onClick={() => setShowCheatSheet(!showCheatSheet)}
-              className="px-4 py-2.5 rounded-lg font-mono text-xs border border-border-subtle hover:border-accent text-text-secondary hover:text-text-primary bg-bg-primary transition-colors"
+              className="px-4 py-2.5 rounded-xl font-mono text-xs glass-pill hover:border-accent text-text-secondary hover:text-text-primary transition-colors"
             >
               📑 {showCheatSheet ? 'Hide Cheat Sheet' : 'Quick Cheat Sheet'}
             </button>
@@ -152,7 +154,7 @@ export const ModuleOverviewPage: React.FC = () => {
 
           {/* Collapsible Cheat Sheet */}
           {showCheatSheet && (
-            <div className="mt-4 p-4 rounded-lg border border-accent/30 bg-bg-primary/80 space-y-2">
+            <div className="relative z-10 mt-4 p-5 rounded-2xl glass-panel-glow space-y-2 border border-accent/30">
               <div className="text-xs font-mono text-accent font-bold uppercase">
                 Module {module.orderIndex} Reference Cheat Sheet
               </div>
@@ -172,7 +174,7 @@ export const ModuleOverviewPage: React.FC = () => {
             {module.objectives.map((obj: string, idx: number) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-lg border border-border-subtle bg-bg-secondary/20 flex items-start gap-3"
+                className="p-4 rounded-2xl glass-panel-subtle flex items-start gap-3 hover:border-accent/30 transition-colors"
               >
                 <span className="text-xs font-mono px-2 py-0.5 rounded bg-accent/10 text-accent font-bold mt-0.5">
                   0{idx + 1}
@@ -207,7 +209,7 @@ export const ModuleOverviewPage: React.FC = () => {
                 <Link
                   key={lesson.slug}
                   to={`/courses/teaming/lessons/${lesson.slug}`}
-                  className={`block p-4 rounded-xl border border-border-subtle bg-bg-secondary/30 hover:border-accent hover:bg-bg-secondary/60 transition-all group ${
+                  className={`block p-4 sm:p-5 rounded-2xl glass-panel-subtle hover:border-accent/40 hover:bg-white/10 transition-all duration-200 group ${
                     lessonLocked ? 'opacity-60 cursor-not-allowed' : ''
                   }`}
                   aria-disabled={lessonLocked}
@@ -215,12 +217,12 @@ export const ModuleOverviewPage: React.FC = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-start gap-3">
                       <span
-                        className={`w-6 h-6 rounded flex items-center justify-center font-mono text-xs flex-shrink-0 mt-0.5 ${
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono text-xs flex-shrink-0 mt-0.5 ${
                           isDone
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500'
                             : lessonLocked
                             ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
-                            : 'bg-bg-primary text-text-muted border border-border-subtle group-hover:border-accent'
+                            : 'glass-pill text-text-muted group-hover:border-accent group-hover:text-accent'
                         }`}
                       >
                         {isDone ? '✓' : lessonLocked ? '🔒' : lIdx + 1}
@@ -242,12 +244,12 @@ export const ModuleOverviewPage: React.FC = () => {
 
                     <div className="flex items-center gap-2 text-xs font-mono flex-shrink-0 sm:pl-4">
                       {hasLab && (
-                        <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded glass-pill text-cyan-400 border border-cyan-500/30 text-[10px] font-bold">
                           LAB
                         </span>
                       )}
                       {hasQuiz && (
-                        <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded glass-pill text-amber-400 border border-amber-500/30 text-[10px] font-bold">
                           QUIZ
                         </span>
                       )}

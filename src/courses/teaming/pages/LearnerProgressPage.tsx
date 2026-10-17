@@ -87,8 +87,10 @@ export const LearnerProgressPage: React.FC = () => {
           <>
 
         {/* Dashboard Header */}
-        <section className="rounded-2xl border border-border-subtle bg-bg-secondary/40 p-6 md:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <section className="rounded-3xl glass-panel p-6 sm:p-8 md:p-10 space-y-6 border border-white/10 shadow-2xl relative overflow-hidden">
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-mono uppercase tracking-wider text-accent font-bold">
@@ -104,7 +106,7 @@ export const LearnerProgressPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowResetModal(true)}
-                className="px-3.5 py-2 rounded-lg border border-rose-500/30 hover:border-rose-500 text-rose-400 hover:bg-rose-500/10 text-xs font-mono transition-colors"
+                className="px-3.5 py-2 rounded-xl glass-pill hover:border-rose-500 text-rose-400 hover:bg-rose-500/10 text-xs font-mono transition-colors"
               >
                 🗑 Reset Progress
               </button>
@@ -112,29 +114,29 @@ export const LearnerProgressPage: React.FC = () => {
           </div>
 
           {/* Overall Progress Bar */}
-          <div className="space-y-2">
+          <div className="relative z-10 space-y-2">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-text-secondary">Overall Completion</span>
               <span className="text-accent font-bold text-sm">{stats.percentage}%</span>
             </div>
-            <div className="h-3 w-full bg-bg-primary rounded-full overflow-hidden border border-border-subtle">
+            <div className="h-3.5 w-full glass-panel-subtle rounded-full overflow-hidden p-0.5 border border-white/10">
               <div
-                className="h-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-500 rounded-full"
+                className="h-full bg-gradient-to-r from-accent via-cyan-400 to-emerald-400 transition-all duration-500 rounded-full shadow-lg shadow-accent/20"
                 style={{ width: `${stats.percentage}%` }}
               />
             </div>
           </div>
 
           {/* Quick Metrics Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs font-mono">
-            <div className="p-4 rounded-xl border border-border-subtle bg-bg-primary">
+          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs font-mono">
+            <div className="p-4 rounded-2xl glass-panel-subtle hover:border-accent/30 transition-colors">
               <div className="text-text-muted">Lessons Completed</div>
               <div className="text-2xl font-bold text-text-primary mt-1">
                 {stats.completedLessons} <span className="text-text-muted text-sm font-normal">/ {stats.totalLessons}</span>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl border border-border-subtle bg-bg-primary">
+            <div className="p-4 rounded-2xl glass-panel-subtle hover:border-accent/30 transition-colors">
               <div className="text-text-muted">Required Units</div>
               <div className="text-2xl font-bold text-emerald-400 mt-1">
                 {stats.completedRequired} <span className="text-text-muted text-sm font-normal">/ {stats.totalRequired}</span>

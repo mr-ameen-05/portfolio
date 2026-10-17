@@ -90,9 +90,9 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
   }, [filterQuery]);
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-bg-secondary/95 backdrop-blur-md border-r border-border-subtle text-text-primary">
+    <div className="flex flex-col h-full glass-panel border-r border-white/10 text-text-primary backdrop-blur-2xl">
       {/* Header */}
-      <div className="p-4 border-b border-border-subtle flex items-center justify-between">
+      <div className="p-4 border-b border-white/10 flex items-center justify-between">
         <div>
           <span className="text-xs font-mono uppercase tracking-widest text-accent font-semibold">
             Curriculum
