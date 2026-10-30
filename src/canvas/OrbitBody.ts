@@ -20,6 +20,9 @@ export class OrbitBody {
   position: Vector2D;
   offset: Vector2D;
   theta: number;
+  z: number = 0;
+  tiltX: number = 0;
+  tiltY: number = 0;
   
   origSemiMajor: number;
   origSemiMinor: number;
@@ -98,8 +101,11 @@ export class OrbitBody {
     const smoothFactor = 1 - Math.exp(-9 * dt);
     this.offset = this.offset.lerp(targetOffset, smoothFactor);
 
-    // 4. Combined final position
+    // 4. Combined final position & 3D orbital depth
     this.position = orbitPos.add(this.offset);
+    this.z = Math.sin(this.theta);
+    this.tiltX = -Math.cos(this.theta) * 14;
+    this.tiltY = Math.sin(this.theta) * 14;
   }
 
   render(ctx: CanvasRenderingContext2D) {

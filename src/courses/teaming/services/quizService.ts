@@ -1,6 +1,12 @@
 import { QuizData } from '../types/course.types';
 import { progressService } from './progressService';
 
+/**
+ * Quiz evaluation endpoint. Point this at an external API service if configured with
+ * VITE_QUIZ_ENDPOINT. When unset, quizzes evaluate locally in the browser.
+ */
+const QUIZ_ENDPOINT: string | undefined = import.meta.env.VITE_QUIZ_ENDPOINT;
+
 export interface QuizEvaluationResult {
   quizId: string;
   score: number;
@@ -38,12 +44,13 @@ export class QuizService {
       learner_id: progress.learnerId
     };
 
-    // 1. Try server-side validation endpoint
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+    // 1. Try server-side validation endpoint if configured
+    if (QUIZ_ENDPOINT) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-      const res = await fetch('/api/course-quiz.php', {
+        const res = await fetch(QUIZ_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -87,8 +94,9 @@ export class QuizService {
           return result;
         }
       }
-    } catch {
-      // Server unreachable, fallback transparently to device-local evaluation
+      } catch {
+        // Server unreachable, fallback transparently to device-local evaluation
+      }
     }
 
     // 2. Client-side fallback evaluation

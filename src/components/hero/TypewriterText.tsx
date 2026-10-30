@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 
-export default function TypewriterText({ text, onComplete }: { text: string, onComplete?: () => void }) {
+export default function TypewriterText({ 
+  text, 
+  onComplete, 
+  speed = 25 
+}: { 
+  text: string; 
+  onComplete?: () => void; 
+  speed?: number; 
+}) {
   const [displayed, setDisplayed] = useState('');
 
   useEffect(() => {
@@ -13,10 +21,10 @@ export default function TypewriterText({ text, onComplete }: { text: string, onC
         clearInterval(interval);
         onComplete?.();
       }
-    }, 30); // 30ms per character
+    }, speed);
 
     return () => clearInterval(interval);
-  }, [text]);
+  }, [text, speed, onComplete]);
 
   return <span>{displayed}</span>;
 }

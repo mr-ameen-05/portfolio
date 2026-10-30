@@ -4,6 +4,7 @@ import { CourseNav } from '../components/layout/CourseNav';
 import { CourseBreadcrumb } from '../components/layout/CourseBreadcrumb';
 import { ResourceItem } from '../types/course.types';
 import { StateEmpty } from '../components/common/CourseStates';
+import { LEARNING_PLATFORMS } from '../../../data/learningPlatforms';
 
 export const CourseResourcesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -176,6 +177,62 @@ export const CourseResourcesPage: React.FC = () => {
             ))}
           </div>
         )}
+
+        {/* External Practice Platforms */}
+        <section className="space-y-4 pt-4">
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold font-sans text-text-primary">
+                Practice on Real Platforms
+              </h2>
+              <p className="text-xs sm:text-sm text-text-secondary max-w-2xl leading-relaxed mt-1">
+                The templates above organise your work. These external, hands-on platforms are where
+                you build the skills — each paired with the discipline it trains best.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono text-text-muted uppercase tracking-wider">
+              {LEARNING_PLATFORMS.length} External Platforms
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {LEARNING_PLATFORMS.map(p => (
+              <a
+                key={p.id}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-5 flex flex-col gap-3 hover:border-accent/40 transition-colors group"
+                aria-label={`${p.name} — opens in a new tab`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase border font-semibold ${p.badge}`}
+                  >
+                    {p.focus}
+                  </span>
+                  <span className="text-xs font-mono text-text-muted group-hover:text-accent transition-colors">
+                    Visit ↗
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold font-sans text-text-primary group-hover:text-accent transition-colors">
+                    {p.name}
+                  </h3>
+                  <p className="text-[11px] font-mono text-text-muted mt-0.5">{p.level}</p>
+                </div>
+
+                <p className="text-xs text-text-secondary leading-relaxed">{p.desc}</p>
+
+                <p className="text-[11px] font-mono text-text-muted leading-relaxed mt-auto pt-3 border-t border-border-subtle/50 group-hover:border-accent/30 transition-colors">
+                  <span className="text-accent font-bold uppercase tracking-wider">Best for:</span>{' '}
+                  {p.bestFor}
+                </p>
+              </a>
+            ))}
+          </div>
+        </section>
 
         {/* Modal Preview */}
         {previewResource && (

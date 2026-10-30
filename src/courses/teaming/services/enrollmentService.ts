@@ -7,6 +7,12 @@ const LEGACY_NAME_KEY = 'course_learner_name';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Enrollment endpoint. Point this at an external API service if configured with
+ * VITE_ENROLL_ENDPOINT. When unset, enrollment is stored locally on the device.
+ */
+const ENROLL_ENDPOINT: string | undefined = import.meta.env.VITE_ENROLL_ENDPOINT;
+
 export interface EnrollResult {
   profile: LearnerProfile;
   /** true when the record reached the backend; false when saved device-locally. */
@@ -85,40 +91,42 @@ export class EnrollmentService {
     const progress = progressService.getProgress();
     const learnerId = progress.learnerId;
 
-    // 1. Attempt to capture the enrollment on the backend.
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+    // 1. Attempt to capture the enrollment on the backend if configured.
+    if (ENROLL_ENDPOINT) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-      const res = await fetch('/api/course-enroll.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          learner_id: learnerId,
-          enrolled_at: Date.now()
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json().catch(() => null);
-        if (data && data.success) {
-          const profile: LearnerProfile = {
+        const res = await fetch(ENROLL_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             name,
             email,
-            enrolledAt: Date.now(),
-            source: 'server'
-          };
-          this.persist(profile);
-          return { profile, serverConfirmed: true };
+            learner_id: learnerId,
+            enrolled_at: Date.now()
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json().catch(() => null);
+          if (data && data.success) {
+            const profile: LearnerProfile = {
+              name,
+              email,
+              enrolledAt: Date.now(),
+              source: 'server'
+            };
+            this.persist(profile);
+            return { profile, serverConfirmed: true };
+          }
         }
+      } catch {
+        // Server unreachable — fall through to the device-local record.
       }
-    } catch {
-      // Server unreachable — fall through to the device-local record.
     }
 
     // 2. Device-local fallback so the learner is never blocked by the network.

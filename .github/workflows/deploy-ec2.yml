@@ -1,0 +1,59 @@
+name: Deploy to EC2
+
+# Manual, on-demand deployment to the aiameen.online EC2 instance.
+#
+# Repository secrets required:
+#   EC2_HOST     e.g. 203.0.113.10
+#   EC2_USER     e.g. ubuntu
+#   EC2_SSH_KEY  contents of the EC2 private key (.pem)
+#   EC2_PATH     optional, defaults to /srv/aiameen/portfolio
+#
+# The server must already be provisioned once with `sudo ./deploy.sh provision`
+# and have its own deploy/deploy.env (see DEPLOYMENT.md).
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Sync source to server
+        run: |
+          rsync -az --delete -e "ssh -i ~/.ssh/ec2_key" \
+            --exclude '.git' --exclude 'node_modules' --exclude 'deploy/deploy.env' \
+            ./ "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_PATH || '/srv/aiameen/portfolio' }}/"
+
+      - name: Release (rsync dist + api, composer, reload nginx)
+        run: |
+          ssh -i ~/.ssh/ec2_key "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            "cd '${{ secrets.EC2_PATH || '/srv/aiameen/portfolio' }}' && sudo bash deploy.sh release && sudo bash deploy.sh verify"

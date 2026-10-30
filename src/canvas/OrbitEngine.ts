@@ -103,10 +103,10 @@ export class OrbitEngine {
       this.rightCenter = new Vector2D(width * 0.84, height * 0.52);
       this.scaleOrbits(0.68);
     } else {
-      // Mobile: compact wings
-      this.leftCenter = new Vector2D(width * 0.22, height * 0.48);
-      this.rightCenter = new Vector2D(width * 0.78, height * 0.56);
-      this.scaleOrbits(0.52);
+      // Mobile (< 768px): position above and below the central text reading zone
+      this.leftCenter = new Vector2D(width * 0.18, height * 0.18);
+      this.rightCenter = new Vector2D(width * 0.82, height * 0.82);
+      this.scaleOrbits(0.40);
     }
 
     // Immediately snap positions to centers on initial layout

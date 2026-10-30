@@ -65,7 +65,13 @@ export default function HeroCanvas() {
           const body = orbit.bodies[i];
           const node = nodes[i] as HTMLElement;
           if (node) {
-            node.style.transform = `translate3d(${body.position.x}px, ${body.position.y}px, 0) translate(-50%, -50%)`;
+            // 3D perspective elevation and scale based on orbital z-depth
+            const depthScale = 0.88 + (body.z + 1) * 0.12;
+            const depthOpacity = 0.72 + (body.z + 1) * 0.14;
+            const zIndex = Math.round((body.z + 1) * 20);
+            node.style.transform = `translate3d(${body.position.x}px, ${body.position.y}px, ${body.z * 35}px) translate(-50%, -50%) scale(${depthScale})`;
+            node.style.opacity = `${depthOpacity}`;
+            node.style.zIndex = `${zIndex}`;
           }
         }
       }
@@ -87,26 +93,43 @@ export default function HeroCanvas() {
   }, []);
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ perspective: '1000px' }}>
       <canvas ref={canvasRef} className="absolute inset-0 z-10" style={{ touchAction: 'none' }} />
-      <div ref={overlayRef} className="absolute inset-0 pointer-events-none z-20 origin-top-left">
+      <div ref={overlayRef} className="absolute inset-0 pointer-events-none z-20 origin-top-left" style={{ transformStyle: 'preserve-3d' }}>
         {bodies.map(body => (
           <div key={body.id} className="absolute top-0 left-0 flex flex-col items-center will-change-transform group cursor-pointer pointer-events-auto">
-            {/* Natural icon shape with silhouette drop-shadow - NO square box */}
+            {/* 3D Effected Glass Orb Medallion */}
             <div 
-              className="flex items-center justify-center transition-transform duration-200 hover:scale-[1.35] cursor-pointer"
+              className="icon-3d-orbit w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 cursor-pointer flex items-center justify-center transition-all duration-300"
               style={{
+                '--orbit-glow': `${body.color}88`,
+                '--orbit-glow-diffuse': `${body.color}35`,
                 color: body.color,
-                filter: `drop-shadow(0 0 8px ${body.color}80) drop-shadow(0 0 16px ${body.color}40)`,
-              }}
+              } as React.CSSProperties}
             >
-              <Icon icon={body.icon} className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+              {/* 3D Elevated Icon Glyph */}
+              <div 
+                className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                style={{
+                  filter: `drop-shadow(0 4px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px ${body.color}90)`,
+                }}
+              >
+                <Icon icon={body.icon} className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+              </div>
+
+              {/* 3D Bottom ambient specular reflection */}
+              <span 
+                className="absolute -bottom-1 w-2.5 h-1 rounded-full blur-[1px] opacity-75 pointer-events-none"
+                style={{ background: body.color, boxShadow: `0 0 8px ${body.color}` }}
+              />
             </div>
+
+            {/* 3D Floating Holographic Label */}
             <span 
-              className="mt-2 text-[10px] font-mono font-medium text-text-primary bg-bg-secondary/95 backdrop-blur-md px-2.5 py-0.5 border rounded pointer-events-none whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-1 shadow-2xl z-30"
+              className="mt-2 text-[10px] font-mono font-medium text-text-primary bg-bg-secondary/95 backdrop-blur-md px-3 py-1 border rounded-lg pointer-events-none whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-1 shadow-2xl z-30"
               style={{
-                borderColor: `${body.color}88`,
-                boxShadow: `0 4px 16px ${body.color}25`,
+                borderColor: `${body.color}99`,
+                boxShadow: `0 6px 20px ${body.color}35, 0 10px 25px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.25)`,
               }}
             >
               {body.label}

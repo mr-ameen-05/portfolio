@@ -1,121 +1,120 @@
 import { motion } from 'framer-motion';
+import { Terminal, Shield, Code, Radar, Bot, Wrench } from 'lucide-react';
+import Icon3D from '../ui/Icon3D';
 
-interface Chapter {
+interface JourneyStage {
   num: string;
   title: string;
-  date: string;
   desc: string;
+  icon: React.ElementType;
 }
 
-const chapters: Chapter[] = [
+const stages: JourneyStage[] = [
   {
     num: '01',
-    title: 'Understanding Systems',
-    date: '2018',
-    desc: 'Began exploring how computers, networks, and operating systems work. Developed curiosity about what happens beneath the interface.',
+    title: 'Systems and Operating Environments',
+    desc: 'Developing an understanding of operating systems, networking, Linux, and the underlying mechanisms that make software work.',
+    icon: Terminal,
   },
   {
     num: '02',
-    title: 'Entering Cybersecurity',
-    date: '2019',
-    desc: 'Discovered cybersecurity through research and experimentation. Started learning about threats, defenses, and security operations.',
+    title: 'Cybersecurity',
+    desc: 'Exploring security assessment, vulnerability research, defensive monitoring, and the relationship between system design and security risk.',
+    icon: Shield,
   },
   {
     num: '03',
-    title: 'Building Software',
-    date: '2020',
-    desc: 'Expanded from analysis to building. Learned web development, APIs, databases, and application architecture.',
+    title: 'Software Engineering',
+    desc: 'Building applications, APIs, database-backed systems, and integrations to solve practical problems.',
+    icon: Code,
   },
   {
     num: '04',
     title: 'Security Operations',
-    date: '2021',
-    desc: 'Gained practical experience in monitoring, log analysis, detection engineering, and incident investigation.',
+    desc: 'Developing practical knowledge of log analysis, security monitoring, investigation workflows, and detection engineering.',
+    icon: Radar,
   },
   {
     num: '05',
-    title: 'AI & Automation',
-    date: '2022',
-    desc: 'Began exploring how AI and local language models can assist engineering and security workflows.',
+    title: 'AI and Automation',
+    desc: 'Exploring how AI models, agent workflows, and system integrations can support technical and operational processes.',
+    icon: Bot,
   },
   {
     num: '06',
-    title: 'Pentesting & Security Research',
-    date: '2023',
-    desc: 'Started conducting authorized security assessments, vulnerability research, and CTF challenges.',
-  },
-  {
-    num: '07',
-    title: 'Building in Public',
-    date: '2024',
-    desc: 'Creating this portfolio, documenting investigations, sharing knowledge, and learning through teaching.',
+    title: 'Engineering in Practice',
+    desc: 'Bringing these disciplines together through independent projects, implementation, experimentation, documentation, and continued technical development.',
+    icon: Wrench,
   },
 ];
 
 export default function JourneySection() {
   return (
-    <section id="journey" className="py-32 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle">
+    <section id="journey" className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle">
       {/* Section Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mb-16 md:mb-20"
+        className="mb-12 sm:mb-16"
       >
-        <p className="text-xs font-mono text-text-muted tracking-widest uppercase mb-4">
-          My Journey
+        <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
+          12 — Professional Journey
         </p>
-        <h2 className="font-display text-5xl md:text-6xl text-text-primary tracking-tight">
-          How I got here.
+        <h2 className="font-sans text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-tight">
+          My Journey
         </h2>
+        <p className="text-text-secondary text-sm sm:text-base md:text-lg max-w-2xl mt-4 leading-relaxed font-sans">
+          The progression of skills, disciplines, and engineering practices that shape how I build and secure systems today.
+        </p>
       </motion.div>
 
-      {/* Timeline Container */}
-      <div className="relative">
-        {/* Timeline vertical line */}
-        <div
-          className="absolute left-8 top-8 bottom-8 w-px bg-border-subtle hidden md:block"
-          aria-hidden="true"
-        />
-
-        <div className="space-y-10 md:space-y-12">
-          {chapters.map((ch, i) => (
+      {/* Structured Journey Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {stages.map((stage, idx) => {
+          const Icon = stage.icon;
+          return (
             <motion.div
-              key={ch.num}
+              key={stage.num}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="relative flex flex-col md:flex-row gap-6 md:gap-8 items-start group"
+              transition={{ duration: 0.4, delay: idx * 0.07 }}
+              className="p-6 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/40 flex flex-col justify-between transition-all group"
             >
-              {/* Circle Marker */}
-              <div className="hidden md:flex flex-shrink-0 w-16 h-16 rounded-full bg-bg-tertiary border border-border-subtle items-center justify-center z-10 group-hover:border-border-hover transition-colors">
-                <span className="font-mono text-base font-semibold text-text-secondary group-hover:text-accent transition-colors">
-                  {ch.num}
-                </span>
-              </div>
-
-              {/* Chapter Card */}
-              <div className="flex-1 w-full bg-bg-secondary border border-border-subtle rounded-2xl p-8 hover:border-border-hover transition-all">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                  <span className="text-xs font-mono text-accent uppercase tracking-widest">
-                    {ch.date}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-mono text-xs font-bold text-accent">
+                    Stage {stage.num}
                   </span>
-                  <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest md:hidden">
-                    Chapter {ch.num}
-                  </span>
+                  <Icon3D icon={Icon} size="sm" glowColor="#C8FF00" />
                 </div>
-                <h3 className="font-sans text-xl md:text-2xl font-bold text-text-primary mb-3">
-                  {ch.title}
+                <h3 className="font-sans text-lg font-bold text-text-primary mb-2.5">
+                  {stage.title}
                 </h3>
-                <p className="text-text-secondary text-sm md:text-base leading-relaxed">
-                  {ch.desc}
+                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-sans">
+                  {stage.desc}
                 </p>
               </div>
             </motion.div>
-          ))}
-        </div>
+          );
+        })}
       </div>
+
+      {/* The common thread statement */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-8 p-6 rounded-2xl bg-bg-secondary/60 border border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left"
+      >
+        <p className="font-sans text-sm sm:text-base text-text-primary font-medium">
+          <span className="font-mono text-accent uppercase text-xs tracking-wider block sm:inline mr-2 font-bold">
+            The Common Thread:
+          </span>
+          Understanding systems deeply enough to improve how they work.
+        </p>
+      </motion.div>
     </section>
   );
 }

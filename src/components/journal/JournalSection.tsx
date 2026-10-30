@@ -1,150 +1,259 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Shield, Server, Sparkles, BookOpen, Clock } from 'lucide-react';
+import Icon3D from '../ui/Icon3D';
 
-interface Article {
-  id: string;
-  series: string;
+interface FieldNoteTopic {
   title: string;
-  tag: string;
-  readTime: string;
-  excerpt: string;
+  category: 'Security Engineering' | 'Systems Engineering' | 'AI Engineering';
+  categoryKey: 'security' | 'systems' | 'ai';
+  summary: string;
 }
 
-const articles: Article[] = [
+const categories = [
   {
-    id: 'approach-security-investigation',
-    series: 'Beyond the Alert',
-    title: 'How I Approach a Security Investigation',
-    tag: 'Security Operations',
-    readTime: '8 min',
-    excerpt: 'A practical look at gathering evidence, testing hypotheses, and distinguishing an alert from a confirmed incident.',
+    key: 'security',
+    label: 'Security Engineering',
+    desc: 'Practical observations on vulnerability assessment, application security, security research, and defensive engineering.',
+    icon: Shield,
   },
   {
-    id: 'trusting-ai-agent-actions',
-    series: 'AI Under Investigation',
-    title: 'Building an AI Agent Is Easy. Trusting Its Actions Is Harder.',
-    tag: 'AI Engineering',
-    readTime: '12 min',
-    excerpt: 'Exploring tool permissions, untrusted input, evaluation, and human oversight in AI-assisted workflows.',
+    key: 'systems',
+    label: 'Systems Engineering',
+    desc: 'Technical notes on infrastructure, deployment, databases, observability, and application reliability.',
+    icon: Server,
   },
   {
-    id: 'worked-locally-changed-deployment',
-    series: 'Build. Break. Understand.',
-    title: 'It Worked Locally. What Changed After Deployment?',
-    tag: 'Software Engineering',
-    readTime: '6 min',
-    excerpt: 'Reproducing a failure, identifying root cause, and validating the fix in a real deployment scenario.',
+    key: 'ai',
+    label: 'AI Engineering',
+    desc: 'Research and practical lessons on AI applications, agent workflows, and responsible automation.',
+    icon: Sparkles,
+  },
+] as const;
+
+const fieldNotesList: FieldNoteTopic[] = [
+  // Security Engineering
+  {
+    title: 'From Scanner Output to a Validated Security Finding',
+    category: 'Security Engineering',
+    categoryKey: 'security',
+    summary: 'Moving beyond automated tool noise to confirm reachability, test business logic, and document verified risk with repeatable reproduction steps.',
   },
   {
-    id: 'failed-security-lab-lessons',
-    series: 'CTF Field Notes',
-    title: 'What a Failed Security Lab Taught Me',
-    tag: 'Learning & Research',
-    readTime: '5 min',
-    excerpt: 'A mistaken assumption, the evidence that challenged it, and the new understanding that emerged.',
+    title: 'How I Approach an Application Security Assessment',
+    category: 'Security Engineering',
+    categoryKey: 'security',
+    summary: 'A methodical playbook for mapping authorization boundaries, inspecting API endpoints, and evaluating trust assumptions in client-server apps.',
   },
   {
-    id: 'network-path-web-application',
-    series: 'Under the Hood',
+    title: 'Understanding Vulnerability Severity Beyond the Score',
+    category: 'Security Engineering',
+    categoryKey: 'security',
+    summary: 'Why generic CVSS numbers often fail to capture contextual business impact, network access preconditions, and defense-in-depth mitigations.',
+  },
+  {
+    title: 'Building Useful Detection Rules',
+    category: 'Security Engineering',
+    categoryKey: 'security',
+    summary: 'Tuning SIEM logic and Sigma rules against adversary techniques while aggressively filtering benign administrative telemetry.',
+  },
+  {
+    title: 'Lessons from Security Testing in Controlled Environments',
+    category: 'Security Engineering',
+    categoryKey: 'security',
+    summary: 'Observing exploit execution in sandboxed environments to verify containment, assess blast radius, and refine blue-team detections.',
+  },
+
+  // Systems Engineering
+  {
     title: 'Understanding the Network Path Behind a Web Application',
-    tag: 'Infrastructure',
-    readTime: '7 min',
-    excerpt: 'DNS, TLS, HTTP, servers — tracing how a request actually reaches your browser.',
+    category: 'Systems Engineering',
+    categoryKey: 'systems',
+    summary: 'Traces through DNS resolution, reverse proxy termination, systemd socket activation, and packet routing down to the container namespace.',
   },
   {
-    id: 'ai-automation-human-judgment',
-    series: 'Learning in Public',
+    title: 'Designing a Cross-Platform Database Replication Workflow',
+    category: 'Systems Engineering',
+    categoryKey: 'systems',
+    summary: 'Handling collation discrepancies, WAL configuration, and automated failover scripts across heterogeneous Windows Server and Rocky Linux hosts.',
+  },
+  {
+    title: 'Debugging a Deployment That Works Locally',
+    category: 'Systems Engineering',
+    categoryKey: 'systems',
+    summary: 'Isolating subtle environment mismatches: cgroup differences, permission boundaries, missing environment variables, and network bridge policies.',
+  },
+  {
+    title: 'Building Observability for Self-Hosted Systems',
+    category: 'Systems Engineering',
+    categoryKey: 'systems',
+    summary: 'Setting up Prometheus, Loki, Promtail, and cAdvisor with resource ceilings that avoid exhausting the monitored workloads.',
+  },
+  {
+    title: 'What Reliable Internal Tools Need Beyond Working Code',
+    category: 'Systems Engineering',
+    categoryKey: 'systems',
+    summary: 'Audit logging, graceful degradation, sane retry backoffs, and role-based access control for tools that operations teams depend on daily.',
+  },
+
+  // AI Engineering
+  {
+    title: 'Building an AI Agent Is Easy. Trusting Its Actions Is Harder.',
+    category: 'AI Engineering',
+    categoryKey: 'ai',
+    summary: 'Engineering defensive runtime wrappers, tool calling privilege sandboxes, and verification layers to prevent runaway autonomous executions.',
+  },
+  {
+    title: 'Evaluating AI Systems Beyond Successful Demonstrations',
+    category: 'AI Engineering',
+    categoryKey: 'ai',
+    summary: 'Benchmarking edge-case hallucinations, adversarial prompts, deterministic reproducibility, and latency metrics across production workflows.',
+  },
+  {
+    title: 'Designing Permission Boundaries for AI Agents',
+    category: 'AI Engineering',
+    categoryKey: 'ai',
+    summary: 'Applying the principle of least privilege to LLM tool execution: read-only tokens, human-in-the-loop gates, and rate-limited API keys.',
+  },
+  {
     title: 'Where AI Automation Needs Human Judgment',
-    tag: 'AI & Automation',
-    readTime: '10 min',
-    excerpt: 'When should an AI system act autonomously, and when does it need a human decision?',
+    category: 'AI Engineering',
+    categoryKey: 'ai',
+    summary: 'Categorizing tasks into high-confidence automations versus high-consequence interventions that require deliberate human sign-off.',
+  },
+  {
+    title: 'Reducing Unverified Claims in AI-Assisted Workflows',
+    category: 'AI Engineering',
+    categoryKey: 'ai',
+    summary: 'Grounding LLM outputs in verified vector context, source attribution, and strict JSON schema enforcement.',
   },
 ];
 
 export default function JournalSection() {
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  const filteredNotes = activeCategory === 'all'
+    ? fieldNotesList
+    : fieldNotesList.filter((note) => note.categoryKey === activeCategory);
+
   return (
-    <section id="field-notes" className="py-32 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle">
+    <section id="field-notes" className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle">
       {/* Section Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="mb-16"
+        className="mb-10 sm:mb-16"
       >
-        <p className="text-xs font-mono text-text-muted tracking-widest uppercase mb-4">
-          Field Notes / Lab Notes
+        <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
+          10 — Field Notes
         </p>
-        <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-tight leading-tight">
-          <span className="block text-text-primary">Notes from building, breaking,</span>
-          <span className="block text-text-muted">and understanding systems.</span>
+        <h2 className="font-sans text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-tight">
+          Field Notes
         </h2>
+        <p className="font-mono text-sm text-accent mt-2 font-medium">
+          Build. Break. Understand. Document. Improve.
+        </p>
+        <p className="text-text-secondary text-sm sm:text-base md:text-lg max-w-3xl mt-4 leading-relaxed font-sans">
+          These notes represent an ongoing practice of learning through implementation, investigation, and technical experimentation across security, systems, and AI.
+        </p>
       </motion.div>
 
-      {/* Grid of Articles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-        {articles.map((article, index) => (
+      {/* Category Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {categories.map((cat) => {
+          const Icon = cat.icon;
+          const isSelected = activeCategory === cat.key;
+          return (
+            <button
+              key={cat.key}
+              type="button"
+              onClick={() => setActiveCategory(isSelected ? 'all' : cat.key)}
+              className={`p-5 rounded-xl border text-left transition-all ${
+                isSelected
+                  ? 'bg-accent/10 border-accent text-text-primary shadow-sm'
+                  : 'bg-bg-secondary border-border-subtle text-text-secondary hover:border-border-hover'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-2.5">
+                <Icon3D icon={Icon} size="sm" glowColor="#C8FF00" />
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-text-primary">
+                  {cat.label}
+                </span>
+              </div>
+              <p className="text-xs text-text-muted leading-relaxed font-sans">
+                {cat.desc}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Filter indicator */}
+      <div className="flex items-center justify-between gap-4 mb-6 text-xs font-mono text-text-muted">
+        <span>Showing {filteredNotes.length} research topics</span>
+        {activeCategory !== 'all' && (
+          <button
+            type="button"
+            onClick={() => setActiveCategory('all')}
+            className="text-accent underline hover:text-white"
+          >
+            Show all topics
+          </button>
+        )}
+      </div>
+
+      {/* Notes Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {filteredNotes.map((note, idx) => (
           <motion.article
-            key={article.id}
-            initial={{ opacity: 0, y: 20 }}
+            key={note.title}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.08 }}
-            className="group flex flex-col justify-between p-6 sm:p-8 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/30 transition-all duration-300"
+            transition={{ duration: 0.35, delay: (idx % 6) * 0.05 }}
+            className="p-6 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/40 flex flex-col justify-between transition-all group"
           >
             <div>
-              {/* Series Label */}
-              <div className="mb-4">
-                <span className="text-xs font-mono uppercase tracking-widest text-accent">
-                  {article.series}
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-accent font-semibold px-2 py-0.5 rounded bg-bg-primary border border-border-subtle">
+                  {note.category}
+                </span>
+                <span className="text-[10px] font-mono text-text-muted flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Planned Topic
                 </span>
               </div>
 
-              {/* Tag Pill & Read Time */}
-              <div className="flex items-center justify-between gap-3 mb-5">
-                <span className="inline-flex items-center px-2.5 py-1 rounded text-xs font-mono bg-bg-tertiary text-text-secondary border border-border-subtle">
-                  {article.tag}
-                </span>
-                <span className="text-xs font-mono text-text-muted">
-                  {article.readTime}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h3 className="font-sans text-xl font-bold text-text-primary mb-3 leading-snug">
-                {article.title}
+              <h3 className="font-sans font-bold text-base text-text-primary group-hover:text-accent transition-colors duration-200 mb-2.5 leading-snug">
+                {note.title}
               </h3>
 
-              {/* Excerpt */}
-              <p className="font-sans text-sm text-text-secondary leading-relaxed mb-6">
-                {article.excerpt}
+              <p className="text-xs text-text-secondary font-sans leading-relaxed">
+                {note.summary}
               </p>
             </div>
 
-            {/* Bottom Link */}
-            <div className="pt-4 border-t border-border-subtle/60 flex items-center justify-between">
-              <a
-                href="#field-notes"
-                className="inline-flex items-center gap-1.5 font-mono text-xs text-text-muted hover:text-accent transition-colors"
-              >
-                Read note &rarr;
-              </a>
+            <div className="mt-5 pt-4 border-t border-border-subtle/60 flex items-center justify-between text-xs font-mono text-text-muted">
+              <span className="inline-flex items-center gap-1.5">
+                <BookOpen className="w-3.5 h-3.5 text-accent" />
+                <span>Field Documentation</span>
+              </span>
+              <span className="text-[10px] uppercase text-text-muted">Research In Progress</span>
             </div>
           </motion.article>
         ))}
       </div>
 
-      {/* Note at Bottom */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="mt-12 text-center"
-      >
-        <p className="text-xs font-mono text-text-muted tracking-wide">
-          These are planned article topics. Published content will appear here as it is completed.
+      {/* Ethos notice */}
+      <div className="mt-10 p-5 rounded-xl border border-border-subtle bg-bg-secondary/40 text-xs font-sans text-text-muted leading-relaxed flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <p>
+          <span className="font-mono text-text-primary font-bold mr-1.5">Publication Integrity:</span>
+          Articles are published only after thorough lab replication, peer validation, or live deployment.
         </p>
-      </motion.div>
+        <span className="font-mono text-accent text-[11px] shrink-0">
+          Build. Break. Understand. Document. Improve.
+        </span>
+      </div>
     </section>
   );
 }

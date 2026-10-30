@@ -1,17 +1,27 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Mail } from 'lucide-react';
+import { Github, Linkedin, Mail, Send, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import Icon3D from '../ui/Icon3D';
+
+const serviceOptions = [
+  'Security Assessment / VAPT',
+  'SOC / Detection Engineering',
+  'Forward Deployed Engineering',
+  'Full-Stack Development',
+  'AI Engineering / Automation',
+  'Technical Consultation',
+  'Other',
+];
 
 export default function ContactSection() {
-  const subjects = ['Technical collaboration', 'Cybersecurity and research', 'Community and workshops', 'Something else'];
-  
-  // Form State
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [subject, setSubject] = useState(subjects[0]);
-  const [message, setMessage] = useState('');
-  
-  // UI State
+  const [company, setCompany] = useState('');
+  const [service, setService] = useState(serviceOptions[0]);
+  const [description, setDescription] = useState('');
+  const [timeline, setTimeline] = useState('');
+  const [budget, setBudget] = useState('');
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [feedback, setFeedback] = useState('');
 
@@ -20,110 +30,299 @@ export default function ContactSection() {
     setStatus('loading');
     setFeedback('');
 
-    if (!name || !email || !message) {
+    if (!name.trim() || !email.trim() || !description.trim()) {
       setStatus('error');
-      setFeedback('Please fill out all required fields.');
+      setFeedback('Please provide your name, work email, and a brief project description.');
       return;
     }
 
-    // Simulate form submission - no backend API call
-    // In a real deployment, you'd replace this with your own form submission logic
-    setStatus('success');
-    setFeedback('Message sent successfully. I will get back to you soon!');
-    setName('');
-    setEmail('');
-    setMessage('');
-    setSubject(subjects[0]);
+    try {
+      const response = await fetch('/api/contact.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          company: company.trim() || 'Individual',
+          service,
+          description: description.trim(),
+          timeline: timeline.trim() || 'Flexible',
+          budget: budget.trim() || 'To be scoped',
+        }),
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (response.ok && result?.success) {
+        setStatus('success');
+        setFeedback(
+          result.message ||
+            `Enquiry dispatched to Al Ameen. A receipt copy has been transmitted to ${email}. I'll review and respond within 24–48 hours.`
+        );
+        // Clear form fields
+        setName('');
+        setEmail('');
+        setCompany('');
+        setDescription('');
+        setTimeline('');
+        setBudget('');
+      } else {
+        throw new Error(result?.error || 'Server error processing enquiry.');
+      }
+    } catch (err: unknown) {
+      // Fallback: prepare mailto in case API endpoint is unreachable
+      const mailtoSubject = encodeURIComponent(`[Project Enquiry - ${service}] from ${name} (${company || 'Individual'})`);
+      const mailtoBody = encodeURIComponent(
+        `Name: ${name}\nEmail: ${email}\nCompany: ${company}\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nProject Description:\n${description}`
+      );
+      setStatus('error');
+      setFeedback(
+        'Unable to reach email dispatcher directly. Click here to send via your email client, or write directly to 26alameen2005@gmail.com.'
+      );
+      window.open(`mailto:26alameen2005@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`, '_blank');
+    }
   };
 
   return (
-    <section id="contact" className="py-32 px-6 md:px-12 lg:px:24 max-w-7xl mx-auto border-t border-border-subtle">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-          <p className="text-xs font-mono text-text-muted tracking-widest uppercase mb-4">Open a Connection</p>
-          <h2 className="font-display text-5xl md:text-6xl mb-4 text-text-primary">Have something interesting</h2>
-          <h2 className="font-display text-5xl md:text-6xl text-text-muted mb-8">to build or investigate?</h2>
-          <p className="text-text-secondary leading-relaxed mb-8">
-            I'm open to meaningful technical discussions, collaboration, cybersecurity education, and projects that challenge how I think about engineering.
+    <section id="contact" className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mb-10 sm:mb-16"
+      >
+        <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
+          15 — Project Enquiry
+        </p>
+        <h2 className="font-sans text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-tight">
+          Have a Technical Problem Worth Solving?
+        </h2>
+        <div className="max-w-3xl space-y-3 mt-4 text-text-secondary text-sm sm:text-base md:text-lg leading-relaxed font-sans">
+          <p>
+            Whether you need to assess an application's security, improve security visibility, integrate existing systems, or build an AI-powered workflow, let's start with the problem.
           </p>
+          <p>
+            Tell me what you are trying to achieve, what challenges you are facing, and what a successful outcome would look like. I'll review the requirements and determine whether I can help.
+          </p>
+        </div>
+      </motion.div>
 
-          <div className="flex gap-4">
-            <a href="https://github.com/mr-ameen-05" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 border border-border-subtle hover:border-accent hover:text-accent transition-colors">
-              <Github size={18} /> <span className="text-sm font-mono">GitHub</span>
-            </a>
-            <a href="https://www.linkedin.com/in/al-ameen05" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-3 border border-border-subtle hover:border-accent hover:text-accent transition-colors">
-              <Linkedin size={18} /> <span className="text-sm font-mono">LinkedIn</span>
-            </a>
-            <a href="mailto:26alameen2005@gmail.com" className="flex items-center gap-2 px-4 py-3 border border-border-subtle hover:border-accent hover:text-accent transition-colors">
-              <Mail size={18} /> <span className="text-sm font-mono">Email</span>
-            </a>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
+        {/* Left Column: Direct Connect & Channels */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="lg:col-span-5 flex flex-col justify-between"
+        >
+          <div>
+            <h3 className="font-sans text-xl sm:text-2xl font-bold text-text-primary mb-3">
+              Start a Conversation
+            </h3>
+            <p className="text-sm text-text-secondary leading-relaxed font-sans mb-6">
+              I prioritize clear scopes, transparent expectations, and measurable engineering outcomes. Reach out directly or submit the enquiry form.
+            </p>
+
+            <div className="space-y-3 mb-8">
+              <a
+                href="mailto:26alameen2005@gmail.com"
+                className="flex items-center gap-3.5 p-3.5 rounded-xl bg-bg-secondary border border-border-subtle hover:border-accent hover:text-accent transition-all text-xs sm:text-sm font-mono text-text-primary group"
+              >
+                <Icon3D icon={Mail} size="sm" />
+                <span>26alameen2005@gmail.com</span>
+              </a>
+
+              <a
+                href="https://www.linkedin.com/in/al-ameen05"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3.5 p-3.5 rounded-xl bg-bg-secondary border border-border-subtle hover:border-accent hover:text-accent transition-all text-xs sm:text-sm font-mono text-text-primary group"
+              >
+                <Icon3D icon={Linkedin} size="sm" glowColor="#0077B5" />
+                <span>LinkedIn Profile</span>
+              </a>
+
+              <a
+                href="https://github.com/mr-ameen-05"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3.5 p-3.5 rounded-xl bg-bg-secondary border border-border-subtle hover:border-accent hover:text-accent transition-all text-xs sm:text-sm font-mono text-text-primary group"
+              >
+                <Icon3D icon={Github} size="sm" />
+                <span>GitHub Repositories</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Confidentiality Reminder Card */}
+          <div className="p-4 rounded-xl bg-bg-secondary border border-border-subtle flex items-start gap-3.5 text-xs text-text-muted font-sans">
+            <div className="shrink-0 mt-0.5">
+              <Icon3D icon={ShieldAlert} size="sm" glowColor="#EF4444" />
+            </div>
+            <p className="leading-relaxed">
+              <strong className="text-text-primary font-mono block mb-0.5">Security Notice:</strong>
+              Please do not include passwords, production credentials, sensitive logs, or confidential vulnerability details in this form.
+            </p>
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-6">
+        {/* Right Column: Structured Project Enquiry Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+          className="lg:col-span-7 bg-bg-secondary border border-border-subtle rounded-2xl p-6 sm:p-8"
+        >
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Name & Work Email */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">Name</label>
-                <input 
-                  type="text" 
+                <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">
+                  Name <span className="text-accent">*</span>
+                </label>
+                <input
+                  type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name" 
-                  className="w-full bg-bg-secondary border border-border-subtle p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary" 
+                  placeholder="Your name"
+                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
                 />
               </div>
+
               <div>
-                <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">Email</label>
-                <input 
-                  type="email" 
+                <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">
+                  Work Email <span className="text-accent">*</span>
+                </label>
+                <input
+                  type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email" 
-                  className="w-full bg-bg-secondary border border-border-subtle p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary" 
+                  placeholder="you@company.com"
+                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
                 />
               </div>
             </div>
 
+            {/* Company or Organization */}
             <div>
-              <label className="block text-xs font-mono text-text-muted mb-3 uppercase tracking-wider">What would you like to discuss?</label>
+              <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">
+                Company or Organization
+              </label>
+              <input
+                type="text"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Your company or organization"
+                className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
+              />
+            </div>
+
+            {/* What do you need help with? */}
+            <div>
+              <label className="block text-xs font-mono text-text-muted mb-2.5 uppercase tracking-wider">
+                What do you need help with?
+              </label>
               <div className="flex flex-wrap gap-2">
-                {subjects.map(s => (
-                  <button key={s} type="button" onClick={() => setSubject(s)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-mono border transition-all ${subject === s ? 'border-accent text-bg-primary bg-accent' : 'border-border-subtle text-text-muted hover:border-text-secondary'}`}>
-                    {s}
+                {serviceOptions.map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setService(opt)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all border ${
+                      service === opt
+                        ? 'bg-accent text-black border-accent font-bold shadow-sm'
+                        : 'bg-bg-primary text-text-secondary border-border-subtle hover:border-border-hover'
+                    }`}
+                  >
+                    {opt}
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* Project Description */}
             <div>
-              <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">Message</label>
-              <textarea 
-                rows={5} 
+              <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">
+                Project Description <span className="text-accent">*</span>
+              </label>
+              <textarea
                 required
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="What would you like to discuss?" 
-                className="w-full bg-bg-secondary border border-border-subtle p-3 text-sm focus:outline-none focus:border-accent transition-colors resize-none text-text-primary" 
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe the problem, desired outcome, existing environment, and relevant constraints."
+                className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary resize-y"
               />
             </div>
 
-            {feedback && (
-              <div className={`p-3 text-sm font-mono border ${status === 'success' ? 'border-accent/50 text-accent bg-accent/10' : 'border-red-500/50 text-red-500 bg-red-500/10'}`}>
-                {feedback}
+            {/* Expected Timeline & Estimated Budget */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">
+                  Expected Timeline
+                </label>
+                <input
+                  type="text"
+                  value={timeline}
+                  onChange={(e) => setTimeline(e.target.value)}
+                  placeholder="e.g. 2-4 weeks / Q4"
+                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
+                />
               </div>
-            )}
 
-            <button 
-              type="submit" 
-              disabled={status === 'loading'}
-              className="w-full p-4 bg-accent text-bg-primary font-sans font-bold text-sm tracking-wide hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {status === 'loading' ? 'Sending...' : 'Send Message'}
-            </button>
+              <div>
+                <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">
+                  Estimated Budget (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  placeholder="e.g. Fixed scope / Hourly"
+                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button & Feedback */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                className="w-full sm:w-auto px-8 py-3.5 bg-accent text-black font-mono text-xs font-bold uppercase tracking-widest hover:bg-white transition-all rounded inline-flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {status === 'loading' ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <span>Transmitting Enquiry...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Submit Project Enquiry</span>
+                    <Send className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+
+              {status === 'success' && (
+                <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30 text-accent text-xs font-mono flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{feedback}</span>
+                </div>
+              )}
+
+              {status === 'error' && (
+                <div className="mt-4 p-3 rounded-lg bg-red-900/20 border border-red-500/40 text-red-300 text-xs font-mono">
+                  {feedback}
+                </div>
+              )}
+            </div>
           </form>
         </motion.div>
       </div>

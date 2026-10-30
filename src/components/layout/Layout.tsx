@@ -1,37 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SITE } from '../../config/site.config';
+import { ArrowUpRight } from 'lucide-react';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  const navLinks = [
+    { href: '#projects', label: 'Work' },
+    { href: '#services', label: 'Services' },
+    { href: '#field-notes', label: 'Field Notes' },
+    { href: '#about', label: 'About' },
+    { href: '#contact', label: 'Contact' },
+  ];
 
   return (
     <div className="relative min-h-screen bg-bg-primary text-text-primary overflow-x-hidden selection:bg-accent selection:text-black">
       
       {/* Navbar - Monochrome Minimal */}
-      <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border-subtle bg-bg-primary/80 backdrop-blur-md z-50 flex items-center justify-between px-6 md:px-12">
+      <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border-subtle bg-bg-primary/85 backdrop-blur-md z-50 flex items-center justify-between px-4 sm:px-6 md:px-12">
         <Link to="/" className="font-mono text-sm tracking-wider font-bold hover:text-accent transition-colors">
           {SITE.name.toUpperCase()}
         </Link>
         
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-7">
-          {SITE.nav.slice(1).map(n => (
-            <a key={n.id} href={`/#${n.id}`} className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors uppercase tracking-widest">
-              {n.label}
+          {navLinks.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors uppercase tracking-widest"
+            >
+              {item.label}
             </a>
           ))}
-          <Link
-            to="/courses/teaming"
-            className="text-xs font-mono px-3 py-1.5 rounded-full border border-accent/40 bg-accent/10 text-accent hover:bg-accent hover:text-black transition-all uppercase tracking-wider font-semibold"
+          
+          <a
+            href="#contact"
+            className="text-xs font-mono px-3.5 py-1.5 rounded border border-accent bg-accent/10 text-accent hover:bg-accent hover:text-black transition-all uppercase tracking-wider font-semibold inline-flex items-center gap-1"
           >
-            🛡️ Security Course
-          </Link>
+            Discuss a Project
+          </a>
         </div>
 
         {/* Mobile Nav Toggle */}
         <button 
-          className="md:hidden flex flex-col justify-center gap-1.5 w-6 h-6 z-50"
+          className="md:hidden flex flex-col items-center justify-center gap-1.5 w-11 h-11 -mr-2 z-50"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle navigation menu"
         >
@@ -43,24 +68,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 bg-bg-primary/95 backdrop-blur-lg z-40 flex flex-col items-center justify-center gap-8 md:hidden">
-          {SITE.nav.slice(1).map(n => (
+        <div className="fixed inset-0 bg-bg-primary/98 backdrop-blur-lg z-40 flex flex-col items-center justify-center gap-6 px-6 py-12 md:hidden overflow-y-auto">
+          {navLinks.map((item) => (
             <a 
-              key={n.id} 
-              href={`/#${n.id}`} 
+              key={item.label} 
+              href={item.href} 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-mono text-text-secondary hover:text-text-primary transition-colors uppercase tracking-widest"
+              className="text-base sm:text-lg font-mono text-text-secondary hover:text-text-primary transition-colors uppercase tracking-widest py-2"
             >
-              {n.label}
+              {item.label}
             </a>
           ))}
-          <Link
-            to="/courses/teaming"
+          <a
+            href="#contact"
             onClick={() => setMobileMenuOpen(false)}
-            className="text-lg font-mono text-accent hover:underline uppercase tracking-widest font-bold"
+            className="text-sm font-mono text-black bg-accent hover:bg-accent/90 uppercase tracking-wider font-bold py-2.5 px-6 rounded transition-all mt-4"
           >
-            🛡️ Security Course (11 Modules)
-          </Link>
+            Discuss a Project
+          </a>
         </div>
       )}
 
@@ -69,45 +94,83 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </div>
 
-      {/* Minimal Footer */}
-      <footer className="border-t border-border-subtle py-12 px-6 md:px-12 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6 w-full max-w-[100vw] overflow-hidden">
-        <div>
-          <p className="font-sans font-bold text-lg text-text-primary mb-1">{SITE.name.toUpperCase()}</p>
-          <p className="font-mono text-xs text-text-muted">Cybersecurity Analyst & Systems Builder</p>
-          <p className="font-serif text-sm text-text-secondary mt-3 max-w-sm">"{SITE.tagline}"</p>
+      {/* Footer (Section 17) */}
+      <footer className="border-t border-border-subtle py-14 px-6 md:px-12 bg-bg-secondary/40 w-full max-w-[100vw] overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div>
+            <p className="font-sans font-bold text-lg text-text-primary mb-1 tracking-tight">
+              {SITE.name.toUpperCase()}
+            </p>
+            <p className="font-mono text-xs text-text-muted">
+              Security Engineer · Forward Deployed Engineer · Systems Builder
+            </p>
+            <p className="font-sans text-sm text-text-secondary mt-2 max-w-md leading-relaxed">
+              Securing systems. Engineering solutions. Building for the real world.
+            </p>
+            <p className="font-mono text-xs text-text-muted mt-2">
+              Kerala, India
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 w-full md:w-auto">
+            {/* Navigation links */}
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-text-muted mb-3">
+                Navigation
+              </p>
+              <div className="flex flex-col space-y-2">
+                {navLinks.map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="text-xs font-mono text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Connect links */}
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-text-muted mb-3">
+                Connect
+              </p>
+              <div className="flex flex-col space-y-2">
+                <a
+                  href="https://www.linkedin.com/in/al-ameen05"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-mono text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1"
+                >
+                  LinkedIn <ArrowUpRight className="w-3 h-3" />
+                </a>
+                <a
+                  href="https://github.com/mr-ameen-05"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-mono text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1"
+                >
+                  GitHub <ArrowUpRight className="w-3 h-3" />
+                </a>
+                <a
+                  href="mailto:26alameen2005@gmail.com"
+                  className="text-xs font-mono text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1"
+                >
+                  Email <ArrowUpRight className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-wrap justify-center gap-6 items-center">
-          {SITE.nav.slice(1).map(n => (
-            <a key={n.id} href={`/#${n.id}`} className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors">
-              {n.label}
-            </a>
-          ))}
-          <Link to="/courses/teaming" className="text-xs font-mono text-accent hover:underline font-semibold">
-            Security Course
-          </Link>
-          <a
-            href="https://buymeacoffee.com/aiameen"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors"
-            aria-label="Buy me a coffee"
-          >
-            ☕ Buy me a coffee
-          </a>
-          <a
-            href="/privacy.html"
-            className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors"
-          >
-            Privacy Policy
-          </a>
-          <a
-            href="/terms.html"
-            className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors"
-          >
-            Terms &amp; Conditions
-          </a>
+
+        <div className="max-w-7xl mx-auto mt-10 pt-6 border-t border-border-subtle/60 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-text-muted">
+          <p>© 2026 {SITE.name}. All rights reserved.</p>
+          <div className="flex items-center gap-5">
+            <a href="/privacy.html" className="hover:text-text-primary transition-colors">Privacy Policy</a>
+            <a href="/terms.html" className="hover:text-text-primary transition-colors">Terms &amp; Conditions</a>
+          </div>
         </div>
-        <p className="text-xs font-mono text-text-muted">© {new Date().getFullYear()} {SITE.name}</p>
       </footer>
     </div>
   );
