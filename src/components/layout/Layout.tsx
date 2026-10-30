@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { SITE } from '../../config/site.config';
 import { ArrowUpRight } from 'lucide-react';
 import { useSmoothScroll } from '../scroll/SmoothScrollContext';
@@ -9,13 +9,34 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [activeSection, setActiveSection] = useState<string>('hero');
   const { scrollTo } = useSmoothScroll();
+
+  // Top global scroll progress tracker with spring physics
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 280,
+    damping: 32,
+    restDelta: 0.001,
+  });
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
+
+      // Track active section for nav telemetry
+      const scrollPos = window.scrollY + 140;
+      const sectionIds = ['contact', 'faq', 'journey', 'stack', 'services', 'projects', 'hero'];
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el && scrollPos >= el.offsetTop) {
+          setActiveSection(id);
+          break;
+        }
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -31,26 +52,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [mobileMenuOpen]);
 
   const navLinks = [
-    { href: '#projects', label: 'Work' },
-    { href: '#services', label: 'Services' },
-    { href: '#stack', label: 'Stack' },
-    { href: '#journey', label: 'Evolution' },
-    { href: '#faq', label: 'FAQ' },
-    { href: '#contact', label: 'Contact' },
+    { href: '#projects', id: 'projects', label: 'Work' },
+    { href: '#services', id: 'services', label: 'Services' },
+    { href: '#stack', id: 'stack', label: 'Stack' },
+    { href: '#journey', id: 'journey', label: 'Evolution' },
+    { href: '#faq', id: 'faq', label: 'FAQ' },
+    { href: '#contact', id: 'contact', label: 'Contact' },
   ];
 
   const handleMobileNavClick = (href: string) => {
     setMobileMenuOpen(false);
-    scrollTo(href, { offset: -30, duration: 1.0 });
+    scrollTo(href, { offset: -75, duration: 0.75 });
   };
 
   const handleDesktopNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    scrollTo(href, { offset: -30, duration: 1.0 });
+    scrollTo(href, { offset: -75, duration: 0.85 });
   };
 
   return (
     <div className="relative min-h-screen bg-bg-primary text-text-primary overflow-x-hidden selection:bg-accent selection:text-black">
+      {/* Phosphor Cyber Scroll Progress Line — Hardware-accelerated for Mobile, Tablet, & Desktop */}
+      <motion.div
+        style={{ scaleX }}
+        className="fixed top-0 left-0 right-0 h-[2.5px] bg-accent z-[60] origin-left shadow-[0_0_10px_#C8FF00,0_0_20px_rgba(200,255,0,0.5)] pointer-events-none"
+      />
+
       {/* Skip Navigation Link for Keyboard Accessibility (WCAG 2.4.1) */}
       <a href="#hero" className="skip-link">
         Skip to main content
@@ -83,7 +110,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
           
-          {/* Desktop Nav with Spring Magnetic Hover Pill */}
+          {/* Desktop Nav with Spring Magnetic Hover Pill & Active Waypoint Indicator */}
           <nav
             onMouseLeave={() => setHoveredIdx(null)}
             className="hidden md:flex items-center gap-1 relative"
@@ -91,19 +118,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           >
             {navLinks.map((item, idx) => {
               const isHovered = hoveredIdx === idx;
+              const isActive = activeSection === item.id;
               return (
                 <a
                   key={item.label}
                   href={item.href}
                   onMouseEnter={() => setHoveredIdx(idx)}
                   onClick={(e) => handleDesktopNavClick(e, item.href)}
-                  className="relative px-3.5 py-1.5 text-[13px] font-sans font-medium tracking-normal text-text-secondary hover:text-text-primary transition-colors cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+                  className={`relative px-3.5 py-1.5 text-[13px] font-sans font-medium tracking-normal transition-colors cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
+                    isActive ? 'text-accent font-semibold' : 'text-text-secondary hover:text-text-primary'
+                  }`}
                 >
                   {isHovered && (
                     <motion.span
                       layoutId="nav-hover-pill"
                       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                       className="absolute inset-0 bg-white/10 border border-white/5 rounded-full -z-10"
+                    />
+                  )}
+                  {isActive && !isHovered && (
+                    <motion.span
+                      layoutId="nav-active-dot"
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent shadow-[0_0_6px_#C8FF00]"
                     />
                   )}
                   {item.label}
@@ -149,18 +185,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="fixed inset-0 bg-[#0A0A0A]/95 backdrop-blur-2xl z-40 flex flex-col items-center justify-center gap-6 px-6 py-12 md:hidden overflow-y-auto"
           >
             <nav className="flex flex-col items-center gap-4 w-full max-w-xs">
-              {navLinks.map((item, idx) => (
-                <motion.button 
-                  key={item.label}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 * idx, duration: 0.3 }}
-                  onClick={() => handleMobileNavClick(item.href)}
-                  className="text-xl font-sans font-bold text-text-secondary hover:text-accent active:text-accent transition-colors tracking-tight py-2.5 px-6 text-center w-full rounded-xl hover:bg-white/5 cursor-pointer touch-manipulation"
-                >
-                  {item.label}
-                </motion.button>
-              ))}
+              {navLinks.map((item, idx) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <motion.button 
+                    key={item.label}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.04 * idx, duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={() => handleMobileNavClick(item.href)}
+                    className={`text-xl font-sans font-bold transition-colors tracking-tight py-2.5 px-6 text-center w-full rounded-xl hover:bg-white/5 cursor-pointer touch-manipulation flex items-center justify-center gap-2 ${
+                      isActive ? 'text-accent' : 'text-text-secondary hover:text-accent'
+                    }`}
+                  >
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_8px_#C8FF00]" />
+                    )}
+                    <span>{item.label}</span>
+                  </motion.button>
+                );
+              })}
             </nav>
 
             <motion.button

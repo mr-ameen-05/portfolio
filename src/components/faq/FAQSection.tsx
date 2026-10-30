@@ -91,7 +91,7 @@ export default function FAQSection() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <div className="px-5 pb-6 sm:px-6 pt-0 text-sm sm:text-base text-text-secondary leading-relaxed font-sans border-t border-border-subtle/50 mt-1">
                       <div className="pt-4">

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import HeroCanvas from './HeroCanvas';
 import Icon3D from '../ui/Icon3D';
@@ -39,6 +39,16 @@ const coreDisciplines = [
 
 export default function HeroSection() {
   const heroRef = useRef<HTMLElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Scroll Zoom Hero: Track progress through the hero section as the user scrolls
   const { scrollYProgress } = useScroll({
@@ -47,10 +57,10 @@ export default function HeroSection() {
   });
 
   // Background Scroll Zoom transforms:
-  // 1. Scales up (zooms in) from 1 to 1.5
-  // 2. Blurs progressively up to 20px
-  // 3. Fades out as the user reaches the end of the hero
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.5]);
+  // 1. Scales up (zooms in) from 1 to 1.35 on mobile, 1.5 on desktop
+  // 2. Blurs progressively on desktop only (disabled on mobile to protect 60-120fps)
+  // 3. Fades out smoothly as the user reaches the end of the hero
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, isMobile ? 1.3 : 1.5]);
   const blurPx = useTransform(scrollYProgress, [0, 0.7, 1], [0, 8, 20]);
   const bgFilter = useTransform(blurPx, (v) => `blur(${v}px)`);
   const bgOpacity = useTransform(scrollYProgress, [0, 0.75, 1], [0.85, 0.4, 0]);
@@ -72,10 +82,10 @@ export default function HeroSection() {
         <motion.div
           style={{
             scale: bgScale,
-            filter: bgFilter,
+            filter: isMobile ? 'none' : bgFilter,
             opacity: bgOpacity,
           }}
-          className="absolute inset-0 z-0 pointer-events-auto origin-center will-change-transform"
+          className="absolute inset-0 z-0 pointer-events-auto origin-center will-change-transform transform-gpu"
         >
           <HeroCanvas />
         </motion.div>
@@ -244,9 +254,13 @@ export default function HeroSection() {
                 key={item.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className={`p-6 sm:p-7 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between ${
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{
+                  duration: 0.45,
+                  delay: isMobile ? Math.min(idx * 0.04, 0.12) : idx * 0.08,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className={`p-6 sm:p-7 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between transform-gpu ${
                   idx === 0 ? 'md:col-span-2 lg:col-span-1' : ''
                 }`}
               >

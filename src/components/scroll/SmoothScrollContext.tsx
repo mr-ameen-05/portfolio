@@ -43,7 +43,7 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     );
 
     const lenis = new Lenis({
-      duration: isTouch ? 0.9 : 1.15,
+      duration: isTouch ? 0.8 : 1.05,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
@@ -63,7 +63,7 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     }
     animationFrameId = requestAnimationFrame(raf);
 
-    // Intercept in-page hash links for seamless camera glide
+    // Intercept in-page hash links for seamless camera glide with responsive offset
     const handleAnchorClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement).closest('a');
       if (!target) return;
@@ -73,7 +73,10 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
         const element = document.querySelector(href);
         if (element) {
           e.preventDefault();
-          lenis.scrollTo(element as HTMLElement, { offset: -30, duration: 1.4 });
+          lenis.scrollTo(element as HTMLElement, {
+            offset: -75,
+            duration: isTouch ? 0.75 : 0.95,
+          });
         }
       }
     };
@@ -92,14 +95,28 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     target: string | HTMLElement,
     options?: { offset?: number; duration?: number; immediate?: boolean }
   ) => {
+    const isTouch = typeof window !== 'undefined' && (
+      'ontouchstart' in window ||
+      (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+      window.matchMedia('(pointer: coarse)').matches
+    );
+
+    const mergedOptions = {
+      offset: options?.offset ?? -75,
+      duration: options?.duration ?? (isTouch ? 0.75 : 0.95),
+      immediate: options?.immediate ?? false,
+    };
+
     if (lenisInstance) {
-      lenisInstance.scrollTo(target, options);
+      lenisInstance.scrollTo(target, mergedOptions);
     } else {
-      if (typeof target === 'string') {
-        const el = document.querySelector(target);
-        el?.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        target.scrollIntoView({ behavior: 'smooth' });
+      const el = typeof target === 'string' ? document.querySelector(target) : target;
+      if (el) {
+        const topPos = el.getBoundingClientRect().top + window.scrollY + mergedOptions.offset;
+        window.scrollTo({
+          top: Math.max(0, topPos),
+          behavior: mergedOptions.immediate ? 'auto' : 'smooth',
+        });
       }
     }
   };

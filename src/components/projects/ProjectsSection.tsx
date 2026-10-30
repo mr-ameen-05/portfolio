@@ -184,9 +184,9 @@ export default function ProjectsSection() {
               key={project.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: idx * 0.08 }}
-              className="flex flex-col justify-between p-6 sm:p-8 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/40 transition-all duration-300 group"
+              viewport={{ once: true, amount: 0.08 }}
+              transition={{ duration: 0.45, delay: Math.min(idx * 0.06, 0.24), ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col justify-between p-6 sm:p-8 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/40 transition-all duration-300 group transform-gpu"
             >
               <div>
                 {/* Header row: Number and tag */}

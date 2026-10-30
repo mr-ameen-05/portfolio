@@ -88,7 +88,7 @@ export default function ScrollTelemetryHUD() {
             return (
               <button
                 key={marker.id}
-                onClick={() => scrollTo(`#${marker.id}`, { offset: -30, duration: 1.4 })}
+                onClick={() => scrollTo(`#${marker.id}`, { offset: -75, duration: 0.9 })}
                 aria-label={`Jump to section ${marker.label}`}
                 className="group relative flex items-center justify-center p-1 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none focus:outline-none rounded-full cursor-pointer"
               >

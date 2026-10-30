@@ -16,14 +16,16 @@ export default function SectionTransitionWrapper({
 }: SectionTransitionWrapperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
+    const checkEnvironment = () => {
       setIsMobile(window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches);
+      setPrefersReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    checkEnvironment();
+    window.addEventListener('resize', checkEnvironment, { passive: true });
+    return () => window.removeEventListener('resize', checkEnvironment);
   }, []);
 
   const { scrollYProgress } = useScroll({
@@ -31,44 +33,54 @@ export default function SectionTransitionWrapper({
     offset: ['start end', 'end start'],
   });
 
-  // Smooth out progress values with spring physics
+  // Desktop subtle parallax scroll spring
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 24,
+    stiffness: 150,
+    damping: 30,
     restDelta: 0.001,
   });
 
-  // Scale: enters at 0.97, peaks at 1.0 in the center 60% of viewport, gently recedes to 0.97
-  const scale = useTransform(smoothProgress, [0, 0.15, 0.85, 1], [0.97, 1, 1, 0.97]);
-
-  // Opacity: soft fade-in on arrival, solid in the focal zone, soft fade on departure
-  const opacity = useTransform(smoothProgress, [0, 0.12, 0.88, 1], [0.55, 1, 1, 0.55]);
-
-  // Subtle vertical parallax drift
-  const y = useTransform(smoothProgress, [0, 0.15, 0.85, 1], [25, 0, 0, -25]);
-
-  // On mobile/touch devices, bypass heavy 3D transforms for native 60-120fps touch performance
-  const shouldUseDepth = enableDepth && !isMobile;
+  // Very gentle vertical drift on desktop only (15px) — completely flat on mobile
+  const desktopYParallax = useTransform(smoothProgress, [0, 1], [15, -15]);
 
   return (
-    <div ref={containerRef} id={id} className={`relative scroll-mt-20 ${className}`}>
-      {shouldUseDepth ? (
-        <motion.div
-          style={{
-            scale,
-            opacity,
-            y,
-            transformPerspective: 1200,
-          }}
-          className="w-full will-change-transform"
-        >
-          {children}
-        </motion.div>
-      ) : (
-        <div className="w-full">
-          {children}
-        </div>
-      )}
+    <div
+      ref={containerRef}
+      id={id}
+      className={`relative scroll-mt-24 ${className}`}
+    >
+      <motion.div
+        initial={
+          prefersReducedMotion
+            ? { opacity: 1, y: 0, scale: 1 }
+            : {
+                opacity: 0,
+                y: isMobile ? 18 : 28,
+                scale: isMobile ? 0.99 : 0.98,
+              }
+        }
+        whileInView={{
+          opacity: 1,
+          y: 0,
+          scale: 1,
+        }}
+        viewport={{
+          once: true,
+          amount: isMobile ? 0.08 : 0.12,
+        }}
+        transition={{
+          duration: isMobile ? 0.45 : 0.65,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+        style={
+          enableDepth && !isMobile && !prefersReducedMotion
+            ? { y: desktopYParallax, transformPerspective: 1200 }
+            : undefined
+        }
+        className="w-full will-change-transform transform-gpu"
+      >
+        {children}
+      </motion.div>
     </div>
   );
 }

@@ -65,9 +65,9 @@ export default function TechStackSection() {
               key={cat.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: idx * 0.07 }}
-              className="p-6 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/30 transition-all flex flex-col justify-between"
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 0.45, delay: Math.min(idx * 0.05, 0.2), ease: [0.16, 1, 0.3, 1] }}
+              className="p-6 rounded-2xl bg-bg-secondary border border-border-subtle hover:border-accent/30 transition-all flex flex-col justify-between transform-gpu"
             >
               <div>
                 <div className="flex items-center gap-3 mb-4">

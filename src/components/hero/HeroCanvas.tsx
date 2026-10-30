@@ -64,7 +64,10 @@ export default function HeroCanvas() {
     // Re-check after initial layout settles to get exact name-badge rect
     resizeTimer = setTimeout(handleResize, 150);
 
+    let isVisible = true;
+
     const render = (time: number) => {
+      if (!isVisible) return;
       if (!lastTime) lastTime = time;
       const dt = prefersReducedMotion ? 0 : Math.min((time - lastTime) / 1000, 0.05);
       lastTime = time;
@@ -96,15 +99,33 @@ export default function HeroCanvas() {
         }
       }
 
-      if (!prefersReducedMotion) {
+      if (!prefersReducedMotion && isVisible) {
         animationFrameId = requestAnimationFrame(render);
       }
     };
     
-    // Exactly one single rendering loop
+    // Pause animation when hero is scrolled out of viewport to maximize scroll FPS on mobile & desktop
+    const observer = new IntersectionObserver(([entry]) => {
+      const visible = entry.isIntersecting;
+      if (visible && !isVisible) {
+        isVisible = true;
+        lastTime = 0;
+        if (!prefersReducedMotion) {
+          animationFrameId = requestAnimationFrame(render);
+        }
+      } else if (!visible && isVisible) {
+        isVisible = false;
+        cancelAnimationFrame(animationFrameId);
+      }
+    }, { threshold: 0.05 });
+
+    observer.observe(canvas);
+
+    // Initial render loop start
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseleave', onLeave);
