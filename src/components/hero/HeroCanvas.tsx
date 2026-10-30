@@ -16,10 +16,10 @@ export default function HeroCanvas() {
     if (!ctx) return;
 
     let animationFrameId: number;
+    let resizeTimer: ReturnType<typeof setTimeout>;
     let lastTime = 0;
     const orbit = new OrbitEngine();
     engineRef.current = orbit;
-    setBodies(orbit.bodies.map(b => b.config));
 
     let mousePos: Vector2D | null = null;
     let mouseActive = false;
@@ -36,7 +36,21 @@ export default function HeroCanvas() {
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      orbit.resize(window.innerWidth, window.innerHeight);
+
+      let mobileAnchorY: number | null = null;
+      if (isMobile) {
+        const badge = document.getElementById('hero-name-badge');
+        const hero = document.getElementById('hero');
+        if (badge && hero) {
+          const badgeRect = badge.getBoundingClientRect();
+          const heroRect = hero.getBoundingClientRect();
+          // Position orbit center cleanly 44px above the AL AMEEN N R name badge
+          mobileAnchorY = (badgeRect.top - heroRect.top) - 44;
+        }
+      }
+
+      orbit.resize(window.innerWidth, window.innerHeight, isMobile, mobileAnchorY);
+      setBodies([...orbit.bodies.map(b => b.config)]);
     };
 
     const onMove = (e: MouseEvent) => { mousePos = new Vector2D(e.clientX, e.clientY); mouseActive = true; };
@@ -46,6 +60,9 @@ export default function HeroCanvas() {
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseleave', onLeave);
     handleResize();
+
+    // Re-check after initial layout settles to get exact name-badge rect
+    resizeTimer = setTimeout(handleResize, 150);
 
     const render = (time: number) => {
       if (!lastTime) lastTime = time;
@@ -63,7 +80,8 @@ export default function HeroCanvas() {
 
       if (overlayRef.current) {
         const nodes = overlayRef.current.children;
-        for (let i = 0; i < orbit.bodies.length; i++) {
+        const count = Math.min(nodes.length, orbit.bodies.length);
+        for (let i = 0; i < count; i++) {
           const body = orbit.bodies[i];
           const node = nodes[i] as HTMLElement;
           if (node) {
@@ -90,6 +108,7 @@ export default function HeroCanvas() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseleave', onLeave);
+      clearTimeout(resizeTimer);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -102,7 +121,7 @@ export default function HeroCanvas() {
           <div key={body.id} className="absolute top-0 left-0 flex flex-col items-center will-change-transform group cursor-pointer pointer-events-none sm:pointer-events-auto">
             {/* 3D Effected Glass Orb Medallion */}
             <div 
-              className="icon-3d-orbit w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 cursor-pointer flex items-center justify-center transition-all duration-300"
+              className="icon-3d-orbit w-8 h-8 sm:w-11 sm:h-11 md:w-12 md:h-12 cursor-pointer flex items-center justify-center transition-all duration-300"
               style={{
                 '--orbit-glow': `${body.color}88`,
                 '--orbit-glow-diffuse': `${body.color}35`,

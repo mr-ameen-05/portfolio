@@ -11,7 +11,7 @@ export interface OrbitBodyConfig {
   angularVelocity: number;
   phase: number;
   size: number;
-  galaxy: 'left' | 'right';
+  galaxy: 'left' | 'right' | 'center';
   ringIndex: number;
 }
 

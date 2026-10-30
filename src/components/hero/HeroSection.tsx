@@ -105,7 +105,10 @@ export default function HeroSection() {
             className="w-full flex flex-col items-center"
           >
             {/* Top Identity & Status Pill */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-border-subtle bg-bg-secondary/90 text-xs font-mono text-text-secondary mb-6 backdrop-blur-md pointer-events-auto">
+            <div 
+              id="hero-name-badge"
+              className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-border-subtle bg-bg-secondary/90 text-xs font-mono text-text-secondary mt-14 sm:mt-0 mb-6 backdrop-blur-md pointer-events-auto"
+            >
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               <span className="text-text-primary font-bold tracking-wider">AL AMEEN N R</span>
               <span className="text-border-hover">|</span>
