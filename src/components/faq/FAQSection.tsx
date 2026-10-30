@@ -52,7 +52,7 @@ export default function FAQSection() {
         className="mb-10 sm:mb-16"
       >
         <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
-          14 — Frequently Asked Questions
+          06.1 — Operational FAQ
         </p>
         <h2 className="font-sans text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-tight">
           Frequently Asked Questions
@@ -74,7 +74,7 @@ export default function FAQSection() {
               <button
                 type="button"
                 onClick={() => toggle(index)}
-                className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 font-sans font-bold text-base sm:text-lg text-text-primary focus:outline-none"
+                className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 font-sans font-bold text-base sm:text-lg text-text-primary focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none focus:outline-none cursor-pointer"
               >
                 <span className="flex items-center gap-3.5">
                   <Icon3D icon={HelpCircle} size="sm" glowColor="#C8FF00" className="hidden sm:inline-flex shrink-0" />

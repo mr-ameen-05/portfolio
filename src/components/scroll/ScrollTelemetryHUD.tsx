@@ -11,17 +11,11 @@ interface SectionMarker {
 
 const SECTION_MARKERS: SectionMarker[] = [
   { id: 'hero', code: '01', label: 'Overview' },
-  { id: 'projects', code: '02', label: 'Projects' },
+  { id: 'projects', code: '02', label: 'Selected Work' },
   { id: 'services', code: '03', label: 'Services' },
-  { id: 'process', code: '04', label: 'Process' },
-  { id: 'trust', code: '05', label: 'Trust' },
-  { id: 'stack', code: '06', label: 'Tech Stack' },
-  { id: 'field-notes', code: '07', label: 'Field Notes' },
-  { id: 'about', code: '08', label: 'About' },
-  { id: 'journey', code: '09', label: 'Journey' },
-  { id: 'community', code: '10', label: 'Community' },
-  { id: 'faq', code: '11', label: 'FAQ' },
-  { id: 'contact', code: '12', label: 'Contact' },
+  { id: 'stack', code: '04', label: 'Technical Stack' },
+  { id: 'journey', code: '05', label: 'Background' },
+  { id: 'contact', code: '06', label: 'Project Enquiry' },
 ];
 
 export default function ScrollTelemetryHUD() {
@@ -96,7 +90,7 @@ export default function ScrollTelemetryHUD() {
                 key={marker.id}
                 onClick={() => scrollTo(`#${marker.id}`, { offset: -30, duration: 1.4 })}
                 aria-label={`Jump to section ${marker.label}`}
-                className="group relative flex items-center justify-center p-1 focus:outline-none"
+                className="group relative flex items-center justify-center p-1 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none focus:outline-none rounded-full cursor-pointer"
               >
                 {/* Node Pill */}
                 <motion.div
@@ -130,7 +124,7 @@ export default function ScrollTelemetryHUD() {
           style={{ opacity: velocityAbs }}
           className="flex flex-col items-center gap-1 pt-1 border-t border-border-subtle/40"
         >
-          <ChevronsUpDown className="w-3.5 h-3.5 text-accent animate-bounce" />
+          <ChevronsUpDown className="w-3.5 h-3.5 text-accent motion-reduce:transform-none" />
         </motion.div>
       </motion.div>
     </aside>

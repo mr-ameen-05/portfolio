@@ -158,14 +158,14 @@ export default function HeroSection() {
             <div className="mt-10 sm:mt-12 flex items-center gap-2 text-xs font-mono text-text-muted pointer-events-auto">
               <span>Kerala, India · Open to Selected Projects</span>
               <a href="#intro" aria-label="Scroll down" className="text-text-muted hover:text-accent transition-colors ml-2">
-                <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
+                <ArrowDown className="w-3.5 h-3.5 motion-safe:animate-pulse motion-reduce:animate-none" />
               </a>
             </div>
           </motion.div>
         </motion.div>
       </section>
 
-      {/* 03. Professional Introduction */}
+      {/* 01.1 Professional Introduction */}
       <section id="intro" className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle bg-bg-primary">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -175,7 +175,7 @@ export default function HeroSection() {
           className="max-w-4xl"
         >
           <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
-            03 — Professional Introduction
+            01.1 — Professional Focus
           </p>
           <h2 className="font-sans text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-text-primary mb-6 leading-tight">
             Engineering beyond the surface.
@@ -217,17 +217,17 @@ export default function HeroSection() {
         </motion.div>
       </section>
 
-      {/* 04. Core Expertise */}
-      <section id="expertise" className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle bg-bg-primary">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-10 sm:mb-14"
-        >
-          <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
-            04 — Core Expertise
-          </p>
+        {/* 01.2 Core Expertise */}
+        <section id="expertise" className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle bg-bg-primary">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-10 sm:mb-14"
+          >
+            <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
+              01.2 — Core Disciplines
+            </p>
           <h2 className="font-sans text-3xl sm:text-5xl font-bold tracking-tight text-text-primary">
             What I Work On
           </h2>

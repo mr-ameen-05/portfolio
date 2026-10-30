@@ -22,8 +22,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navLinks = [
     { href: '#projects', label: 'Work' },
     { href: '#services', label: 'Services' },
-    { href: '#field-notes', label: 'Field Notes' },
-    { href: '#about', label: 'About' },
+    { href: '#stack', label: 'Stack' },
+    { href: '#journey', label: 'Background' },
+    { href: '#faq', label: 'FAQ' },
     { href: '#contact', label: 'Contact' },
   ];
 
@@ -32,8 +33,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     scrollTo(href, { offset: -20, duration: 1.0 });
   };
 
+  const handleDesktopNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    scrollTo(href, { offset: -20, duration: 1.0 });
+  };
+
   return (
     <div className="relative min-h-screen bg-bg-primary text-text-primary overflow-x-hidden selection:bg-accent selection:text-black">
+      {/* Skip Navigation Link for Keyboard Accessibility (WCAG 2.4.1) */}
+      <a href="#hero" className="skip-link">
+        Skip to main content
+      </a>
       
       {/* Navbar - Monochrome Minimal */}
       <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border-subtle bg-bg-primary/90 backdrop-blur-md z-50 flex items-center justify-between px-4 sm:px-6 md:px-12">
@@ -42,12 +52,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </Link>
         
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-7">
+        <div className="hidden md:flex items-center gap-6">
           {navLinks.map((item) => (
             <a
               key={item.label}
               href={item.href}
-              className="text-xs font-mono text-text-muted hover:text-text-primary transition-colors uppercase tracking-widest"
+              onClick={(e) => handleDesktopNavClick(e, item.href)}
+              className="text-xs font-mono text-text-secondary hover:text-text-primary transition-colors uppercase tracking-widest cursor-pointer"
             >
               {item.label}
             </a>
@@ -55,7 +66,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           
           <a
             href="#contact"
-            className="text-xs font-mono px-3.5 py-1.5 rounded border border-accent bg-accent/10 text-accent hover:bg-accent hover:text-black transition-all uppercase tracking-wider font-semibold inline-flex items-center gap-1"
+            onClick={(e) => handleDesktopNavClick(e, '#contact')}
+            className="text-xs font-mono px-3.5 py-1.5 rounded border border-accent bg-accent/10 text-accent hover:bg-accent hover:text-black transition-all uppercase tracking-wider font-semibold inline-flex items-center gap-1 cursor-pointer"
           >
             Discuss a Project
           </a>

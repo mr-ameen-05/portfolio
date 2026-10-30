@@ -5,13 +5,8 @@ import Layout from './components/layout/Layout';
 import HeroSection from './components/hero/HeroSection';
 import ProjectsSection from './components/projects/ProjectsSection';
 import ServicesSection from './components/services/ServicesSection';
-import HowIWorkSection from './components/process/HowIWorkSection';
-import TrustSection from './components/trust/TrustSection';
 import TechStackSection from './components/stack/TechStackSection';
-import JournalSection from './components/journal/JournalSection';
-import AboutSection from './components/about/AboutSection';
 import JourneySection from './components/journey/JourneySection';
-import CommunitySection from './components/community/CommunitySection';
 import FAQSection from './components/faq/FAQSection';
 import ContactSection from './components/contact/ContactSection';
 import FinalCTASection from './components/cta/FinalCTASection';
@@ -48,90 +43,48 @@ function PortfolioHome() {
         <GlobalSprite />
         <ScrollTelemetryHUD />
         <main className="min-h-screen">
-          {/* 02. Hero, 03. Professional Introduction, 04. Core Expertise */}
-          <SectionTransitionWrapper enableDepth={false}>
+          {/* 01. Hero & System Telemetry */}
+          <SectionTransitionWrapper enableDepth={false} id="hero">
             <HeroSection />
           </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_05" label="SELECTED_PROJECTS" />
+          <LaserInterlockDivider sectionCode="SEC_02" label="SELECTED_WORK" />
 
-          {/* 05. Selected Projects */}
-          <SectionTransitionWrapper>
+          {/* 02. Selected Work */}
+          <SectionTransitionWrapper id="projects">
             <ProjectsSection />
           </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_06" label="SERVICES_OFFERING" />
+          <LaserInterlockDivider sectionCode="SEC_03" label="SERVICES_ENGAGEMENT" />
 
-          {/* 06. Services */}
-          <SectionTransitionWrapper>
+          {/* 03. Engineering Services */}
+          <SectionTransitionWrapper id="services">
             <ServicesSection />
           </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_07" label="ENGINEERING_PROCESS" />
+          <LaserInterlockDivider sectionCode="SEC_04" label="TECHNICAL_STACK" />
 
-          {/* 07. How I Work */}
-          <SectionTransitionWrapper>
-            <HowIWorkSection />
-          </SectionTransitionWrapper>
-
-          <LaserInterlockDivider sectionCode="SEC_08" label="TRUST_ASSURANCE" />
-
-          {/* 08. Trust & Assurance */}
-          <SectionTransitionWrapper>
-            <TrustSection />
-          </SectionTransitionWrapper>
-
-          <LaserInterlockDivider sectionCode="SEC_09" label="TECHNICAL_STACK" />
-
-          {/* 09. Technical Stack */}
-          <SectionTransitionWrapper>
+          {/* 04. Technical Stack */}
+          <SectionTransitionWrapper id="stack">
             <TechStackSection />
           </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_10" label="FIELD_NOTES" />
+          <LaserInterlockDivider sectionCode="SEC_05" label="BACKGROUND_JOURNEY" />
 
-          {/* 10. Field Notes */}
-          <SectionTransitionWrapper>
-            <JournalSection />
-          </SectionTransitionWrapper>
-
-          <LaserInterlockDivider sectionCode="SEC_11" label="ABOUT_OPERATOR" />
-
-          {/* 11. About Me */}
-          <SectionTransitionWrapper>
-            <AboutSection />
-          </SectionTransitionWrapper>
-
-          <LaserInterlockDivider sectionCode="SEC_12" label="CAREER_TIMELINE" />
-
-          {/* 12. Professional Journey */}
-          <SectionTransitionWrapper>
+          {/* 05. Professional Background & Journey */}
+          <SectionTransitionWrapper id="journey">
             <JourneySection />
           </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_13" label="COMMUNITY_ETHOS" />
+          <LaserInterlockDivider sectionCode="SEC_06" label="OPERATIONAL_ENQUIRY" />
 
-          {/* 13. Community & Knowledge Sharing */}
-          <SectionTransitionWrapper>
-            <CommunitySection />
-          </SectionTransitionWrapper>
-
-          <LaserInterlockDivider sectionCode="SEC_14" label="OPERATIONAL_FAQ" />
-
-          {/* 14. Frequently Asked Questions */}
-          <SectionTransitionWrapper>
+          {/* 06. Operational FAQ & Project Enquiry */}
+          <SectionTransitionWrapper id="faq">
             <FAQSection />
           </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_15" label="COMMUNICATION_UPLINK" />
-
-          {/* 15. Project Enquiry */}
-          <SectionTransitionWrapper>
+          <SectionTransitionWrapper id="contact">
             <ContactSection />
-          </SectionTransitionWrapper>
-
-          {/* 16. Final Call to Action */}
-          <SectionTransitionWrapper>
             <FinalCTASection />
           </SectionTransitionWrapper>
         </main>

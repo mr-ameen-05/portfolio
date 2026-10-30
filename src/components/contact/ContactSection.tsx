@@ -98,7 +98,7 @@ export default function ContactSection() {
         className="mb-10 sm:mb-16"
       >
         <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
-          15 — Project Enquiry
+          06.2 — Project Enquiry
         </p>
         <h2 className="font-sans text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-tight">
           Have a Technical Problem Worth Solving?

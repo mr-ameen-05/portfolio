@@ -56,16 +56,34 @@ export default function JourneySection() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mb-12 sm:mb-16"
+        className="mb-10 sm:mb-12"
       >
         <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
-          12 — Professional Journey
+          05 — Professional Background
         </p>
         <h2 className="font-sans text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-tight">
-          My Journey
+          Background &amp; Evolution
         </h2>
-        <p className="text-text-secondary text-sm sm:text-base md:text-lg max-w-2xl mt-4 leading-relaxed font-sans">
-          The progression of skills, disciplines, and engineering practices that shape how I build and secure systems today.
+        <p className="text-text-secondary text-sm sm:text-base md:text-lg max-w-3xl mt-4 leading-relaxed font-sans">
+          The progression of disciplines, systems engineering, and security practices that shape how I build and defend systems today.
+        </p>
+      </motion.div>
+
+      {/* Narrative Bio Callout */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mb-10 p-6 sm:p-8 rounded-2xl bg-bg-secondary/60 border border-border-subtle text-text-secondary text-sm sm:text-base leading-relaxed font-sans max-w-4xl"
+      >
+        <p className="text-text-primary font-medium mb-3">
+          I'm <strong className="text-accent font-semibold">Al Ameen N R</strong>, a systems builder working at the intersection of cybersecurity, full-stack software development, and AI engineering.
+        </p>
+        <p className="mb-3">
+          My focus spans offensive testing and defensive operations: identifying architecture vulnerabilities, configuring SIEM telemetry, and developing custom software platforms that solve operational bottlenecks.
+        </p>
+        <p className="text-text-muted text-xs font-mono">
+          Location: Kerala, India · Open to Remote &amp; On-Site Engagements
         </p>
       </motion.div>
 

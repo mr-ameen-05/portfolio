@@ -364,7 +364,17 @@ export default function GlobalSprite() {
                     BYTE
                   </span>
                 </div>
-                <span className="text-[8px] font-mono text-text-muted">OSINT GUIDE</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[8px] font-mono text-text-muted">OSINT GUIDE</span>
+                  <button
+                    type="button"
+                    onClick={() => setSpeech(null)}
+                    aria-label="Dismiss speech bubble"
+                    className="text-text-muted hover:text-text-primary text-[11px] leading-none px-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
 
               {/* Highly Readable Dialogue Body: Clean sans font with optimal line-height */}
@@ -386,7 +396,7 @@ export default function GlobalSprite() {
         <button
           type="button"
           onClick={handleSpriteClick}
-          className="absolute -translate-x-1/2 bottom-0 w-[80px] sm:w-[110px] h-[130px] sm:h-[190px] pointer-events-auto cursor-pointer focus:outline-none touch-pan-y"
+          className="absolute -translate-x-1/2 bottom-0 w-[80px] sm:w-[110px] h-[130px] sm:h-[190px] pointer-events-auto cursor-pointer focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none focus:outline-none touch-pan-y"
           title="Click to interact with companion"
           aria-label="Interactive digital companion"
         />
