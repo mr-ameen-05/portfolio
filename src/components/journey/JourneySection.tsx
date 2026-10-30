@@ -50,39 +50,39 @@ const stages: JourneyStage[] = [
 
 export default function JourneySection() {
   return (
-    <section id="journey" className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 max-w-7xl mx-auto border-t border-border-subtle">
+    <section id="journey" className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 max-w-7xl mx-auto">
       {/* Section Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mb-10 sm:mb-12"
+        className="mb-8 sm:mb-10"
       >
         <p className="text-[11px] sm:text-xs font-mono text-accent tracking-widest uppercase mb-3">
-          05 — Professional Background
+          05 — Evolution
         </p>
-        <h2 className="font-sans text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-tight">
-          Background &amp; Evolution
+        <h2 className="font-sans text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-text-primary leading-none">
+          Evolution
         </h2>
         <p className="text-text-secondary text-sm sm:text-base md:text-lg max-w-3xl mt-4 leading-relaxed font-sans">
           The progression of disciplines, systems engineering, and security practices that shape how I build and defend systems today.
         </p>
       </motion.div>
 
-      {/* Narrative Bio Callout */}
+      {/* Narrative Bio — Free-standing typography without artificial card box */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mb-10 p-6 sm:p-8 rounded-2xl bg-bg-secondary/60 border border-border-subtle text-text-secondary text-sm sm:text-base leading-relaxed font-sans max-w-4xl"
+        className="mb-12 max-w-4xl space-y-3 text-text-secondary text-base sm:text-lg leading-relaxed font-sans"
       >
-        <p className="text-text-primary font-medium mb-3">
+        <p className="text-text-primary font-medium text-lg sm:text-xl">
           I'm <strong className="text-accent font-semibold">Al Ameen N R</strong>, a systems builder working at the intersection of cybersecurity, full-stack software development, and AI engineering.
         </p>
-        <p className="mb-3">
+        <p className="text-text-secondary text-sm sm:text-base">
           My focus spans offensive testing and defensive operations: identifying architecture vulnerabilities, configuring SIEM telemetry, and developing custom software platforms that solve operational bottlenecks.
         </p>
-        <p className="text-text-muted text-xs font-mono">
+        <p className="text-text-muted text-xs font-mono pt-1">
           Location: Kerala, India · Open to Remote &amp; On-Site Engagements
         </p>
       </motion.div>

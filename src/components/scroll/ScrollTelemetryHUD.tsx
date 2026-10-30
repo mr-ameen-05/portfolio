@@ -14,7 +14,7 @@ const SECTION_MARKERS: SectionMarker[] = [
   { id: 'projects', code: '02', label: 'Selected Work' },
   { id: 'services', code: '03', label: 'Services' },
   { id: 'stack', code: '04', label: 'Technical Stack' },
-  { id: 'journey', code: '05', label: 'Background' },
+  { id: 'journey', code: '05', label: 'Evolution' },
   { id: 'contact', code: '06', label: 'Project Enquiry' },
 ];
 

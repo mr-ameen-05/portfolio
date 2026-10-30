@@ -69,9 +69,9 @@ function PortfolioHome() {
             <TechStackSection />
           </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_05" label="BACKGROUND_JOURNEY" />
+          <LaserInterlockDivider sectionCode="SEC_05" label="EVOLUTION" />
 
-          {/* 05. Professional Background & Journey */}
+          {/* 05. Evolution */}
           <SectionTransitionWrapper id="journey">
             <JourneySection />
           </SectionTransitionWrapper>
