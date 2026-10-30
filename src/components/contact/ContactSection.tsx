@@ -193,7 +193,7 @@ export default function ContactSection() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
+                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-base sm:text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
                 />
               </div>
 
@@ -207,7 +207,7 @@ export default function ContactSection() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
+                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-base sm:text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
                 />
               </div>
             </div>
@@ -222,7 +222,7 @@ export default function ContactSection() {
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="Your company or organization"
-                className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
+                className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-base sm:text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
               />
             </div>
 
@@ -237,7 +237,7 @@ export default function ContactSection() {
                     key={opt}
                     type="button"
                     onClick={() => setService(opt)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all border ${
+                    className={`px-3 py-2 rounded-lg text-xs font-mono transition-all border active:scale-95 touch-manipulation ${
                       service === opt
                         ? 'bg-accent text-black border-accent font-bold shadow-sm'
                         : 'bg-bg-primary text-text-secondary border-border-subtle hover:border-border-hover'
@@ -260,7 +260,7 @@ export default function ContactSection() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the problem, desired outcome, existing environment, and relevant constraints."
-                className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary resize-y"
+                className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-base sm:text-sm focus:outline-none focus:border-accent transition-colors text-text-primary resize-y"
               />
             </div>
 
@@ -275,7 +275,7 @@ export default function ContactSection() {
                   value={timeline}
                   onChange={(e) => setTimeline(e.target.value)}
                   placeholder="e.g. 2-4 weeks / Q4"
-                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
+                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-base sm:text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
                 />
               </div>
 
@@ -288,7 +288,7 @@ export default function ContactSection() {
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
                   placeholder="e.g. Fixed scope / Hourly"
-                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
+                  className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-base sm:text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
                 />
               </div>
             </div>

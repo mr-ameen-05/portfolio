@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
 interface SectionTransitionWrapperProps {
@@ -15,6 +15,16 @@ export default function SectionTransitionWrapper({
   enableDepth = true,
 }: SectionTransitionWrapperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -37,9 +47,12 @@ export default function SectionTransitionWrapper({
   // Subtle vertical parallax drift
   const y = useTransform(smoothProgress, [0, 0.15, 0.85, 1], [25, 0, 0, -25]);
 
+  // On mobile/touch devices, bypass heavy 3D transforms for native 60-120fps touch performance
+  const shouldUseDepth = enableDepth && !isMobile;
+
   return (
     <div ref={containerRef} id={id} className={`relative scroll-mt-20 ${className}`}>
-      {enableDepth ? (
+      {shouldUseDepth ? (
         <motion.div
           style={{
             scale,
@@ -52,7 +65,9 @@ export default function SectionTransitionWrapper({
           {children}
         </motion.div>
       ) : (
-        children
+        <div className="w-full">
+          {children}
+        </div>
       )}
     </div>
   );

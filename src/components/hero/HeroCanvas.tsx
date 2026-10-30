@@ -28,9 +28,11 @@ export default function HeroCanvas() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const handleResize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+      const isMobile = window.innerWidth < 768;
+      // Cap DPR to 1.5 on mobile to avoid rendering gigantic framebuffers on high-density displays
+      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -97,7 +99,7 @@ export default function HeroCanvas() {
       <canvas ref={canvasRef} className="absolute inset-0 z-10" style={{ touchAction: 'none' }} />
       <div ref={overlayRef} className="absolute inset-0 pointer-events-none z-20 origin-top-left" style={{ transformStyle: 'preserve-3d' }}>
         {bodies.map(body => (
-          <div key={body.id} className="absolute top-0 left-0 flex flex-col items-center will-change-transform group cursor-pointer pointer-events-auto">
+          <div key={body.id} className="absolute top-0 left-0 flex flex-col items-center will-change-transform group cursor-pointer pointer-events-none sm:pointer-events-auto">
             {/* 3D Effected Glass Orb Medallion */}
             <div 
               className="icon-3d-orbit w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 cursor-pointer flex items-center justify-center transition-all duration-300"

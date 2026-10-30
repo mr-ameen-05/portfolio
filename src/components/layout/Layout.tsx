@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SITE } from '../../config/site.config';
 import { ArrowUpRight } from 'lucide-react';
+import { useSmoothScroll } from '../scroll/SmoothScrollContext';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { scrollTo } = useSmoothScroll();
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -25,12 +27,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { href: '#contact', label: 'Contact' },
   ];
 
+  const handleMobileNavClick = (href: string) => {
+    setMobileMenuOpen(false);
+    scrollTo(href, { offset: -20, duration: 1.0 });
+  };
+
   return (
     <div className="relative min-h-screen bg-bg-primary text-text-primary overflow-x-hidden selection:bg-accent selection:text-black">
       
       {/* Navbar - Monochrome Minimal */}
-      <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border-subtle bg-bg-primary/85 backdrop-blur-md z-50 flex items-center justify-between px-4 sm:px-6 md:px-12">
-        <Link to="/" className="font-mono text-sm tracking-wider font-bold hover:text-accent transition-colors">
+      <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border-subtle bg-bg-primary/90 backdrop-blur-md z-50 flex items-center justify-between px-4 sm:px-6 md:px-12">
+        <Link to="/" className="font-mono text-sm tracking-wider font-bold hover:text-accent transition-colors py-2">
           {SITE.name.toUpperCase()}
         </Link>
         
@@ -54,9 +61,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </a>
         </div>
 
-        {/* Mobile Nav Toggle */}
+        {/* Mobile Nav Toggle with Generous 48px Tap Target */}
         <button 
-          className="md:hidden flex flex-col items-center justify-center gap-1.5 w-11 h-11 -mr-2 z-50"
+          className="md:hidden flex flex-col items-center justify-center gap-1.5 w-12 h-12 -mr-2 z-50 active:scale-95 transition-transform"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle navigation menu"
         >
@@ -66,26 +73,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </button>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 bg-bg-primary/98 backdrop-blur-lg z-40 flex flex-col items-center justify-center gap-6 px-6 py-12 md:hidden overflow-y-auto">
+        <div className="fixed inset-0 bg-bg-primary/98 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-6 px-6 py-12 md:hidden overflow-y-auto">
           {navLinks.map((item) => (
-            <a 
+            <button 
               key={item.label} 
-              href={item.href} 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-base sm:text-lg font-mono text-text-secondary hover:text-text-primary transition-colors uppercase tracking-widest py-2"
+              onClick={() => handleMobileNavClick(item.href)}
+              className="text-lg font-mono text-text-secondary hover:text-accent active:text-accent transition-colors uppercase tracking-widest py-3 px-6 text-center w-full max-w-xs"
             >
               {item.label}
-            </a>
+            </button>
           ))}
-          <a
-            href="#contact"
-            onClick={() => setMobileMenuOpen(false)}
-            className="text-sm font-mono text-black bg-accent hover:bg-accent/90 uppercase tracking-wider font-bold py-2.5 px-6 rounded transition-all mt-4"
+          <button
+            onClick={() => handleMobileNavClick('#contact')}
+            className="text-sm font-mono text-black bg-accent hover:bg-white active:bg-white uppercase tracking-wider font-bold py-3.5 px-8 rounded transition-all mt-4 w-full max-w-xs shadow-lg shadow-accent/10"
           >
             Discuss a Project
-          </a>
+          </button>
         </div>
       )}
 

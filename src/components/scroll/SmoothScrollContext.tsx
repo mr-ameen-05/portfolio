@@ -36,13 +36,19 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       window.scrollTo(0, 0);
     }
 
+    const isTouch = typeof window !== 'undefined' && (
+      'ontouchstart' in window ||
+      (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+      window.matchMedia('(pointer: coarse)').matches
+    );
+
     const lenis = new Lenis({
-      duration: 1.15,
+      duration: isTouch ? 0.9 : 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      touchMultiplier: 1.5,
+      touchMultiplier: 1.0,
       wheelMultiplier: 0.9,
     });
 

@@ -275,17 +275,22 @@ export default function ProjectsSection() {
       {/* Interactive Project Detail Modal */}
       <AnimatePresence>
         {selectedProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setSelectedProject(null);
+            }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overscroll-contain"
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-2xl bg-bg-secondary border border-border-hover rounded-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-2xl bg-bg-secondary border border-border-hover rounded-2xl p-5 sm:p-8 max-h-[88vh] overflow-y-auto overscroll-contain"
             >
               <button
                 type="button"
                 onClick={() => setSelectedProject(null)}
-                className="absolute top-5 right-5 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-tertiary transition-colors"
+                className="absolute top-4 right-4 sm:top-5 sm:right-5 w-10 h-10 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-tertiary transition-colors touch-manipulation cursor-pointer"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
