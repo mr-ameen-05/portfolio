@@ -185,20 +185,15 @@ use authenticated SMTP) and any container runtime (not needed for this stack).
 
 ```
 /var/www/aiameen.online/
-├── public/            # the built SPA + sitemap.xml + robots.txt + legal pages
-└── api/               # PHP mailing API
-    ├── contact.php           POST  contact form  → DB + email
-    ├── course-enroll.php     POST  course gate    → DB + email
-    ├── course-quiz.php       POST  quiz grading   → DB + audit
-    ├── health.php            GET   health probe
-    ├── bootstrap.php         shared config + helpers
-    ├── data/quizzes.php      server-side answer key (never web-reachable)
-    └── lib/                  Database, Mailer, RateLimiter, EmailTemplate
+├── public/            # built React SPA + sitemap.xml + robots.txt + legal pages
+└── api/               # PHP authenticated SMTP mailing API
+    ├── contact.php           POST  project enquiry → SMTP dossier + client receipt
+    └── enquiries.jsonl       structured audit log (permissions www-data)
 
-/etc/aiameen/api.env         # runtime config (chmod 640 root:www-data)
+/etc/aiameen/api.env         # runtime config & SMTP secrets (chmod 640 root:www-data)
 /etc/nginx/sites-available/aiameen.online
 /etc/letsencrypt/live/aiameen.online/
-/var/log/aiameen/            # jsonl logs (mail, error, ratelimit)
+/var/log/aiameen/            # runtime server logs
 ```
 
 ---
