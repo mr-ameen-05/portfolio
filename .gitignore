@@ -1,15 +1,24 @@
-# ── dependencies ─────────────────────────────────────────────────────────────
+# ── Dependencies ─────────────────────────────────────────────────────────────
 node_modules/
+*/node_modules/
+.pnpm-store/
+.pnp/
+.pnp.js
 
-# ── environment / secrets ────────────────────────────────────────────────────
+# ── Environment & Secrets ────────────────────────────────────────────────────
 .env
 .env.*
 !.env.example
 !.env.*.example
 deploy/deploy.env
 api/.env
+api/*.env
+credentials.json
+service-account*.json
+secrets.yaml
+secrets.yml
 
-# ── keys, certificates & credentials ─────────────────────────────────────────
+# ── Keys, Certificates & SSH ──────────────────────────────────────────────────
 *.pem
 *.key
 *.p12
@@ -26,34 +35,68 @@ known_hosts
 .npmrc
 .yarnrc
 .envrc
-credentials.json
-service-account*.json
-secrets.yaml
-secrets.yml
 
-# ── database dumps / local databases ─────────────────────────────────────────
-*.sqlite
-*.sqlite3
-*.db
-dump.sql
-*.sql.gz
+# ── Build Caches & Compiler Metadata ──────────────────────────────────────────
+.vite/
+.cache/
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+tsconfig.node.tsbuildinfo
+.eslintcache
 
-# ── infrastructure state ─────────────────────────────────────────────────────
-*.tfstate
-*.tfstate.*
-
-# ── php / composer ───────────────────────────────────────────────────────────
-api/vendor/
+# ── Runtime Logs & Mailer Spool ──────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 api/tmp-logs/
 api/*.jsonl
 api/*_log.txt
+api/local_mail_log.txt
+api/enquiries.jsonl
+api/course_enrollments.jsonl
+api/course_enrollments_log.txt
+
+# ── PHP / Composer ───────────────────────────────────────────────────────────
+vendor/
+api/vendor/
 composer.phar
 
-# ── editor / OS ──────────────────────────────────────────────────────────────
-.DS_Store
-Thumbs.db
-*.log
-*.tsbuildinfo
+# ── Database Dumps & Local Stores ─────────────────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+*.sql
+*.sql.gz
+dump.sql
 
-# ── scratch ──────────────────────────────────────────────────────────────────
-scratch.ts
+# ── Infrastructure & Provisioning ────────────────────────────────────────────
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# ── Editor & Operating System Temp Files ─────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+
+# ── Scratch & Working Files ──────────────────────────────────────────────────
+scratch.*
+scratch/
+tmp/
+temp/
