@@ -1,0 +1,32 @@
+[Unit]
+Description=Portfolio Application 24/7 Autonomous Git Auto-Updater & Rollback
+Documentation=https://github.com/mr-ameen-05/portfolio
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ameen
+Group=ameen
+WorkingDirectory=/home/ameen/Desktop/portfolio
+ExecStart=/home/ameen/Desktop/portfolio/scripts/auto-update.sh --daemon --interval 8h
+Restart=always
+RestartSec=60
+KillMode=process
+TimeoutStopSec=45
+
+# Environment configuration
+Environment="NODE_ENV=production"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
+Environment="AUTOUPDATE_INTERVAL=28800"
+
+# Security & Sandboxing (Optional standard hardening)
+NoNewPrivileges=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=portfolio-autoupdate
+
+[Install]
+WantedBy=multi-user.target

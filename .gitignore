@@ -46,6 +46,8 @@ tsconfig.node.tsbuildinfo
 
 # ── Runtime Logs & Mailer Spool ──────────────────────────────────────────────
 *.log
+logs/
+.last_successful_commit
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

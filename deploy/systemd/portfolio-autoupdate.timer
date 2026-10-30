@@ -1,0 +1,15 @@
+[Unit]
+Description=Portfolio Application Auto-Update Timer (Runs 3 Times A Day)
+Documentation=https://github.com/mr-ameen-05/portfolio
+
+[Timer]
+# Runs exactly 3 times a day: 00:00 (Midnight), 08:00 (Morning), 16:00 (Afternoon)
+OnCalendar=*-*-* 00,08,16:00:00
+# Run 3 minutes after boot if machine was just restarted
+OnBootSec=3min
+# Catch up on missed runs if machine was powered off
+Persistent=true
+Unit=portfolio-autoupdate-oneshot.service
+
+[Install]
+WantedBy=timers.target

@@ -277,3 +277,43 @@ sudo apt-get update && sudo apt-get upgrade -y     # and/or enable unattended-up
 `.github/workflows/deploy-ec2.yml` can deploy on demand. Configure repository
 secrets `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY` and run the workflow manually from
 the **Actions** tab.
+
+---
+
+## 8. Autonomous 24/7 Git Auto-Updater & Rollback
+
+The application includes an autonomous update script and systemd daemon/timer configuration that polls Git 3 times a day (every 8 hours) or continuously 24/7, builds the application, performs integrity verification, and **automatically rolls back** to the previous working commit if the build or health check fails.
+
+### Files
+- **Script**: `scripts/auto-update.sh` (handles lock, fetch, diff check, pull, build, health check, rollback)
+- **24/7 Daemon Service**: `deploy/systemd/portfolio-autoupdate.service`
+- **3x/Day Timer**: `deploy/systemd/portfolio-autoupdate.timer`
+- **Installer**: `deploy/systemd/install-service.sh`
+
+### Quick Start
+
+**Option A: 24/7 Background Daemon (Recommended)**
+```bash
+sudo ./deploy/systemd/install-service.sh --daemon
+```
+
+**Option B: Systemd Timer (Runs at 00:00, 08:00, 16:00)**
+```bash
+sudo ./deploy/systemd/install-service.sh --timer
+```
+
+### Manual Testing
+```bash
+# Check remote and update if new commit is available:
+./scripts/auto-update.sh --check
+
+# Force re-build & verify:
+./scripts/auto-update.sh --force
+
+# Manual rollback to last good commit:
+./scripts/auto-update.sh --rollback
+
+# View live systemd logs:
+sudo journalctl -u portfolio-autoupdate.service -f
+```
+

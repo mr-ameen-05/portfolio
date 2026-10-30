@@ -1,0 +1,21 @@
+[Unit]
+Description=Portfolio Application One-Shot Git Auto-Updater & Rollback
+Documentation=https://github.com/mr-ameen-05/portfolio
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ameen
+Group=ameen
+WorkingDirectory=/home/ameen/Desktop/portfolio
+ExecStart=/home/ameen/Desktop/portfolio/scripts/auto-update.sh --check
+TimeoutSec=600
+
+# Environment configuration
+Environment="NODE_ENV=production"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=portfolio-autoupdate
