@@ -11,10 +11,21 @@ header("Content-Type: application/json; charset=UTF-8");
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: DENY");
 
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+declare(strict_types=1);
+
+require __DIR__ . '/bootstrap.php';
+
+require_post();
+RateLimiter::check('contact');
+
+$data    = read_json();
+$name    = trim((string) ($data['name'] ?? ''));
+$email   = trim((string) ($data['email'] ?? ''));
+$subject = trim((string) ($data['subject'] ?? 'Portfolio inquiry'));
+$message = trim((string) ($data['message'] ?? ''));
+
+if ($name === '' || $email === '' || $message === '') {
+    json_out(400, ['error' => 'Name, email and message are required.']);
 }
 
 // Enforce POST only

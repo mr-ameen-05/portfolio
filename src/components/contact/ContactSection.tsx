@@ -13,6 +13,9 @@ const serviceOptions = [
   'Other',
 ];
 
+const CONTACT_ENDPOINT: string =
+  import.meta.env.VITE_CONTACT_ENDPOINT || '/api/contact.php';
+
 export default function ContactSection() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

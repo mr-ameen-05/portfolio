@@ -1,8 +1,13 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import fs from 'fs';
-import path from 'path';
-var BASE_URL = 'https://aiameen.online';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const BASE_URL = 'https://aiameen.online'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 function generateSeo() {
     return {
         name: 'generate-seo',
