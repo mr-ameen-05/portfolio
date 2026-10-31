@@ -99,15 +99,10 @@ export default function ContactSection() {
       }
     } catch (err: unknown) {
       // True network fetch failure (e.g. offline or DNS failure)
-      const mailtoSubject = encodeURIComponent(`[Project Enquiry - ${service}] from ${name} (${company || 'Individual'})`);
-      const mailtoBody = encodeURIComponent(
-        `Name: ${name}\nEmail: ${email}\nCompany: ${company}\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nProject Description:\n${description}`
-      );
       setStatus('error');
       setFeedback(
-        'Unable to reach server directly. Click below to send via your email client, or write directly to 26alameen2005@gmail.com.'
+        'Unable to reach server directly. Please check your internet connection and try submitting again.'
       );
-      window.open(`mailto:26alameen2005@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`, '_blank');
     }
   };
 

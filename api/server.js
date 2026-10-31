@@ -14,15 +14,16 @@ function loadEnv() {
     HOST: process.env.HOST || '0.0.0.0',
     GOOGLE_SHEET_WEBHOOK_URL: process.env.GOOGLE_SHEET_WEBHOOK_URL || '',
     SEND_EMAIL: String(process.env.SEND_EMAIL || 'false').toLowerCase() === 'true',
-    RECEIVER_EMAIL: process.env.RECEIVER_EMAIL || process.env.MAIL_TO || '26alameen2005@gmail.com',
-    MAIL_TO: process.env.RECEIVER_EMAIL || process.env.MAIL_TO || '26alameen2005@gmail.com',
-    MAIL_FROM_EMAIL: process.env.MAIL_FROM_EMAIL || '26alameen2005@gmail.com',
-    MAIL_FROM_NAME: process.env.MAIL_FROM_NAME || 'Al Ameen N R',
+    SMTP_USER: process.env.SMTP_USER || '',
+    SMTP_PASS: process.env.SMTP_PASS || '',
     SMTP_HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
     SMTP_PORT: process.env.SMTP_PORT || '465',
     SMTP_SECURE: process.env.SMTP_SECURE || 'true',
-    SMTP_USER: process.env.SMTP_USER || '',
-    SMTP_PASS: process.env.SMTP_PASS || '',
+    MAIL_FROM_NAME: process.env.MAIL_FROM_NAME || 'Al Ameen N R',
+    MAIL_FROM_EMAIL: process.env.MAIL_FROM_EMAIL || process.env.SMTP_USER || '',
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL || process.env.MAIL_TO || process.env.RECEIVER_EMAIL || process.env.SMTP_USER || '',
+    MAIL_TO: process.env.MAIL_TO || process.env.RECEIVER_EMAIL || process.env.SMTP_USER || '',
+    RECEIVER_EMAIL: process.env.RECEIVER_EMAIL || process.env.MAIL_TO || process.env.SMTP_USER || '',
     RATE_LIMIT_PER_MINUTE: parseInt(process.env.RATE_LIMIT_PER_MINUTE || '12', 10),
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || '*',
   };
@@ -71,8 +72,11 @@ function loadEnv() {
   config.SMTP_PORT = parseInt(config.SMTP_PORT, 10) || 465;
   config.SMTP_SECURE = String(config.SMTP_SECURE).toLowerCase() === 'true' || config.SMTP_PORT === 465;
   config.SEND_EMAIL = String(config.SEND_EMAIL).toLowerCase() === 'true';
-  config.RECEIVER_EMAIL = config.RECEIVER_EMAIL || config.MAIL_TO || '26alameen2005@gmail.com';
-  config.MAIL_TO = config.RECEIVER_EMAIL;
+  config.SMTP_USER = config.SMTP_USER || '';
+  config.MAIL_FROM_EMAIL = config.MAIL_FROM_EMAIL || config.SMTP_USER;
+  config.ADMIN_EMAIL = config.ADMIN_EMAIL || config.MAIL_TO || config.RECEIVER_EMAIL || config.SMTP_USER;
+  config.MAIL_TO = config.ADMIN_EMAIL;
+  config.RECEIVER_EMAIL = config.ADMIN_EMAIL;
 
   // Clean Google App Password whitespace if user copied with spaces (e.g. "abcd efgh ijkl mnop")
   if (config.SMTP_PASS && (config.SMTP_HOST.includes('gmail.com') || !config.SMTP_HOST)) {
@@ -573,27 +577,33 @@ const server = http.createServer(async (req, res) => {
     let lastError = null;
 
     if (ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
-      const receiverEmail = ENV.RECEIVER_EMAIL || ENV.MAIL_TO || '26alameen2005@gmail.com';
+      // The Admin mail is the one linked to the SMTP service (or specified in .env)
+      const adminEmail = ENV.ADMIN_EMAIL || ENV.MAIL_TO || ENV.SMTP_USER;
+      // The Sender is the email specified in the .env file
+      const senderEmail = ENV.MAIL_FROM_EMAIL || ENV.SMTP_USER;
+      const senderName = ENV.MAIL_FROM_NAME || 'Al Ameen N R';
 
-      // Admin Notification Dossier (Enquiry sent to the portfolio owner / receiver)
-      // Sender is clearly identified as the user who submitted the contact page enquiry
+      // 1. Client Confirmation Receipt
+      // The Sender is the email specified in the .env file
+      // The receiver is the input field of the email in the application form (email)
+      const clientMailOptions = {
+        from: `"${senderName}" <${senderEmail}>`,
+        to: email,
+        replyTo: `"${senderName}" <${adminEmail}>`,
+        subject: `Technical Enquiry Received — ${senderName}`,
+        html: renderClientAcknowledgement(dossierData),
+        text: `Hello ${name},\n\nThank you for reaching out. Your project enquiry regarding "${service}" has been received and queued.\n\nSummary:\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nBest regards,\n${senderName}`,
+      };
+
+      // 2. Admin Notification Dossier
+      // Sent to the Admin mail (the one linked to the SMTP service)
       const adminMailOptions = {
-        from: `"${name} (${email})" <${ENV.SMTP_USER}>`,
-        to: receiverEmail,
+        from: `"${name} (Portfolio Enquiry)" <${senderEmail}>`,
+        to: adminEmail,
         replyTo: `"${name}" <${email}>`,
         subject: `[${service}] Project Enquiry from ${name} (${company})`,
         html: renderAdminDossier(dossierData),
         text: `New Technical Enquiry from ${name} (${email}, ${company})\nDomain: ${service}\nTimeline: ${timeline} | Budget: ${budget}\n\nDescription:\n${description}\n\nClient IP: ${clientIp} | Timestamp: ${timestamp}`,
-      };
-
-      // Client Confirmation Receipt (Sent to the user who entered the form)
-      const clientMailOptions = {
-        from: `"${ENV.MAIL_FROM_NAME}" <${ENV.SMTP_USER}>`,
-        to: email,
-        replyTo: `"${ENV.MAIL_FROM_NAME}" <${receiverEmail}>`,
-        subject: `Technical Enquiry Received — Al Ameen N R`,
-        html: renderClientAcknowledgement(dossierData),
-        text: `Hello ${name},\n\nThank you for reaching out. Your project enquiry regarding "${service}" has been received and queued.\n\nSummary:\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nBest regards,\nAl Ameen N R`,
       };
 
       const mailer = await getMailer();

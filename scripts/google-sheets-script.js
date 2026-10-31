@@ -56,7 +56,14 @@ function isAnonymousOrInvalid(data) {
   return null;
 }
 
-var RECEIVER_EMAIL = "26alameen2005@gmail.com";
+// The Admin email defaults to the active account running this script, or dynamic adminEmail
+var DEFAULT_ADMIN_EMAIL = (function() {
+  try {
+    return Session.getActiveUser().getEmail() || "";
+  } catch (e) {
+    return "";
+  }
+})();
 
 function renderAcknowledgementHtml(data, refId) {
   var name = escapeHtml(data.name || "Client");
@@ -232,32 +239,38 @@ function doPost(e) {
 
     // 4. Send Admin Notification & Auto-Acknowledgement
     var ackStatus = "PENDING";
-    var recipientEmail = data.receiverEmail || RECEIVER_EMAIL;
+    var adminEmail = data.adminEmail || data.receiverEmail || DEFAULT_ADMIN_EMAIL;
 
-    // Send Enquiry Dossier to Portfolio Owner (Receiver)
-    // The sender is the user who entered their details on the contact page
-    try {
-      var adminSubject = "[" + (data.service || "Project Enquiry") + "] Enquiry from " + data.name + " (" + data.company + ")";
-      var adminHtml = renderAdminDossierHtml(data, refId);
-      GmailApp.sendEmail(recipientEmail, adminSubject, "New Technical Enquiry from " + data.name + " (" + clientEmail + ", " + data.company + ")\nDomain: " + data.service + "\nTimeline: " + data.timeline + " | Budget: " + data.budget + "\n\nDescription:\n" + (data.description || data.message || "") + "\n\nClient IP: " + (data.clientIp || "127.0.0.1"), {
-        htmlBody: adminHtml,
-        name: data.name + " (" + clientEmail + ")",
-        replyTo: clientEmail
-      });
-    } catch (adminErr) {
-      Logger.log("Admin notification email error: " + adminErr.message);
+    // Send Enquiry Dossier to Admin mail
+    if (adminEmail) {
+      try {
+        var adminSubject = "[" + (data.service || "Project Enquiry") + "] Enquiry from " + data.name + " (" + data.company + ")";
+        var adminHtml = renderAdminDossierHtml(data, refId);
+        GmailApp.sendEmail(adminEmail, adminSubject, "New Technical Enquiry from " + data.name + " (" + clientEmail + ", " + data.company + ")\nDomain: " + data.service + "\nTimeline: " + data.timeline + " | Budget: " + data.budget + "\n\nDescription:\n" + (data.description || data.message || "") + "\n\nClient IP: " + (data.clientIp || "127.0.0.1"), {
+          htmlBody: adminHtml,
+          name: data.name + " (" + clientEmail + ")",
+          replyTo: clientEmail
+        });
+      } catch (adminErr) {
+        Logger.log("Admin notification email error: " + adminErr.message);
+      }
     }
 
     // Send Auto-Acknowledgement Receipt to Enquirer
+    // Receiver: The input field of the email in the application form (clientEmail)
     try {
       var subject = "Technical Enquiry Received — Al Ameen N R [Ref: #" + refId + "]";
       var htmlBody = renderAcknowledgementHtml(data, refId);
 
-      GmailApp.sendEmail(clientEmail, subject, "Hello " + data.name + ",\n\nYour project enquiry regarding '" + data.service + "' has been received and queued.\n\nAl Ameen will follow up within 24-48 hours.\nReference: #" + refId, {
+      var mailOptions = {
         htmlBody: htmlBody,
-        name: "Al Ameen N R",
-        replyTo: recipientEmail
-      });
+        name: "Al Ameen N R"
+      };
+      if (adminEmail) {
+        mailOptions.replyTo = adminEmail;
+      }
+
+      GmailApp.sendEmail(clientEmail, subject, "Hello " + data.name + ",\n\nYour project enquiry regarding '" + data.service + "' has been received and queued.\n\nAl Ameen will follow up within 24-48 hours.\nReference: #" + refId, mailOptions);
       ackStatus = "SENT (" + new Date().toLocaleTimeString() + ")";
     } catch (mailErr) {
       ackStatus = "FAILED: " + mailErr.message;
