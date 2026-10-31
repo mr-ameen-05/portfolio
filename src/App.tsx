@@ -8,6 +8,9 @@ import { SmoothScrollProvider } from './components/scroll/SmoothScrollContext';
 import SectionTransitionWrapper from './components/scroll/SectionTransitionWrapper';
 import LaserInterlockDivider from './components/scroll/LaserInterlockDivider';
 
+import GlobalSprite from './components/sprite/GlobalSprite';
+import ScrollTelemetryHUD from './components/scroll/ScrollTelemetryHUD';
+
 // Lazy-load below-the-fold components to reduce initial JS bundle and boost mobile LCP
 const ProjectsSection = React.lazy(() => import('./components/projects/ProjectsSection'));
 const ServicesSection = React.lazy(() => import('./components/services/ServicesSection'));
@@ -16,8 +19,29 @@ const JourneySection = React.lazy(() => import('./components/journey/JourneySect
 const FAQSection = React.lazy(() => import('./components/faq/FAQSection'));
 const ContactSection = React.lazy(() => import('./components/contact/ContactSection'));
 const FinalCTASection = React.lazy(() => import('./components/cta/FinalCTASection'));
-const GlobalSprite = React.lazy(() => import('./components/sprite/GlobalSprite'));
-const ScrollTelemetryHUD = React.lazy(() => import('./components/scroll/ScrollTelemetryHUD'));
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('Portfolio ErrorBoundary caught an error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-[200px] flex items-center justify-center font-mono text-xs text-text-muted">
+          Telemetric section recovering...
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function SubdomainRedirect() {
   React.useEffect(() => {
@@ -42,10 +66,8 @@ function PortfolioHome() {
   return (
     <SmoothScrollProvider>
       <Layout>
-        <React.Suspense fallback={null}>
-          <GlobalSprite />
-          <ScrollTelemetryHUD />
-        </React.Suspense>
+        <GlobalSprite />
+        <ScrollTelemetryHUD />
         <main className="min-h-screen">
           {/* 01. Hero & System Telemetry (Eagerly Rendered for Instant LCP) */}
           <SectionTransitionWrapper enableDepth={false} id="hero">
@@ -53,7 +75,8 @@ function PortfolioHome() {
           </SectionTransitionWrapper>
 
           {/* Below-the-fold sections stream in without delaying Hero render */}
-          <React.Suspense fallback={<div className="min-h-[300px]" />}>
+          <ErrorBoundary>
+            <React.Suspense fallback={<div className="min-h-[300px]" />}>
             <LaserInterlockDivider sectionCode="SEC_02" label="SELECTED_WORK" />
 
             {/* 02. Selected Work */}
@@ -94,6 +117,7 @@ function PortfolioHome() {
               <FinalCTASection />
             </SectionTransitionWrapper>
           </React.Suspense>
+          </ErrorBoundary>
         </main>
       </Layout>
     </SmoothScrollProvider>

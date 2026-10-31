@@ -20,6 +20,7 @@ export default function HeroCanvas() {
     let resizeTimer: ReturnType<typeof setTimeout>;
     let cycleInterval: ReturnType<typeof setInterval> | null = null;
     let lastTime = 0;
+    let isVisible = true;
     const orbit = new OrbitEngine();
     engineRef.current = orbit;
 
@@ -83,8 +84,6 @@ export default function HeroCanvas() {
 
     // Re-check after initial layout settles to get exact name-badge rect
     resizeTimer = setTimeout(handleResize, 150);
-
-    let isVisible = true;
 
     const render = (time: number) => {
       if (!isVisible) return;
