@@ -18,7 +18,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-CURRENT_USER="${SUDO_USER:-$(logname 2>/dev/null || echo "ameen")}"
+CURRENT_USER="${SUDO_USER:-$(id -un 2>/dev/null || echo "root")}"
 CURRENT_GROUP="$(id -gn "$CURRENT_USER" 2>/dev/null || echo "$CURRENT_USER")"
 
 MODE="${1:---daemon}"
