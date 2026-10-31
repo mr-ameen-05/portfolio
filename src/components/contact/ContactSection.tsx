@@ -91,17 +91,21 @@ export default function ContactSection() {
         setTimeline('');
         setBudget('');
       } else {
-        throw new Error(result?.error || 'Server error processing enquiry.');
+        const errorMsg = result?.error || (response.status === 404 
+          ? 'API endpoint returned 404. Please run "sudo ./deploy.sh config" on your server to update Nginx.'
+          : `Server returned HTTP ${response.status}. Please check your inputs.`);
+        setStatus('error');
+        setFeedback(errorMsg);
       }
     } catch (err: unknown) {
-      // Fallback: prepare mailto in case API endpoint is unreachable
+      // True network fetch failure (e.g. offline or DNS failure)
       const mailtoSubject = encodeURIComponent(`[Project Enquiry - ${service}] from ${name} (${company || 'Individual'})`);
       const mailtoBody = encodeURIComponent(
         `Name: ${name}\nEmail: ${email}\nCompany: ${company}\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nProject Description:\n${description}`
       );
       setStatus('error');
       setFeedback(
-        'Unable to reach email dispatcher directly. Click here to send via your email client, or write directly to 26alameen2005@gmail.com.'
+        'Unable to reach server directly. Click below to send via your email client, or write directly to 26alameen2005@gmail.com.'
       );
       window.open(`mailto:26alameen2005@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`, '_blank');
     }

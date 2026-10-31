@@ -506,10 +506,10 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    if (!description || description.length < 8) {
+    if (!description || description.length < 2) {
       sendJson(res, 400, {
         success: false,
-        error: 'Please provide a brief technical description of your project requirements (minimum 8 characters).',
+        error: 'Please provide a brief technical description of your project requirements (minimum 2 characters).',
       });
       return;
     }

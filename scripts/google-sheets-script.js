@@ -49,8 +49,8 @@ function isAnonymousOrInvalid(data) {
     return "Please provide your organization or company name (or freelance domain). Anonymous requests are blocked.";
   }
 
-  if (description.length < 8) {
-    return "Please provide a brief project description (minimum 8 characters).";
+  if (description.length < 2) {
+    return "Please provide a brief project description (minimum 2 characters).";
   }
 
   return null;
