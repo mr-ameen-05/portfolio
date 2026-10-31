@@ -169,7 +169,7 @@ Manual follow-ups:
 |-------|------------------|
 | Web server | `nginx` |
 | Database | `mysql-server` (server + client) |
-| PHP runtime | `php-fpm`, `php-cli`, `php-mysql`, `php-mbstring`, `php-curl`, `php-xml`, `php-zip`, `php-opcache` |
+| PHP runtime | `php-fpm`, `php-cli`, `php-mysql`, `php-mbstring`, `php-curl`, `php-xml`, `php-zip` (OPcache built-in) |
 | TLS | `certbot` (+ `certbot.timer` auto-renewal) |
 | Build | Node.js 20.x (NodeSource) + npm |
 | PHP deps | Composer → `phpmailer/phpmailer` (`composer install`) |

@@ -181,7 +181,7 @@ cmd_provision() {
   apt-get update -y
   apt-get install -y \
     nginx mysql-server ca-certificates curl git rsync unzip jq openssl ufw \
-    php-fpm php-cli php-mysql php-mbstring php-curl php-xml php-zip php-opcache \
+    php-fpm php-cli php-mysql php-mbstring php-curl php-xml php-zip \
     certbot
 
   if [[ "$CREATE_SWAP" == "true" ]] && ! swapon --show | grep -q .; then
@@ -401,9 +401,10 @@ cmd_verify() {
   check "php-fpm is running (socket present)" bash -c 'ls /run/php/php*-fpm.sock >/dev/null 2>&1' || failures=$((failures + 1))
 
   # ── php extensions required by the API / mailer ──
-  for ext in pdo_mysql openssl mbstring curl dom zip opcache; do
+  for ext in pdo_mysql openssl mbstring curl dom zip; do
     check "php extension: $ext" php -r "exit(extension_loaded('$ext') ? 0 : 1);" || failures=$((failures + 1))
   done
+  check "php extension: opcache" php -r "exit((extension_loaded('Zend OPcache') || extension_loaded('opcache')) ? 0 : 1);" || failures=$((failures + 1))
 
   # ── configuration ──
   check "api env exists with 640 perms" bash -c '[[ "$(stat -c %a /etc/aiameen/api.env)" == "640" ]]' || failures=$((failures + 1))
