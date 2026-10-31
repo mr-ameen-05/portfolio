@@ -33,9 +33,28 @@ export default function ContactSection() {
     setStatus('loading');
     setFeedback('');
 
-    if (!name.trim() || !email.trim() || !description.trim()) {
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanCompany = company.trim();
+    const cleanDescription = description.trim();
+
+    if (!cleanName || !cleanEmail || !cleanCompany || !cleanDescription) {
       setStatus('error');
-      setFeedback('Please provide your name, work email, and a brief project description.');
+      setFeedback('Anonymous submissions are blocked. Please provide your real name, work email, organization, and project description.');
+      return;
+    }
+
+    const lowerName = cleanName.toLowerCase();
+    const lowerCompany = cleanCompany.toLowerCase();
+    if (['anonymous', 'anon', 'unknown', 'n/a', 'none', 'test', 'fake'].includes(lowerName) || cleanName.length < 2) {
+      setStatus('error');
+      setFeedback('Anonymous submissions are not accepted. Please provide your real full name.');
+      return;
+    }
+
+    if (['anonymous', 'anon', 'unknown', 'n/a', 'none', 'test'].includes(lowerCompany) || cleanCompany.length < 2) {
+      setStatus('error');
+      setFeedback('Please provide your real organization, company, or domain name. Anonymous requests are blocked.');
       return;
     }
 
@@ -46,11 +65,11 @@ export default function ContactSection() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          company: company.trim() || 'Individual',
+          name: cleanName,
+          email: cleanEmail,
+          company: cleanCompany,
           service,
-          description: description.trim(),
+          description: cleanDescription,
           timeline: timeline.trim() || 'Flexible',
           budget: budget.trim() || 'To be scoped',
         }),
@@ -62,7 +81,7 @@ export default function ContactSection() {
         setStatus('success');
         setFeedback(
           result.message ||
-            `Enquiry dispatched to Al Ameen. A receipt copy has been transmitted to ${email}. I'll review and respond within 24–48 hours.`
+            `Enquiry logged and confirmation receipt transmitted to ${cleanEmail}. Al Ameen will review and respond within 24–48 hours.`
         );
         // Clear form fields
         setName('');
@@ -215,13 +234,14 @@ export default function ContactSection() {
             {/* Company or Organization */}
             <div>
               <label className="block text-xs font-mono text-text-muted mb-2 uppercase tracking-wider">
-                Company or Organization
+                Company or Organization <span className="text-accent">*</span>
               </label>
               <input
                 type="text"
+                required
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                placeholder="Your company or organization"
+                placeholder="Acme Corp / Enterprise / Studio"
                 className="w-full bg-bg-primary border border-border-subtle rounded-lg p-3 text-base sm:text-sm focus:outline-none focus:border-accent transition-colors text-text-primary"
               />
             </div>

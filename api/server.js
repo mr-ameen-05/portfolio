@@ -454,32 +454,64 @@ const server = http.createServer(async (req, res) => {
 
     const name = String(payload.name || '').trim();
     const email = String(payload.email || '').trim().toLowerCase();
-    const company = String(payload.company || 'Individual / Confidential').trim();
+    const company = String(payload.company || '').trim();
     const service = String(payload.service || payload.subject || 'Technical Consultation').trim();
     const timeline = String(payload.timeline || 'Flexible / TBD').trim();
     const budget = String(payload.budget || 'To be scoped').trim();
     const description = String(payload.description || payload.message || '').trim();
 
-    // Validation
-    if (!name || !email || !description) {
+    // ── Strict Anti-Anonymous & Format Validation ───────────────────────────
+    const blockedKeywords = ['anonymous', 'anon', 'unknown', 'n/a', 'na', 'none', 'test', 'tester', 'fake', 'someone', 'asdf', 'null', 'undefined'];
+    const blockedDomains = ['example.com', 'test.com', 'fake.com', 'tempmail.com', 'throwaway.com'];
+
+    const lowerName = name.toLowerCase();
+    const lowerCompany = company.toLowerCase();
+
+    if (!name || name.length < 2 || blockedKeywords.includes(lowerName)) {
       sendJson(res, 400, {
         success: false,
-        error: 'Name, work email, and a project description are required.',
+        error: 'Anonymous requests are strictly blocked. Please provide your real full name.',
       });
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!email || !emailRegex.test(email)) {
       sendJson(res, 400, {
         success: false,
-        error: 'Please provide a valid work email address.',
+        error: 'Please provide a valid, deliverable work email address.',
+      });
+      return;
+    }
+
+    const emailDomain = email.split('@')[1];
+    if (blockedDomains.includes(emailDomain) || email.startsWith('anon') || email.startsWith('test@')) {
+      sendJson(res, 400, {
+        success: false,
+        error: 'Disposable, temporary, or placeholder email addresses are not accepted.',
+      });
+      return;
+    }
+
+    if (!company || company.length < 2 || blockedKeywords.includes(lowerCompany)) {
+      sendJson(res, 400, {
+        success: false,
+        error: 'Please specify your real organization, company, or domain name. Anonymous submissions are not accepted.',
+      });
+      return;
+    }
+
+    if (!description || description.length < 8) {
+      sendJson(res, 400, {
+        success: false,
+        error: 'Please provide a brief technical description of your project requirements (minimum 8 characters).',
       });
       return;
     }
 
     const timestamp = new Date().toISOString();
-    const dossierData = { name, email, company, service, timeline, budget, description, clientIp, userAgent, timestamp };
+    const refId = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const dossierData = { name, email, company, service, timeline, budget, description, clientIp, userAgent, timestamp, refId };
 
     // ── 1. Dispatch to Google Sheet Webhook ──────────────────────────────────
     let sheetSaved = false;
@@ -492,6 +524,7 @@ const server = http.createServer(async (req, res) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             timestamp,
+            reference: refId,
             name,
             email,
             company,
