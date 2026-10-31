@@ -81,13 +81,37 @@ load_config() {
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 detect_php_socket() {
-  if [[ -n "$PHP_VERSION" ]]; then
-    PHP_SOCK="/run/php/php${PHP_VERSION}-fpm.sock"
-  else
-    PHP_SOCK="$(ls /run/php/php*-fpm.sock 2>/dev/null | head -n1 || true)"
-    [[ -n "$PHP_SOCK" ]] && PHP_VERSION="$(basename "$PHP_SOCK" | sed -E 's/php([0-9.]+)-fpm.sock/\1/')"
+  # Clean up PHP_VERSION in case deploy.env specified "php-fpm.sock", "php8.5", "8.5", etc.
+  if [[ -n "${PHP_VERSION:-}" ]]; then
+    local cleaned
+    cleaned="$(echo "$PHP_VERSION" | sed -E 's/^php//; s/(-fpm)?\.sock$//')"
+    if [[ -n "$cleaned" ]]; then
+      PHP_VERSION="$cleaned"
+      PHP_SOCK="/run/php/php${PHP_VERSION}-fpm.sock"
+    else
+      PHP_VERSION=""
+      PHP_SOCK=""
+    fi
   fi
-  [[ -n "${PHP_SOCK:-}" && -S "$PHP_SOCK" ]] || die "php-fpm socket not found (tried $PHP_SOCK). Is php-fpm installed/running?"
+
+  # Auto-detect socket from filesystem if not found or empty
+  if [[ -z "${PHP_SOCK:-}" || ! -S "$PHP_SOCK" ]]; then
+    # Ensure php-fpm is started on the host
+    systemctl start php*-fpm >/dev/null 2>&1 || systemctl start php-fpm >/dev/null 2>&1 || true
+    sleep 0.5
+    PHP_SOCK="$(ls /run/php/php*-fpm.sock /run/php/php-fpm.sock 2>/dev/null | head -n1 || true)"
+    if [[ -n "$PHP_SOCK" ]]; then
+      local base
+      base="$(basename "$PHP_SOCK")"
+      if [[ "$base" =~ php([0-9.]+)-fpm\.sock ]]; then
+        PHP_VERSION="${BASH_REMATCH[1]}"
+      elif [[ "$base" == "php-fpm.sock" ]]; then
+        PHP_VERSION="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo "8.5")"
+      fi
+    fi
+  fi
+
+  [[ -n "${PHP_SOCK:-}" && -S "$PHP_SOCK" ]] || die "php-fpm socket not found (tried ${PHP_SOCK:-none}). Is php-fpm running? Try: systemctl restart php*-fpm"
 }
 
 mysql_root() {
@@ -208,10 +232,11 @@ cmd_provision() {
 
   systemctl enable --now nginx >/dev/null 2>&1 || true
   systemctl enable --now mysql >/dev/null 2>&1 || systemctl enable --now mysqld >/dev/null 2>&1 || true
-  # enable whichever php-fpm service exists
-  for svc in /lib/systemd/system/php*-fpm.service; do
+  # enable and start whichever php-fpm service exists
+  for svc in /lib/systemd/system/php*-fpm.service /usr/lib/systemd/system/php*-fpm.service /etc/systemd/system/php*-fpm.service; do
     [[ -e "$svc" ]] && systemctl enable --now "$(basename "$svc")" >/dev/null 2>&1 || true
   done
+  systemctl start php*-fpm >/dev/null 2>&1 || systemctl start php-fpm >/dev/null 2>&1 || true
 
   if [[ "$ENABLE_UFW" == "true" ]] && command -v ufw >/dev/null; then
     ufw allow "${SSH_PORT}/tcp" >/dev/null || true
