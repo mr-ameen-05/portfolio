@@ -80,8 +80,30 @@ case "$MODE" in
     echo "  Live logs:     sudo journalctl -u portfolio-autoupdate-oneshot.service -f"
     ;;
 
+  --api)
+    TARGET_FILE="/etc/systemd/system/portfolio-api.service"
+    NODE_BIN="$(command -v node || echo "/usr/bin/node")"
+    sed \
+      -e "s|^WorkingDirectory=.*|WorkingDirectory=$REPO_ROOT|g" \
+      -e "s|^ExecStart=.*|ExecStart=$NODE_BIN $REPO_ROOT/api/server.js|g" \
+      "$SCRIPT_DIR/portfolio-api.service" > "$TARGET_FILE"
+
+    systemctl daemon-reload
+    systemctl enable portfolio-api.service
+    systemctl restart portfolio-api.service
+
+    echo "✓ Portfolio Node.js API service installed and active!"
+    echo "  Status check:  sudo systemctl status portfolio-api.service"
+    echo "  Live logs:     sudo journalctl -u portfolio-api.service -f"
+    ;;
+
+  --all)
+    "$0" --daemon
+    "$0" --api
+    ;;
+
   *)
-    echo "Usage: sudo $0 [--daemon | --timer]"
+    echo "Usage: sudo $0 [--daemon | --timer | --api | --all]"
     exit 1
     ;;
 esac
