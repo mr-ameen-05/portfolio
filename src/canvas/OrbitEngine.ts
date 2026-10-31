@@ -1,6 +1,29 @@
 import { OrbitBody, OrbitBodyConfig } from './OrbitBody';
 import { Vector2D } from '../lib/math';
 
+export const ALL_TECH_ITEMS = [
+  { id: 'linux-sec', label: 'Linux Security', icon: 'logos:linux-tux', color: '#FCC624' },
+  { id: 'wazuh', label: 'Wazuh SIEM', icon: 'simple-icons:wazuh', color: '#00A3E0' },
+  { id: 'wireshark', label: 'Wireshark', icon: 'simple-icons:wireshark', color: '#1679A7' },
+  { id: 'kali', label: 'Kali Linux', icon: 'simple-icons:kalilinux', color: '#00D2FF' },
+  { id: 'burp', label: 'Burp Suite', icon: 'simple-icons:burpsuite', color: '#FF6633' },
+  { id: 'nmap', label: 'Nmap Scanner', icon: 'mdi:radar', color: '#38BDF8' },
+  { id: 'nuclei', label: 'Nuclei Vuln Scanning', icon: 'mdi:atom', color: '#A855F7' },
+  { id: 'mitre', label: 'MITRE ATT&CK', icon: 'mdi:shield-search', color: '#EF4444' },
+  { id: 'docker', label: 'Docker Hardening', icon: 'logos:docker-icon', color: '#2496ED' },
+  { id: 'aws', label: 'AWS Cloud Security', icon: 'logos:aws', color: '#FF9900' },
+  { id: 'python', label: 'Python Systems', icon: 'logos:python', color: '#3776AB' },
+  { id: 'react', label: 'React Frontend', icon: 'logos:react', color: '#61DAFB' },
+  { id: 'ts', label: 'TypeScript', icon: 'logos:typescript-icon', color: '#3178C6' },
+  { id: 'node', label: 'Node.js Backend', icon: 'logos:nodejs-icon', color: '#5FA04E' },
+  { id: 'postgres', label: 'PostgreSQL DB', icon: 'logos:postgresql', color: '#4169E1' },
+  { id: 'git', label: 'GitOps & CI/CD', icon: 'logos:git-icon', color: '#F05032' },
+  { id: 'grafana', label: 'Grafana Telemetry', icon: 'logos:grafana', color: '#F47E20' },
+  { id: 'ollama', label: 'Ollama Local LLMs', icon: 'simple-icons:ollama', color: '#F8FAFC' },
+  { id: 'llms', label: 'Local LLM Reasoning', icon: 'mdi:brain', color: '#EC4899' },
+  { id: 'agents', label: 'Autonomous Agents', icon: 'mdi:robot', color: '#10B981' },
+];
+
 export class OrbitEngine {
   bodies: OrbitBody[] = [];
   desktopBodies: OrbitBody[] = [];
@@ -12,6 +35,7 @@ export class OrbitEngine {
   
   isMobile: boolean = false;
   currentScale: number = 1.0;
+  mobileNextSlot: number = 0;
   
   constructor() {
     this.initBodies();
@@ -84,9 +108,9 @@ export class OrbitEngine {
       ...rightRing0, ...rightRing1, ...rightRing2
     ].map(c => new OrbitBody(c));
 
-    // ── MOBILE HALO ORBIT: Reduced to 4 Core Representative Elements ──
-    // Positioned smoothly on top of AL AMEEN N R
-    const mobileItems = [
+    // ── MOBILE INVISIBLE ORBIT: 4 Active Representative Slots ──
+    // Initially loaded with 4 distinct tools; dynamically and randomly cycles through all tools
+    const initialMobile = [
       { id: 'm-linux', label: 'Linux Security', icon: 'logos:linux-tux', color: '#FCC624' },
       { id: 'm-react', label: 'React Systems', icon: 'logos:react', color: '#61DAFB' },
       { id: 'm-docker', label: 'Docker Hardening', icon: 'logos:docker-icon', color: '#2496ED' },
@@ -94,13 +118,13 @@ export class OrbitEngine {
     ];
 
     const mobileRadius = 66;
-    this.mobileBodies = mobileItems.map((item, i) => new OrbitBody({
+    this.mobileBodies = initialMobile.map((item, i) => new OrbitBody({
       ...item,
       semiMajor: mobileRadius,
       semiMinor: mobileRadius * 0.40,
       inclination: -0.05,
       angularVelocity: 0.36,
-      phase: (Math.PI * 2 / mobileItems.length) * i,
+      phase: (Math.PI * 2 / initialMobile.length) * i,
       size: 28,
       galaxy: 'center',
       ringIndex: 0,
@@ -108,6 +132,34 @@ export class OrbitEngine {
 
     // Default to desktop bodies
     this.bodies = this.desktopBodies;
+  }
+
+  // Cycles one of the 4 mobile logos to another random logo from the entire catalog
+  cycleRandomMobileItem(): OrbitBodyConfig[] | null {
+    if (!this.isMobile || this.mobileBodies.length === 0) return null;
+
+    // Pick slot in round-robin sequence so all 4 orbs refresh evenly
+    const slotIdx = this.mobileNextSlot % this.mobileBodies.length;
+    this.mobileNextSlot++;
+
+    // Collect currently visible icon identifiers
+    const currentIcons = new Set(this.mobileBodies.map(b => b.config.icon));
+
+    // Get all candidate icons not currently visible
+    const availablePool = ALL_TECH_ITEMS.filter(item => !currentIcons.has(item.icon));
+    if (availablePool.length === 0) return null;
+
+    // Pick random item from pool
+    const randomChoice = availablePool[Math.floor(Math.random() * availablePool.length)];
+
+    // Morph the selected body's config smoothly
+    const targetBody = this.mobileBodies[slotIdx];
+    targetBody.config.id = `m-${randomChoice.id}`;
+    targetBody.config.label = randomChoice.label;
+    targetBody.config.icon = randomChoice.icon;
+    targetBody.config.color = randomChoice.color;
+
+    return this.mobileBodies.map(b => ({ ...b.config }));
   }
 
   resize(width: number, height: number, isMobile: boolean = false, mobileAnchorY?: number | null) {
@@ -169,7 +221,12 @@ export class OrbitEngine {
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    // Refined, glowing orbital tracks for each ring
+    // On mobile view, the orbit track is completely invisible (clean transparent orbit)
+    if (this.isMobile) {
+      return;
+    }
+
+    // Refined, glowing orbital tracks for each desktop ring
     ctx.lineWidth = 1;
     const drawnRings = new Set<string>();
     
@@ -183,12 +240,9 @@ export class OrbitEngine {
       if (drawnRings.has(key)) continue;
       drawnRings.add(key);
 
-      const isCenter = body.config.galaxy === 'center';
       const isLeft = body.config.galaxy === 'left';
-      ctx.strokeStyle = isCenter
-        ? 'rgba(200, 255, 0, 0.20)'
-        : (isLeft ? 'rgba(0, 210, 255, 0.07)' : 'rgba(168, 85, 247, 0.07)');
-      ctx.setLineDash(isCenter ? [2, 4] : [3, 6]);
+      ctx.strokeStyle = isLeft ? 'rgba(0, 210, 255, 0.07)' : 'rgba(168, 85, 247, 0.07)';
+      ctx.setLineDash([3, 6]);
       
       ctx.beginPath();
       for (let i = 0; i <= Math.PI * 2; i += 0.05) {

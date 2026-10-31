@@ -8,6 +8,7 @@ export default function HeroCanvas() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<OrbitEngine | null>(null);
   const [bodies, setBodies] = useState<any[]>([]);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -17,6 +18,7 @@ export default function HeroCanvas() {
 
     let animationFrameId: number;
     let resizeTimer: ReturnType<typeof setTimeout>;
+    let cycleInterval: ReturnType<typeof setInterval> | null = null;
     let lastTime = 0;
     const orbit = new OrbitEngine();
     engineRef.current = orbit;
@@ -27,10 +29,27 @@ export default function HeroCanvas() {
     // Respect reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    const startCyclingIfNeeded = (mobile: boolean, visible: boolean) => {
+      if (cycleInterval) {
+        clearInterval(cycleInterval);
+        cycleInterval = null;
+      }
+      if (mobile && visible) {
+        cycleInterval = setInterval(() => {
+          const updated = orbit.cycleRandomMobileItem();
+          if (updated) {
+            setBodies(updated);
+          }
+        }, 2400);
+      }
+    };
+
     const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+
       // Cap DPR to 1.5 on mobile to avoid rendering gigantic framebuffers on high-density displays
-      const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
       canvas.width = Math.round(window.innerWidth * dpr);
       canvas.height = Math.round(window.innerHeight * dpr);
       canvas.style.width = `${window.innerWidth}px`;
@@ -38,7 +57,7 @@ export default function HeroCanvas() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       let mobileAnchorY: number | null = null;
-      if (isMobile) {
+      if (mobile) {
         const badge = document.getElementById('hero-name-badge');
         const hero = document.getElementById('hero');
         if (badge && hero) {
@@ -49,8 +68,9 @@ export default function HeroCanvas() {
         }
       }
 
-      orbit.resize(window.innerWidth, window.innerHeight, isMobile, mobileAnchorY);
-      setBodies([...orbit.bodies.map(b => b.config)]);
+      orbit.resize(window.innerWidth, window.innerHeight, mobile, mobileAnchorY);
+      setBodies([...orbit.bodies.map(b => ({ ...b.config }))]);
+      startCyclingIfNeeded(mobile, isVisible);
     };
 
     const onMove = (e: MouseEvent) => { mousePos = new Vector2D(e.clientX, e.clientY); mouseActive = true; };
@@ -110,11 +130,13 @@ export default function HeroCanvas() {
       if (visible && !isVisible) {
         isVisible = true;
         lastTime = 0;
+        startCyclingIfNeeded(window.innerWidth < 768, true);
         if (!prefersReducedMotion) {
           animationFrameId = requestAnimationFrame(render);
         }
       } else if (!visible && isVisible) {
         isVisible = false;
+        startCyclingIfNeeded(false, false);
         cancelAnimationFrame(animationFrameId);
       }
     }, { threshold: 0.05 });
@@ -125,6 +147,7 @@ export default function HeroCanvas() {
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
+      if (cycleInterval) clearInterval(cycleInterval);
       observer.disconnect();
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', onMove);
@@ -138,46 +161,55 @@ export default function HeroCanvas() {
     <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ perspective: '1000px' }}>
       <canvas ref={canvasRef} className="absolute inset-0 z-10" style={{ touchAction: 'none' }} />
       <div ref={overlayRef} className="absolute inset-0 pointer-events-none z-20 origin-top-left" style={{ transformStyle: 'preserve-3d' }}>
-        {bodies.map(body => (
-          <div key={body.id} className="absolute top-0 left-0 flex flex-col items-center will-change-transform group cursor-pointer pointer-events-none sm:pointer-events-auto">
-            {/* 3D Effected Glass Orb Medallion */}
+        {bodies.map((body, idx) => {
+          // On mobile view, keep a stable key per orbital slot so RAF transforms stay continuous
+          // while inner icon and glow colors morph smoothly.
+          const slotKey = isMobile ? `mobile-slot-${idx}` : body.id;
+          return (
             <div 
-              className="icon-3d-orbit w-8 h-8 sm:w-11 sm:h-11 md:w-12 md:h-12 cursor-pointer flex items-center justify-center transition-all duration-300"
-              style={{
-                '--orbit-glow': `${body.color}88`,
-                '--orbit-glow-diffuse': `${body.color}35`,
-                color: body.color,
-              } as React.CSSProperties}
+              key={slotKey} 
+              className="absolute top-0 left-0 flex flex-col items-center will-change-transform group cursor-pointer pointer-events-none sm:pointer-events-auto"
             >
-              {/* 3D Elevated Icon Glyph */}
+              {/* 3D Effected Glass Orb Medallion */}
               <div 
-                className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                className="icon-3d-orbit w-8 h-8 sm:w-11 sm:h-11 md:w-12 md:h-12 cursor-pointer flex items-center justify-center transition-all duration-500 ease-out"
                 style={{
-                  filter: `drop-shadow(0 4px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px ${body.color}90)`,
-                }}
+                  '--orbit-glow': `${body.color}88`,
+                  '--orbit-glow-diffuse': `${body.color}35`,
+                  color: body.color,
+                } as React.CSSProperties}
               >
-                <Icon icon={body.icon} className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                {/* 3D Elevated Icon Glyph */}
+                <div 
+                  key={body.icon}
+                  className="relative z-10 flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-110"
+                  style={{
+                    filter: `drop-shadow(0 4px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px ${body.color}90)`,
+                  }}
+                >
+                  <Icon icon={body.icon} className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                </div>
+
+                {/* 3D Bottom ambient specular reflection */}
+                <span 
+                  className="absolute -bottom-1 w-2.5 h-1 rounded-full blur-[1px] opacity-75 pointer-events-none transition-all duration-500"
+                  style={{ background: body.color, boxShadow: `0 0 8px ${body.color}` }}
+                />
               </div>
 
-              {/* 3D Bottom ambient specular reflection */}
+              {/* 3D Floating Holographic Label */}
               <span 
-                className="absolute -bottom-1 w-2.5 h-1 rounded-full blur-[1px] opacity-75 pointer-events-none"
-                style={{ background: body.color, boxShadow: `0 0 8px ${body.color}` }}
-              />
+                className="mt-2 text-[10px] font-mono font-medium text-text-primary bg-bg-secondary/95 backdrop-blur-md px-3 py-1 border rounded-lg pointer-events-none whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-1 shadow-2xl z-30"
+                style={{
+                  borderColor: `${body.color}99`,
+                  boxShadow: `0 6px 20px ${body.color}35, 0 10px 25px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.25)`,
+                }}
+              >
+                {body.label}
+              </span>
             </div>
-
-            {/* 3D Floating Holographic Label */}
-            <span 
-              className="mt-2 text-[10px] font-mono font-medium text-text-primary bg-bg-secondary/95 backdrop-blur-md px-3 py-1 border rounded-lg pointer-events-none whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-1 shadow-2xl z-30"
-              style={{
-                borderColor: `${body.color}99`,
-                boxShadow: `0 6px 20px ${body.color}35, 0 10px 25px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.25)`,
-              }}
-            >
-              {body.label}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
