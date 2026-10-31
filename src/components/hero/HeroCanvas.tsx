@@ -48,14 +48,7 @@ export default function HeroCanvas() {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
 
-      // Cap DPR to 1.5 on mobile to avoid rendering gigantic framebuffers on high-density displays
-      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
-      canvas.width = Math.round(window.innerWidth * dpr);
-      canvas.height = Math.round(window.innerHeight * dpr);
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
+      // 1. Read layout geometry BEFORE style mutations to prevent forced reflow
       let mobileAnchorY: number | null = null;
       if (mobile) {
         const badge = document.getElementById('hero-name-badge');
@@ -63,10 +56,17 @@ export default function HeroCanvas() {
         if (badge && hero) {
           const badgeRect = badge.getBoundingClientRect();
           const heroRect = hero.getBoundingClientRect();
-          // Position orbit center cleanly 44px above the AL AMEEN N R name badge
           mobileAnchorY = (badgeRect.top - heroRect.top) - 44;
         }
       }
+
+      // 2. Perform style and canvas buffer updates
+      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       orbit.resize(window.innerWidth, window.innerHeight, mobile, mobileAnchorY);
       setBodies([...orbit.bodies.map(b => ({ ...b.config }))]);

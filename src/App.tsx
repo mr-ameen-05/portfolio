@@ -3,19 +3,21 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/layout/Layout';
 import HeroSection from './components/hero/HeroSection';
-import ProjectsSection from './components/projects/ProjectsSection';
-import ServicesSection from './components/services/ServicesSection';
-import TechStackSection from './components/stack/TechStackSection';
-import JourneySection from './components/journey/JourneySection';
-import FAQSection from './components/faq/FAQSection';
-import ContactSection from './components/contact/ContactSection';
-import FinalCTASection from './components/cta/FinalCTASection';
-import GlobalSprite from './components/sprite/GlobalSprite';
 import { SITE } from './config/site.config';
 import { SmoothScrollProvider } from './components/scroll/SmoothScrollContext';
 import SectionTransitionWrapper from './components/scroll/SectionTransitionWrapper';
 import LaserInterlockDivider from './components/scroll/LaserInterlockDivider';
-import ScrollTelemetryHUD from './components/scroll/ScrollTelemetryHUD';
+
+// Lazy-load below-the-fold components to reduce initial JS bundle and boost mobile LCP
+const ProjectsSection = React.lazy(() => import('./components/projects/ProjectsSection'));
+const ServicesSection = React.lazy(() => import('./components/services/ServicesSection'));
+const TechStackSection = React.lazy(() => import('./components/stack/TechStackSection'));
+const JourneySection = React.lazy(() => import('./components/journey/JourneySection'));
+const FAQSection = React.lazy(() => import('./components/faq/FAQSection'));
+const ContactSection = React.lazy(() => import('./components/contact/ContactSection'));
+const FinalCTASection = React.lazy(() => import('./components/cta/FinalCTASection'));
+const GlobalSprite = React.lazy(() => import('./components/sprite/GlobalSprite'));
+const ScrollTelemetryHUD = React.lazy(() => import('./components/scroll/ScrollTelemetryHUD'));
 
 function SubdomainRedirect() {
   React.useEffect(() => {
@@ -40,53 +42,58 @@ function PortfolioHome() {
   return (
     <SmoothScrollProvider>
       <Layout>
-        <GlobalSprite />
-        <ScrollTelemetryHUD />
+        <React.Suspense fallback={null}>
+          <GlobalSprite />
+          <ScrollTelemetryHUD />
+        </React.Suspense>
         <main className="min-h-screen">
-          {/* 01. Hero & System Telemetry */}
+          {/* 01. Hero & System Telemetry (Eagerly Rendered for Instant LCP) */}
           <SectionTransitionWrapper enableDepth={false} id="hero">
             <HeroSection />
           </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_02" label="SELECTED_WORK" />
+          {/* Below-the-fold sections stream in without delaying Hero render */}
+          <React.Suspense fallback={<div className="min-h-[300px]" />}>
+            <LaserInterlockDivider sectionCode="SEC_02" label="SELECTED_WORK" />
 
-          {/* 02. Selected Work */}
-          <SectionTransitionWrapper id="projects">
-            <ProjectsSection />
-          </SectionTransitionWrapper>
+            {/* 02. Selected Work */}
+            <SectionTransitionWrapper id="projects">
+              <ProjectsSection />
+            </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_03" label="SERVICES_ENGAGEMENT" />
+            <LaserInterlockDivider sectionCode="SEC_03" label="SERVICES_ENGAGEMENT" />
 
-          {/* 03. Engineering Services */}
-          <SectionTransitionWrapper id="services">
-            <ServicesSection />
-          </SectionTransitionWrapper>
+            {/* 03. Engineering Services */}
+            <SectionTransitionWrapper id="services">
+              <ServicesSection />
+            </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_04" label="TECHNICAL_STACK" />
+            <LaserInterlockDivider sectionCode="SEC_04" label="TECHNICAL_STACK" />
 
-          {/* 04. Technical Stack */}
-          <SectionTransitionWrapper id="stack">
-            <TechStackSection />
-          </SectionTransitionWrapper>
+            {/* 04. Technical Stack */}
+            <SectionTransitionWrapper id="stack">
+              <TechStackSection />
+            </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_05" label="EVOLUTION" />
+            <LaserInterlockDivider sectionCode="SEC_05" label="EVOLUTION" />
 
-          {/* 05. Evolution */}
-          <SectionTransitionWrapper id="journey">
-            <JourneySection />
-          </SectionTransitionWrapper>
+            {/* 05. Evolution */}
+            <SectionTransitionWrapper id="journey">
+              <JourneySection />
+            </SectionTransitionWrapper>
 
-          <LaserInterlockDivider sectionCode="SEC_06" label="OPERATIONAL_ENQUIRY" />
+            <LaserInterlockDivider sectionCode="SEC_06" label="OPERATIONAL_ENQUIRY" />
 
-          {/* 06. Operational FAQ & Project Enquiry */}
-          <SectionTransitionWrapper id="faq">
-            <FAQSection />
-          </SectionTransitionWrapper>
+            {/* 06. Operational FAQ & Project Enquiry */}
+            <SectionTransitionWrapper id="faq">
+              <FAQSection />
+            </SectionTransitionWrapper>
 
-          <SectionTransitionWrapper id="contact">
-            <ContactSection />
-            <FinalCTASection />
-          </SectionTransitionWrapper>
+            <SectionTransitionWrapper id="contact">
+              <ContactSection />
+              <FinalCTASection />
+            </SectionTransitionWrapper>
+          </React.Suspense>
         </main>
       </Layout>
     </SmoothScrollProvider>

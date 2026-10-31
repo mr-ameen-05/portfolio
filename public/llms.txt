@@ -1,0 +1,21 @@
+# Al Ameen N R — Systems & Security Engineer
+
+> Security Engineer, Forward Deployed Systems Builder, and Full-Stack Developer working at the intersection of cybersecurity, systems engineering, and AI safeguards. Based in Kerala, India.
+
+## Core Navigation & Sections
+- [Portfolio Home](https://aiameen.online/): Technical overview, active telemetry, and engineering philosophy.
+- [Selected Work & Projects](https://aiameen.online/#projects): Production applications, security assessments, open-source toolchains, and AI integrations.
+- [Engineering Services](https://aiameen.online/#services): Professional security assessments (VAPT), SIEM engineering, forward-deployed software integration, and full-stack systems.
+- [Technical Stack](https://aiameen.online/#stack): Linux systems, Docker hardening, Python, Wazuh, TypeScript, PostgreSQL, and local LLM runtime architectures.
+- [Professional Journey](https://aiameen.online/#journey): Interactive career trajectory, academic foundations, and key technical milestones.
+- [Frequently Asked Questions](https://aiameen.online/#faq): Scoping, project timelines, engagement models, and confidentiality assurances.
+- [Project Enquiry & Scoping](https://aiameen.online/#contact): Direct engagement form with Google Sheets integration and automated acknowledgement dispatch.
+- [Privacy Policy](https://aiameen.online/privacy.html): Professional non-disclosure and platform privacy practices.
+- [Terms of Service](https://aiameen.online/terms.html): Platform usage terms and security guidelines.
+
+## Technical Skills & Specializations
+- **Cybersecurity & VAPT**: Attack surface mapping, Web Application Penetration Testing, OWASP Top 10 validation, vulnerability assessments.
+- **Security Operations & SIEM**: Wazuh deployment, Suricata IDS, log telemetry pipelines, custom detection rules, MITRE ATT&CK mapping.
+- **Forward Deployed Engineering**: Custom integrations, client workflow automation, production deployment, Linux server hardening.
+- **Full-Stack & Systems**: React, TypeScript, Vite, Node.js, REST APIs, PostgreSQL, Nginx reverse proxies, systemd daemons.
+- **AI Automation & LLMs**: Local LLM inference (Ollama), autonomous agent workflows, safety constraints, Retrieval-Augmented Generation (RAG).

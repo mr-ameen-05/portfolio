@@ -63,16 +63,37 @@ server {
 
     client_max_body_size 2m;
 
+    # ── Gzip Compression for Mobile Performance ──
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/json
+        application/javascript
+        application/x-javascript
+        application/xml
+        application/xml+rss
+        image/svg+xml
+        font/woff
+        font/woff2;
+    gzip_min_length 256;
+
     # ── static single-page app ──
     location / {
         try_files $uri $uri/ /index.html;
     }
 
-    # never cache the app shell / SEO files
-    # (use `expires`, not add_header, so the security headers above stay inherited)
+    # never cache the app shell / SEO / Agentic Discovery files
     location = /index.html { expires -1; }
     location = /sitemap.xml { expires -1; }
     location = /robots.txt  { expires -1; }
+    location = /llms.txt    { expires -1; default_type "text/plain"; }
+    location = /ard.json    { expires -1; default_type "application/json"; }
 
     # long-cache hashed assets
     location ~* \.(?:css|js|mjs|woff2?|ttf|otf|svg|png|jpe?g|gif|webp|avif|ico)$ {

@@ -20,6 +20,7 @@ function generateSeo() {
           { loc: `${BASE_URL}/#about`, changefreq: 'monthly', priority: '0.6', lastmod: today },
           { loc: `${BASE_URL}/privacy.html`, changefreq: 'yearly', priority: '0.3', lastmod: today },
           { loc: `${BASE_URL}/terms.html`, changefreq: 'yearly', priority: '0.3', lastmod: today },
+          { loc: `${BASE_URL}/llms.txt`, changefreq: 'monthly', priority: '0.5', lastmod: today },
         ]
 
         const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -58,6 +59,20 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    target: 'esnext',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-icons': ['lucide-react'],
+        },
       },
     },
   },

@@ -109,9 +109,8 @@ export default function HeroSection() {
           className="relative z-30 flex flex-col items-center justify-center pointer-events-none max-w-4xl mx-auto px-4 sm:px-6 text-center will-change-transform"
         >
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7 }}
+            initial={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             className="w-full flex flex-col items-center"
           >
             {/* Top Identity & Status Pill */}

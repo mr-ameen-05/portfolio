@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "name": "Al Ameen N R Portfolio",
+  "description": "Security engineering, full-stack systems, and forward-deployed software engineering portfolio.",
+  "url": "https://aiameen.online",
+  "provider": {
+    "name": "Al Ameen N R",
+    "role": "Security Engineer & Systems Builder",
+    "website": "https://aiameen.online"
+  },
+  "resources": [
+    {
+      "id": "portfolio-home",
+      "name": "Portfolio Home",
+      "url": "https://aiameen.online/",
+      "description": "Full interactive systems overview and technical telemetry.",
+      "type": "document"
+    },
+    {
+      "id": "contact-api",
+      "name": "Contact & Enquiry API",
+      "url": "https://aiameen.online/api/contact",
+      "description": "Secure API endpoint to submit project enquiries and technical consultation scopes.",
+      "method": "POST",
+      "contentType": "application/json"
+    },
+    {
+      "id": "health-api",
+      "name": "API Health Check",
+      "url": "https://aiameen.online/api/health",
+      "description": "Liveness and telemetry check for the Node.js API dispatcher.",
+      "method": "GET"
+    }
+  ]
+}
