@@ -56,6 +56,8 @@ function isAnonymousOrInvalid(data) {
   return null;
 }
 
+var RECEIVER_EMAIL = "26alameen2005@gmail.com";
+
 function renderAcknowledgementHtml(data, refId) {
   var name = escapeHtml(data.name || "Client");
   var service = escapeHtml(data.service || "Technical Consultation");
@@ -66,45 +68,98 @@ function renderAcknowledgementHtml(data, refId) {
   return "<!DOCTYPE html>" +
   "<html>" +
   "<head><meta charset='UTF-8'></head>" +
-  "<body style='margin:0;padding:24px;background-color:#0A0A0A;color:#E5E5E5;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif;font-size:14px;line-height:1.6;'>" +
-    "<div style='max-width:620px;margin:0 auto;background:#111111;border:1px solid #222222;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5);'>" +
-      "<div style='padding:26px 30px;background:#161616;border-bottom:2px solid #C8FF00;'>" +
-        "<div style='font-family:monospace;font-size:11px;text-transform:uppercase;color:#C8FF00;letter-spacing:2px;font-weight:bold;margin-bottom:4px;'>AL AMEEN N R &bull; TRANSMISSION ACKNOWLEDGEMENT</div>" +
-        "<h1 style='font-size:20px;font-weight:700;color:#FFFFFF;margin:0;'>Enquiry Received &amp; Queued</h1>" +
+  "<body style='margin:0;padding:24px;background-color:#F1F5F9;color:#1E293B;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif;font-size:14px;line-height:1.6;'>" +
+    "<div style='max-width:620px;margin:0 auto;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(15,23,42,0.06);'>" +
+      "<div style='padding:26px 32px;background:#F8FAFC;border-bottom:2px solid #2563EB;'>" +
+        "<div style='font-size:11px;text-transform:uppercase;color:#2563EB;letter-spacing:1.5px;font-weight:700;margin-bottom:4px;'>AL AMEEN N R &bull; TRANSMISSION ACKNOWLEDGEMENT</div>" +
+        "<h1 style='font-size:20px;font-weight:700;color:#0F172A;margin:0;'>Enquiry Received &amp; Queued</h1>" +
       "</div>" +
-      "<div style='padding:30px;'>" +
-        "<div style='font-size:16px;font-weight:600;color:#FFFFFF;margin-bottom:14px;'>Hello " + name + ",</div>" +
-        "<p style='margin:0 0 16px 0;color:#B5B5B5;'>Thank you for reaching out. Your project enquiry regarding <strong style='color:#FFFFFF;'>" + service + "</strong> has been logged and queued for evaluation.</p>" +
+      "<div style='padding:32px;'>" +
+        "<div style='font-size:16px;font-weight:700;color:#0F172A;margin-bottom:14px;'>Hello " + name + ",</div>" +
+        "<p style='margin:0 0 16px 0;color:#334155;line-height:1.6;'>Thank you for reaching out. Your project enquiry regarding <strong style='color:#0F172A;'>" + service + "</strong> has been logged and queued for evaluation.</p>" +
         
-        "<div style='background:#161616;border-left:3px solid #C8FF00;padding:18px 20px;border-radius:0 8px 8px 0;margin:20px 0;'>" +
-          "<h4 style='margin:0 0 10px 0;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#FFFFFF;font-family:monospace;'>What Happens Next?</h4>" +
-          "<ul style='margin:0;padding-left:18px;color:#CCCCCC;font-size:13px;'>" +
-            "<li style='margin-bottom:6px;'><strong style='color:#FFFFFF;'>Architecture &amp; Scope Review:</strong> I will personally review your technical problem statement and delivery timeline.</li>" +
-            "<li style='margin-bottom:6px;'><strong style='color:#FFFFFF;'>Direct Response (24–48 Hours):</strong> You will receive a direct follow-up with feasibility notes or an invitation to a technical scoping call.</li>" +
-            "<li><strong style='color:#FFFFFF;'>Strict Confidentiality:</strong> All specifications, architectures, and business contexts are held with strict non-disclosure integrity.</li>" +
-          "</ul>" +
+        "<div style='background:#F8FAFC;border-left:4px solid #2563EB;border-top:1px solid #E2E8F0;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;padding:18px 20px;border-radius:0 8px 8px 0;margin:22px 0;'>" +
+          "<h4 style='margin:0 0 10px 0;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:#0F172A;font-weight:700;'>What Happens Next?</h4>" +
+          "<ul style='margin:0;padding-left:18px;color:#334155;font-size:13.5px;'>" +
+            "<li style='margin-bottom:6px;'><strong style='color:#0F172A;'>Architecture &amp; Scope Review:</strong> I will personally review your technical problem statement and delivery timeline.</li>" +
+            "<li style='margin-bottom:6px;'><strong style='color:#0F172A;'>Direct Response (24–48 Hours):</strong> You will receive a direct follow-up with feasibility notes or an invitation to a technical scoping call.</li>" +
+            "<li><strong style='color:#0F172A;'>Strict Confidentiality:</strong> All specifications, architectures, and business contexts are held with strict professional confidentiality.</li>" +
+          </ul>" +
         "</div>" +
 
-        "<div style='background:#0D0D0D;border:1px solid #222222;border-radius:8px;padding:18px;margin:20px 0;'>" +
-          "<div style='font-family:monospace;font-size:11px;text-transform:uppercase;color:#888888;letter-spacing:1px;margin-bottom:10px;font-weight:bold;'>Specification Copy (Reference: #" + refId + ")</div>" +
-          "<div style='font-size:13px;margin-bottom:6px;color:#A0A0A0;'><strong>Service Scope:</strong> <span style='color:#FFFFFF;'>" + service + "</span></div>" +
-          "<div style='font-size:13px;margin-bottom:6px;color:#A0A0A0;'><strong>Organization:</strong> <span style='color:#FFFFFF;'>" + company + "</span></div>" +
-          "<div style='font-size:13px;margin-bottom:6px;color:#A0A0A0;'><strong>Target Timeline:</strong> <span style='color:#FFFFFF;'>" + timeline + "</span></div>" +
-          "<div style='font-size:13px;color:#A0A0A0;'><strong>Estimated Budget:</strong> <span style='color:#FFFFFF;'>" + budget + "</span></div>" +
+        "<div style='background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:18px 20px;margin:22px 0;'>" +
+          "<div style='font-size:11px;text-transform:uppercase;color:#64748B;letter-spacing:1px;margin-bottom:12px;font-weight:700;'>Specification Copy (Reference: #" + refId + ")</div>" +
+          "<div style='font-size:13.5px;margin-bottom:8px;color:#475569;'><strong>Service Scope:</strong> <span style='color:#0F172A;'>" + service + "</span></div>" +
+          "<div style='font-size:13.5px;margin-bottom:8px;color:#475569;'><strong>Organization:</strong> <span style='color:#0F172A;'>" + company + "</span></div>" +
+          "<div style='font-size:13.5px;margin-bottom:8px;color:#475569;'><strong>Target Timeline:</strong> <span style='color:#0F172A;'>" + timeline + "</span></div>" +
+          "<div style='font-size:13.5px;color:#475569;'><strong>Estimated Budget:</strong> <span style='color:#0F172A;'>" + budget + "</span></div>" +
         "</div>" +
 
-        "<div style='padding:14px 18px;background:rgba(200,255,0,0.06);border:1px solid rgba(200,255,0,0.25);border-radius:6px;font-size:13px;color:#C8FF00;margin-top:24px;'>" +
+        "<div style='padding:14px 18px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;font-size:13px;color:#166534;margin-top:24px;line-height:1.5;'>" +
           "<strong>Need to attach technical docs?</strong> You can reply directly to this email with architecture diagrams, threat models, or API specs at any time." +
         "</div>" +
 
-        "<div style='margin-top:30px;padding-top:20px;border-top:1px solid #222222;'>" +
-          "<div style='font-weight:700;color:#FFFFFF;font-size:15px;'>Al Ameen N R</div>" +
-          "<div style='font-size:12px;color:#888888;font-family:monospace;margin-top:2px;'>Security Engineer &bull; Forward Deployed Engineer &bull; Systems Builder</div>" +
-          "<div style='font-size:12px;color:#555555;margin-top:4px;'>Kerala, India &bull; <a href='https://aiameen.online' style='color:#888888;text-decoration:none;'>aiameen.online</a></div>" +
+        "<div style='margin-top:28px;padding-top:20px;border-top:1px solid #E2E8F0;'>" +
+          "<div style='font-weight:700;color:#0F172A;font-size:15px;'>Al Ameen N R</div>" +
+          "<div style='font-size:12px;color:#64748B;margin-top:2px;'>Security Engineer &bull; Forward Deployed Engineer &bull; Systems Builder</div>" +
+          "<div style='font-size:12px;color:#64748B;margin-top:4px;'>Kerala, India &bull; <a href='https://aiameen.online' style='color:#2563EB;text-decoration:none;'>aiameen.online</a></div>" +
         "</div>" +
       "</div>" +
-      "<div style='padding:16px 30px;background:#0A0A0A;border-top:1px solid #1A1A1A;font-size:11px;color:#555555;text-align:center;font-family:monospace;'>" +
-        "SECURE TRANSMISSION RECEIPT &bull; REFERENCE: " + refId +
+      "<div style='padding:18px 32px;background:#F8FAFC;border-top:1px solid #E2E8F0;font-size:11px;color:#94A3B8;text-align:center;'>" +
+        "AUTOMATED CONFIRMATION DISPATCH &bull; REFERENCE: #" + refId +
+      "</div>" +
+    "</div>" +
+  "</body>" +
+  "</html>";
+}
+
+function renderAdminDossierHtml(data, refId) {
+  var name = escapeHtml(data.name || "Client");
+  var email = escapeHtml(data.email || "");
+  var company = escapeHtml(data.company || "N/A");
+  var service = escapeHtml(data.service || "Technical Consultation");
+  var timeline = escapeHtml(data.timeline || "Flexible");
+  var budget = escapeHtml(data.budget || "To be scoped");
+  var description = escapeHtml(data.description || data.message || "");
+  var clientIp = escapeHtml(data.clientIp || "N/A");
+  var userAgent = escapeHtml(data.userAgent || "N/A");
+  var timestamp = escapeHtml(data.timestamp || new Date().toISOString());
+
+  return "<!DOCTYPE html>" +
+  "<html>" +
+  "<head><meta charset='UTF-8'></head>" +
+  "<body style='margin:0;padding:24px;background-color:#F1F5F9;color:#1E293B;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif;font-size:14px;line-height:1.6;'>" +
+    "<div style='max-width:620px;margin:0 auto;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(15,23,42,0.06);'>" +
+      "<div style='padding:26px 32px;background:#F8FAFC;border-bottom:2px solid #2563EB;'>" +
+        "<div style='font-size:11px;text-transform:uppercase;color:#2563EB;letter-spacing:1.5px;font-weight:700;margin-bottom:4px;'>NEW PROJECT ENQUIRY &bull; AL AMEEN N R PORTFOLIO</div>" +
+        "<h1 style='font-size:20px;font-weight:700;color:#0F172A;margin:0;'>Enquiry Dossier from " + name + "</h1>" +
+      "</div>" +
+      "<div style='padding:32px;'>" +
+        "<table style='width:100%;border-collapse:collapse;margin-bottom:24px;'>" +
+          "<tr><td style='width:140px;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:12px;text-transform:uppercase;color:#64748B;font-weight:600;'>Client / Lead:</td><td style='padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0F172A;font-weight:600;'>" + name + "</td></tr>" +
+          "<tr><td style='width:140px;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:12px;text-transform:uppercase;color:#64748B;font-weight:600;'>Work Email:</td><td style='padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;'><a href='mailto:" + email + "' style='color:#2563EB;font-weight:600;text-decoration:underline;'>" + email + "</a></td></tr>" +
+          "<tr><td style='width:140px;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:12px;text-transform:uppercase;color:#64748B;font-weight:600;'>Organization:</td><td style='padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0F172A;'>" + company + "</td></tr>" +
+          "<tr><td style='width:140px;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:12px;text-transform:uppercase;color:#64748B;font-weight:600;'>Domain / Scope:</td><td style='padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;'><span style='display:inline-block;padding:3px 10px;border-radius:6px;background:#EFF6FF;color:#1D4ED8;border:1px solid #DBEAFE;font-size:12px;font-weight:600;'>" + service + "</span></td></tr>" +
+          "<tr><td style='width:140px;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:12px;text-transform:uppercase;color:#64748B;font-weight:600;'>Timeline:</td><td style='padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0F172A;'>" + timeline + "</td></tr>" +
+          "<tr><td style='width:140px;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:12px;text-transform:uppercase;color:#64748B;font-weight:600;'>Budget:</td><td style='padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0F172A;font-weight:600;'>" + budget + "</td></tr>" +
+          "<tr><td style='width:140px;padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:12px;text-transform:uppercase;color:#64748B;font-weight:600;'>Reference ID:</td><td style='padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;font-family:monospace;color:#64748B;'>#" + refId + "</td></tr>" +
+        "</table>" +
+
+        "<div style='font-size:12px;text-transform:uppercase;color:#475569;letter-spacing:0.5px;margin-bottom:8px;font-weight:700;'>Project Description &amp; Technical Requirements:</div>" +
+        "<div style='background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:18px 20px;color:#1E293B;white-space:pre-wrap;font-size:14px;line-height:1.6;'>" + description + "</div>" +
+
+        "<div style='margin-top:24px;'>" +
+          "<a href='mailto:" + email + "?subject=Re:%20[" + encodeURIComponent(service) + "]%20Technical%20Enquiry%20Discussion' style='display:inline-block;padding:11px 22px;background:#0F172A;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600;'>Reply Directly to " + name + " &rarr;</a>" +
+        "</div>" +
+
+        "<div style='margin-top:24px;padding:14px 18px;background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:6px;font-family:monospace;font-size:11px;color:#64748B;line-height:1.6;'>" +
+          "<div><strong>TIMESTAMP:</strong> " + timestamp + "</div>" +
+          "<div><strong>CLIENT IP:</strong> " + clientIp + "</div>" +
+          "<div><strong>USER AGENT:</strong> " + userAgent + "</div>" +
+        "</div>" +
+      "</div>" +
+      "<div style='padding:18px 32px;background:#F8FAFC;border-top:1px solid #E2E8F0;font-size:11px;color:#94A3B8;text-align:center;'>" +
+        "TRANSMITTED FROM AL AMEEN N R PORTFOLIO PLATFORM &bull; SENDER: " + email +
       "</div>" +
     "</div>" +
   "</body>" +
@@ -175,16 +230,33 @@ function doPost(e) {
     var refId = data.reference || Utilities.getUuid().substring(0, 8).toUpperCase();
     var clientEmail = String(data.email).trim();
 
-    // 4. Send Auto-Acknowledgement Email to Enquirer
+    // 4. Send Admin Notification & Auto-Acknowledgement
     var ackStatus = "PENDING";
+    var recipientEmail = data.receiverEmail || RECEIVER_EMAIL;
+
+    // Send Enquiry Dossier to Portfolio Owner (Receiver)
+    // The sender is the user who entered their details on the contact page
     try {
-      var subject = "Technical Enquiry Received — Al Ameen N R [Ref: " + refId + "]";
+      var adminSubject = "[" + (data.service || "Project Enquiry") + "] Enquiry from " + data.name + " (" + data.company + ")";
+      var adminHtml = renderAdminDossierHtml(data, refId);
+      GmailApp.sendEmail(recipientEmail, adminSubject, "New Technical Enquiry from " + data.name + " (" + clientEmail + ", " + data.company + ")\nDomain: " + data.service + "\nTimeline: " + data.timeline + " | Budget: " + data.budget + "\n\nDescription:\n" + (data.description || data.message || "") + "\n\nClient IP: " + (data.clientIp || "127.0.0.1"), {
+        htmlBody: adminHtml,
+        name: data.name + " (" + clientEmail + ")",
+        replyTo: clientEmail
+      });
+    } catch (adminErr) {
+      Logger.log("Admin notification email error: " + adminErr.message);
+    }
+
+    // Send Auto-Acknowledgement Receipt to Enquirer
+    try {
+      var subject = "Technical Enquiry Received — Al Ameen N R [Ref: #" + refId + "]";
       var htmlBody = renderAcknowledgementHtml(data, refId);
 
       GmailApp.sendEmail(clientEmail, subject, "Hello " + data.name + ",\n\nYour project enquiry regarding '" + data.service + "' has been received and queued.\n\nAl Ameen will follow up within 24-48 hours.\nReference: #" + refId, {
         htmlBody: htmlBody,
         name: "Al Ameen N R",
-        replyTo: "26alameen2005@gmail.com"
+        replyTo: recipientEmail
       });
       ackStatus = "SENT (" + new Date().toLocaleTimeString() + ")";
     } catch (mailErr) {

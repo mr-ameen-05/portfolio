@@ -14,7 +14,8 @@ function loadEnv() {
     HOST: process.env.HOST || '0.0.0.0',
     GOOGLE_SHEET_WEBHOOK_URL: process.env.GOOGLE_SHEET_WEBHOOK_URL || '',
     SEND_EMAIL: String(process.env.SEND_EMAIL || 'false').toLowerCase() === 'true',
-    MAIL_TO: process.env.MAIL_TO || '26alameen2005@gmail.com',
+    RECEIVER_EMAIL: process.env.RECEIVER_EMAIL || process.env.MAIL_TO || '26alameen2005@gmail.com',
+    MAIL_TO: process.env.RECEIVER_EMAIL || process.env.MAIL_TO || '26alameen2005@gmail.com',
     MAIL_FROM_EMAIL: process.env.MAIL_FROM_EMAIL || '26alameen2005@gmail.com',
     MAIL_FROM_NAME: process.env.MAIL_FROM_NAME || 'Al Ameen N R',
     SMTP_HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -70,6 +71,8 @@ function loadEnv() {
   config.SMTP_PORT = parseInt(config.SMTP_PORT, 10) || 465;
   config.SMTP_SECURE = String(config.SMTP_SECURE).toLowerCase() === 'true' || config.SMTP_PORT === 465;
   config.SEND_EMAIL = String(config.SEND_EMAIL).toLowerCase() === 'true';
+  config.RECEIVER_EMAIL = config.RECEIVER_EMAIL || config.MAIL_TO || '26alameen2005@gmail.com';
+  config.MAIL_TO = config.RECEIVER_EMAIL;
 
   // Clean Google App Password whitespace if user copied with spaces (e.g. "abcd efgh ijkl mnop")
   if (config.SMTP_PASS && (config.SMTP_HOST.includes('gmail.com') || !config.SMTP_HOST)) {
@@ -207,67 +210,75 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-// ── 5. Branded HTML Email Templates ──────────────────────────────────────────
+// ── 5. Branded HTML Email Templates (Light Themed) ───────────────────────────
 function renderAdminDossier(data) {
-  const { name, email, company, service, timeline, budget, description, clientIp, userAgent, timestamp } = data;
+  const { name, email, company, service, timeline, budget, description, clientIp, userAgent, timestamp, refId } = data;
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin: 0; padding: 24px; background-color: #0A0A0A; color: #E5E5E5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; }
-    .card { max-width: 620px; margin: 0 auto; background: #111111; border: 1px solid #222222; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .header { padding: 24px 30px; background: #161616; border-bottom: 2px solid #C8FF00; }
-    .header-tag { font-family: 'Courier New', Courier, monospace; font-size: 11px; text-transform: uppercase; color: #C8FF00; letter-spacing: 2px; margin-bottom: 6px; font-weight: bold; }
-    .header-title { font-size: 20px; font-weight: 700; color: #FFFFFF; margin: 0; }
-    .content { padding: 30px; }
-    .grid { margin-bottom: 24px; }
-    .row { padding: 10px 0; border-bottom: 1px solid #1A1A1A; display: flex; }
-    .label { width: 140px; font-family: 'Courier New', Courier, monospace; font-size: 11px; text-transform: uppercase; color: #777777; letter-spacing: 1px; font-weight: bold; padding-top: 2px; }
-    .value { flex: 1; color: #FFFFFF; font-size: 14px; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(200, 255, 0, 0.12); color: #C8FF00; border: 1px solid rgba(200, 255, 0, 0.3); font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; }
-    .brief-title { font-family: 'Courier New', Courier, monospace; font-size: 11px; text-transform: uppercase; color: #777777; letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
-    .brief-box { background: #0A0A0A; border: 1px solid #262626; border-radius: 8px; padding: 18px; color: #E5E5E5; white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
-    .telemetry { margin-top: 24px; padding: 14px 18px; background: #0E0E0E; border: 1px dashed #222222; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #666666; }
-    .footer { padding: 18px 30px; background: #0E0E0E; border-top: 1px solid #1A1A1A; font-size: 11px; color: #666666; text-align: center; font-family: 'Courier New', Courier, monospace; }
+    body { margin: 0; padding: 24px; background-color: #F1F5F9; color: #1E293B; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; }
+    .card { max-width: 620px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); }
+    .header { padding: 26px 32px; background: #F8FAFC; border-bottom: 2px solid #2563EB; }
+    .header-tag { font-size: 11px; text-transform: uppercase; color: #2563EB; letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 700; }
+    .header-title { font-size: 20px; font-weight: 700; color: #0F172A; margin: 0; }
+    .content { padding: 32px; }
+    .table-details { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    .table-details td { padding: 10px 0; border-bottom: 1px solid #F1F5F9; vertical-align: top; }
+    .label { width: 140px; font-size: 12px; text-transform: uppercase; color: #64748B; letter-spacing: 0.5px; font-weight: 600; padding-top: 3px; }
+    .value { color: #0F172A; font-size: 14px; font-weight: 500; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; background: #EFF6FF; color: #1D4ED8; border: 1px solid #DBEAFE; font-size: 12px; font-weight: 600; }
+    .brief-title { font-size: 12px; text-transform: uppercase; color: #475569; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 700; }
+    .brief-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 18px 20px; color: #1E293B; white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
+    .action-row { margin-top: 24px; }
+    .reply-btn { display: inline-block; padding: 11px 22px; background: #0F172A; color: #FFFFFF !important; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600; letter-spacing: 0.3px; }
+    .telemetry { margin-top: 24px; padding: 14px 18px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; color: #64748B; line-height: 1.6; }
+    .footer { padding: 18px 32px; background: #F8FAFC; border-top: 1px solid #E2E8F0; font-size: 11px; color: #94A3B8; text-align: center; }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="header">
-      <div class="header-tag">SECURITY &bull; SYSTEMS &bull; FORWARD DEPLOYED</div>
+      <div class="header-tag">PROJECT ENQUIRY &bull; AL AMEEN N R PORTFOLIO</div>
       <h1 class="header-title">New Technical Enquiry Received</h1>
     </div>
     <div class="content">
-      <div class="grid">
-        <div class="row">
-          <div class="label">Client / Lead:</div>
-          <div class="value"><strong>${escapeHtml(name)}</strong></div>
-        </div>
-        <div class="row">
-          <div class="label">Work Email:</div>
-          <div class="value"><a href="mailto:${escapeHtml(email)}" style="color: #C8FF00; text-decoration: none;">${escapeHtml(email)}</a></div>
-        </div>
-        <div class="row">
-          <div class="label">Organization:</div>
-          <div class="value">${escapeHtml(company)}</div>
-        </div>
-        <div class="row">
-          <div class="label">Domain / Scope:</div>
-          <div class="value"><span class="badge">${escapeHtml(service)}</span></div>
-        </div>
-        <div class="row">
-          <div class="label">Target Timeline:</div>
-          <div class="value">${escapeHtml(timeline)}</div>
-        </div>
-        <div class="row">
-          <div class="label">Budget:</div>
-          <div class="value">${escapeHtml(budget)}</div>
-        </div>
-      </div>
+      <table class="table-details">
+        <tr>
+          <td class="label">Client / Lead:</td>
+          <td class="value"><strong>${escapeHtml(name)}</strong></td>
+        </tr>
+        <tr>
+          <td class="label">Work Email:</td>
+          <td class="value"><a href="mailto:${escapeHtml(email)}" style="color: #2563EB; text-decoration: underline; font-weight: 600;">${escapeHtml(email)}</a></td>
+        </tr>
+        <tr>
+          <td class="label">Organization:</td>
+          <td class="value">${escapeHtml(company)}</td>
+        </tr>
+        <tr>
+          <td class="label">Domain / Scope:</td>
+          <td class="value"><span class="badge">${escapeHtml(service)}</span></td>
+        </tr>
+        <tr>
+          <td class="label">Target Timeline:</td>
+          <td class="value">${escapeHtml(timeline)}</td>
+        </tr>
+        <tr>
+          <td class="label">Budget:</td>
+          <td class="value"><strong>${escapeHtml(budget)}</strong></td>
+        </tr>
+        ${refId ? `<tr><td class="label">Reference ID:</td><td class="value" style="font-family: ui-monospace, monospace; color: #64748B;">#${escapeHtml(refId)}</td></tr>` : ''}
+      </table>
 
       <div class="brief-title">Project Description &amp; Technical Requirements:</div>
       <div class="brief-box">${escapeHtml(description)}</div>
+
+      <div class="action-row">
+        <a class="reply-btn" href="mailto:${escapeHtml(email)}?subject=Re:%20[${escapeHtml(encodeURIComponent(service))}]%20Technical%20Enquiry%20Discussion">Reply Directly to ${escapeHtml(name)} &rarr;</a>
+      </div>
 
       <div class="telemetry">
         <div><strong>TIMESTAMP:</strong> ${escapeHtml(timestamp)}</div>
@@ -276,7 +287,7 @@ function renderAdminDossier(data) {
       </div>
     </div>
     <div class="footer">
-      TRANSMITTED FROM AL AMEEN N R PORTFOLIO PLATFORM &bull; NODE.JS DISPATCHER
+      TRANSMITTED FROM AL AMEEN N R PORTFOLIO PLATFORM &bull; SENDER: ${escapeHtml(email)}
     </div>
   </div>
 </body>
@@ -284,33 +295,34 @@ function renderAdminDossier(data) {
 }
 
 function renderClientAcknowledgement(data) {
-  const { name, service, company, timeline, budget } = data;
+  const { name, service, company, timeline, budget, refId } = data;
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin: 0; padding: 24px; background-color: #0A0A0A; color: #E5E5E5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; }
-    .card { max-width: 620px; margin: 0 auto; background: #111111; border: 1px solid #222222; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .header { padding: 26px 30px; background: #161616; border-bottom: 2px solid #C8FF00; }
-    .brand { font-family: 'Courier New', Courier, monospace; font-size: 11px; text-transform: uppercase; color: #C8FF00; letter-spacing: 2px; font-weight: bold; margin-bottom: 4px; }
-    .header-title { font-size: 20px; font-weight: 700; color: #FFFFFF; margin: 0; }
-    .content { padding: 30px; }
-    .salutation { font-size: 16px; font-weight: 600; color: #FFFFFF; margin-bottom: 14px; }
-    p { margin: 0 0 16px 0; color: #B5B5B5; line-height: 1.6; }
-    .steps-card { background: #161616; border-left: 3px solid #C8FF00; padding: 18px 20px; border-radius: 0 8px 8px 0; margin: 20px 0; }
-    .steps-card h4 { margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #FFFFFF; font-family: 'Courier New', Courier, monospace; }
-    .steps-card ul { margin: 0; padding-left: 18px; color: #CCCCCC; }
+    body { margin: 0; padding: 24px; background-color: #F1F5F9; color: #1E293B; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; }
+    .card { max-width: 620px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); }
+    .header { padding: 26px 32px; background: #F8FAFC; border-bottom: 2px solid #2563EB; }
+    .brand { font-size: 11px; text-transform: uppercase; color: #2563EB; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 4px; }
+    .header-title { font-size: 20px; font-weight: 700; color: #0F172A; margin: 0; }
+    .content { padding: 32px; }
+    .salutation { font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 14px; }
+    p { margin: 0 0 16px 0; color: #334155; line-height: 1.6; }
+    .steps-card { background: #F8FAFC; border-left: 4px solid #2563EB; border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; padding: 18px 20px; border-radius: 0 8px 8px 0; margin: 22px 0; }
+    .steps-card h4 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #0F172A; font-weight: 700; }
+    .steps-card ul { margin: 0; padding-left: 18px; color: #334155; font-size: 13.5px; }
     .steps-card li { margin-bottom: 6px; }
-    .summary-card { background: #0D0D0D; border: 1px solid #222222; border-radius: 8px; padding: 18px; margin: 20px 0; }
-    .summary-title { font-family: 'Courier New', Courier, monospace; font-size: 11px; text-transform: uppercase; color: #888888; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; }
-    .summary-item { font-size: 13px; margin-bottom: 6px; color: #A0A0A0; }
-    .summary-item strong { color: #E5E5E5; }
-    .reply-box { padding: 14px 18px; background: rgba(200, 255, 0, 0.05); border: 1px solid rgba(200, 255, 0, 0.2); border-radius: 6px; font-size: 13px; color: #C8FF00; margin-top: 24px; }
-    .signature { margin-top: 30px; padding-top: 20px; border-top: 1px solid #222222; }
-    .sig-name { font-weight: 700; color: #FFFFFF; font-size: 15px; }
-    .sig-title { font-size: 12px; color: #777777; font-family: 'Courier New', Courier, monospace; margin-top: 2px; }
-    .footer { padding: 18px 30px; background: #0A0A0A; border-top: 1px solid #1A1A1A; font-size: 11px; color: #555555; text-align: center; font-family: 'Courier New', Courier, monospace; }
+    .summary-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 18px 20px; margin: 22px 0; }
+    .summary-title { font-size: 11px; text-transform: uppercase; color: #64748B; letter-spacing: 1px; margin-bottom: 12px; font-weight: 700; }
+    .summary-item { font-size: 13.5px; margin-bottom: 8px; color: #475569; }
+    .summary-item strong { color: #0F172A; }
+    .reply-box { padding: 14px 18px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 6px; font-size: 13px; color: #166534; margin-top: 24px; line-height: 1.5; }
+    .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid #E2E8F0; }
+    .sig-name { font-weight: 700; color: #0F172A; font-size: 15px; }
+    .sig-title { font-size: 12px; color: #64748B; margin-top: 2px; }
+    .footer { padding: 18px 32px; background: #F8FAFC; border-top: 1px solid #E2E8F0; font-size: 11px; color: #94A3B8; text-align: center; }
   </style>
 </head>
 <body>
@@ -321,19 +333,19 @@ function renderClientAcknowledgement(data) {
     </div>
     <div class="content">
       <div class="salutation">Hello ${escapeHtml(name)},</div>
-      <p>Thank you for reaching out. Your project enquiry regarding <strong>${escapeHtml(service)}</strong> has been received and securely queued for evaluation.</p>
+      <p>Thank you for reaching out. Your project enquiry regarding <strong style="color: #0F172A;">${escapeHtml(service)}</strong> has been received and securely queued for evaluation.</p>
       
       <div class="steps-card">
         <h4>What Happens Next?</h4>
         <ul>
-          <li><strong>Architecture &amp; Scope Review:</strong> I will personally review your problem statement, technical requirements, and delivery timeline.</li>
-          <li><strong>Direct Response (24–48 Hours):</strong> You will receive a direct reply with preliminary observations, feasibility assessments, or an invitation to a technical scoping call.</li>
-          <li><strong>Confidentiality Assurance:</strong> All project specifications, workflows, and business contexts are held with strict professional confidentiality.</li>
+          <li><strong style="color: #0F172A;">Architecture &amp; Scope Review:</strong> I will personally review your problem statement, technical requirements, and delivery timeline.</li>
+          <li><strong style="color: #0F172A;">Direct Response (24–48 Hours):</strong> You will receive a direct reply with preliminary observations, feasibility assessments, or an invitation to a technical scoping call.</li>
+          <li><strong style="color: #0F172A;">Confidentiality Assurance:</strong> All project specifications, workflows, and business contexts are held with strict professional confidentiality.</li>
         </ul>
       </div>
 
       <div class="summary-card">
-        <div class="summary-title">Submitted Specification Copy</div>
+        <div class="summary-title">Submitted Specification Copy ${refId ? `(Reference: #${escapeHtml(refId)})` : ''}</div>
         <div class="summary-item"><strong>Service Scope:</strong> ${escapeHtml(service)}</div>
         <div class="summary-item"><strong>Organization:</strong> ${escapeHtml(company)}</div>
         <div class="summary-item"><strong>Target Timeline:</strong> ${escapeHtml(timeline)}</div>
@@ -347,7 +359,7 @@ function renderClientAcknowledgement(data) {
       <div class="signature">
         <div class="sig-name">Al Ameen N R</div>
         <div class="sig-title">Security Engineer &bull; Forward Deployed Engineer &bull; Systems Builder</div>
-        <div class="sig-title" style="color: #555555; margin-top: 4px;">Kerala, India &bull; <a href="https://aiameen.online" style="color: #777777;">aiameen.online</a></div>
+        <div class="sig-title" style="color: #64748B; margin-top: 4px;">Kerala, India &bull; <a href="https://aiameen.online" style="color: #2563EB; text-decoration: none;">aiameen.online</a></div>
       </div>
     </div>
     <div class="footer">
@@ -561,21 +573,24 @@ const server = http.createServer(async (req, res) => {
     let lastError = null;
 
     if (ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
-      // Admin Notification Dossier
+      const receiverEmail = ENV.RECEIVER_EMAIL || ENV.MAIL_TO || '26alameen2005@gmail.com';
+
+      // Admin Notification Dossier (Enquiry sent to the portfolio owner / receiver)
+      // Sender is clearly identified as the user who submitted the contact page enquiry
       const adminMailOptions = {
-        from: `"${ENV.MAIL_FROM_NAME}" <${ENV.SMTP_USER}>`,
-        to: ENV.MAIL_TO,
+        from: `"${name} (${email})" <${ENV.SMTP_USER}>`,
+        to: receiverEmail,
         replyTo: `"${name}" <${email}>`,
         subject: `[${service}] Project Enquiry from ${name} (${company})`,
         html: renderAdminDossier(dossierData),
         text: `New Technical Enquiry from ${name} (${email}, ${company})\nDomain: ${service}\nTimeline: ${timeline} | Budget: ${budget}\n\nDescription:\n${description}\n\nClient IP: ${clientIp} | Timestamp: ${timestamp}`,
       };
 
-      // Client Confirmation Receipt
+      // Client Confirmation Receipt (Sent to the user who entered the form)
       const clientMailOptions = {
         from: `"${ENV.MAIL_FROM_NAME}" <${ENV.SMTP_USER}>`,
         to: email,
-        replyTo: `"${ENV.MAIL_FROM_NAME}" <${ENV.MAIL_TO}>`,
+        replyTo: `"${ENV.MAIL_FROM_NAME}" <${receiverEmail}>`,
         subject: `Technical Enquiry Received — Al Ameen N R`,
         html: renderClientAcknowledgement(dossierData),
         text: `Hello ${name},\n\nThank you for reaching out. Your project enquiry regarding "${service}" has been received and queued.\n\nSummary:\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nBest regards,\nAl Ameen N R`,
