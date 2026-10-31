@@ -2,7 +2,6 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import nodemailer from 'nodemailer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,42 +81,49 @@ function loadEnv() {
 
 const ENV = loadEnv();
 
-// ── 2. Nodemailer SMTP Transporter ───────────────────────────────────────────
-function createMailerTransport() {
-  const isGmail = ENV.SMTP_HOST.includes('gmail.com') || (!ENV.SMTP_HOST && ENV.SMTP_USER.includes('@gmail.com'));
-  const baseTimeoutOptions = {
-    connectionTimeout: 8000,
-    greetingTimeout: 8000,
-    socketTimeout: 10000,
-  };
-  
-  if (isGmail) {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: ENV.SMTP_USER,
-        pass: ENV.SMTP_PASS,
-      },
-      ...baseTimeoutOptions,
-    });
+// ── 2. Lazy Nodemailer SMTP Transporter ───────────────────────────────────────
+let mailerInstance = null;
+async function getMailer() {
+  if (mailerInstance) return mailerInstance;
+  try {
+    const nodemailer = (await import('nodemailer')).default;
+    const isGmail = ENV.SMTP_HOST.includes('gmail.com') || (!ENV.SMTP_HOST && ENV.SMTP_USER.includes('@gmail.com'));
+    const baseTimeoutOptions = {
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
+    };
+    
+    if (isGmail) {
+      mailerInstance = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: ENV.SMTP_USER,
+          pass: ENV.SMTP_PASS,
+        },
+        ...baseTimeoutOptions,
+      });
+    } else {
+      mailerInstance = nodemailer.createTransport({
+        host: ENV.SMTP_HOST,
+        port: ENV.SMTP_PORT,
+        secure: ENV.SMTP_SECURE,
+        auth: ENV.SMTP_USER ? {
+          user: ENV.SMTP_USER,
+          pass: ENV.SMTP_PASS,
+        } : undefined,
+        tls: {
+          rejectUnauthorized: true,
+        },
+        ...baseTimeoutOptions,
+      });
+    }
+    return mailerInstance;
+  } catch (err) {
+    console.warn('[SMTP] Note: nodemailer package not found. Run "npm install nodemailer" if you wish to enable SMTP.');
+    return null;
   }
-
-  return nodemailer.createTransport({
-    host: ENV.SMTP_HOST,
-    port: ENV.SMTP_PORT,
-    secure: ENV.SMTP_SECURE,
-    auth: ENV.SMTP_USER ? {
-      user: ENV.SMTP_USER,
-      pass: ENV.SMTP_PASS,
-    } : undefined,
-    tls: {
-      rejectUnauthorized: true,
-    },
-    ...baseTimeoutOptions,
-  });
 }
-
-const mailer = createMailerTransport();
 
 // Output startup service modes
 if (ENV.GOOGLE_SHEET_WEBHOOK_URL) {
@@ -127,14 +133,13 @@ if (ENV.GOOGLE_SHEET_WEBHOOK_URL) {
 }
 
 if (ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
-  mailer.verify()
-    .then(() => {
-      console.log(`[SMTP] ✓ Connected & authenticated successfully to ${ENV.SMTP_HOST} (user: ${ENV.SMTP_USER})`);
-    })
-    .catch((err) => {
-      console.error(`[SMTP] ✗ Connection verification warning: ${err.message}`);
-      console.error(`[SMTP] Tip: For Gmail SMTP, ensure you use a 16-character Google App Password (https://myaccount.google.com/apppasswords) with 2FA enabled.`);
-    });
+  getMailer().then(mailer => {
+    if (mailer) {
+      mailer.verify()
+        .then(() => console.log(`[SMTP] ✓ Connected & authenticated successfully to ${ENV.SMTP_HOST} (user: ${ENV.SMTP_USER})`))
+        .catch(err => console.error(`[SMTP] ✗ Connection warning: ${err.message}`));
+    }
+  });
 } else if (ENV.SEND_EMAIL) {
   console.warn(`[SMTP] ! SEND_EMAIL is true but SMTP credentials are not configured in environment.`);
 } else {
@@ -576,15 +581,18 @@ const server = http.createServer(async (req, res) => {
         text: `Hello ${name},\n\nThank you for reaching out. Your project enquiry regarding "${service}" has been received and queued.\n\nSummary:\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nBest regards,\nAl Ameen N R`,
       };
 
-      const results = await Promise.allSettled([
-        mailer.sendMail(adminMailOptions),
-        mailer.sendMail(clientMailOptions),
-      ]);
+      const mailer = await getMailer();
+      if (mailer) {
+        const results = await Promise.allSettled([
+          mailer.sendMail(adminMailOptions),
+          mailer.sendMail(clientMailOptions),
+        ]);
 
-      if (results[0].status === 'fulfilled') adminSent = true;
-      else lastError = results[0].reason?.message;
+        if (results[0].status === 'fulfilled') adminSent = true;
+        else lastError = results[0].reason?.message;
 
-      if (results[1].status === 'fulfilled') ackSent = true;
+        if (results[1].status === 'fulfilled') ackSent = true;
+      }
     }
 
     // ── 3. Persistent Local Log ──────────────────────────────────────────────
