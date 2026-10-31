@@ -62,15 +62,15 @@ load_config() {
   : "${LETSENCRYPT_EMAIL:?set LETSENCRYPT_EMAIL in deploy/deploy.env}"
   APP_ROOT="${APP_ROOT:-/var/www/$DOMAIN}"
   SITE_USER="${SITE_USER:-www-data}"
-  PHP_VERSION="${PHP_VERSION:-}"
 
   : "${DB_NAME:?}"; : "${DB_USER:?}"; : "${DB_PASS:?}"
   DB_HOST="${DB_HOST:-127.0.0.1}"; DB_PORT="${DB_PORT:-3306}"
 
-  MAIL_TO="${MAIL_TO:-}"; MAIL_FROM_EMAIL="${MAIL_FROM_EMAIL:-no-reply@$DOMAIN}"
-  MAIL_FROM_NAME="${MAIL_FROM_NAME:-$DOMAIN}"; MAIL_TRANSPORT="${MAIL_TRANSPORT:-mail}"
-  SMTP_HOST="${SMTP_HOST:-}"; SMTP_PORT="${SMTP_PORT:-587}"; SMTP_USER="${SMTP_USER:-}"
-  SMTP_PASS="${SMTP_PASS:-}"; SMTP_ENCRYPTION="${SMTP_ENCRYPTION:-tls}"; SMTP_DEBUG="${SMTP_DEBUG:-0}"
+  MAIL_TO="${MAIL_TO:-26alameen2005@gmail.com}"; MAIL_FROM_EMAIL="${MAIL_FROM_EMAIL:-26alameen2005@gmail.com}"
+  MAIL_FROM_NAME="${MAIL_FROM_NAME:-Al Ameen N R}"
+  SMTP_HOST="${SMTP_HOST:-smtp.gmail.com}"; SMTP_PORT="${SMTP_PORT:-465}"; SMTP_USER="${SMTP_USER:-}"
+  SMTP_PASS="${SMTP_PASS:-}"; SMTP_SECURE="${SMTP_SECURE:-true}"
+  API_PORT="${API_PORT:-3001}"
   QUIZ_SECRET="${QUIZ_SECRET:-}"; RATE_LIMIT_PER_MINUTE="${RATE_LIMIT_PER_MINUTE:-20}"
   ALLOWED_ORIGINS="${ALLOWED_ORIGINS:-https://$DOMAIN}"
   ENABLE_UFW="${ENABLE_UFW:-true}"; CREATE_SWAP="${CREATE_SWAP:-true}"
@@ -80,40 +80,6 @@ load_config() {
 }
 
 # ── helpers ──────────────────────────────────────────────────────────────────
-detect_php_socket() {
-  # Clean up PHP_VERSION in case deploy.env specified "php-fpm.sock", "php8.5", "8.5", etc.
-  if [[ -n "${PHP_VERSION:-}" ]]; then
-    local cleaned
-    cleaned="$(echo "$PHP_VERSION" | sed -E 's/^php//; s/(-fpm)?\.sock$//')"
-    if [[ -n "$cleaned" ]]; then
-      PHP_VERSION="$cleaned"
-      PHP_SOCK="/run/php/php${PHP_VERSION}-fpm.sock"
-    else
-      PHP_VERSION=""
-      PHP_SOCK=""
-    fi
-  fi
-
-  # Auto-detect socket from filesystem if not found or empty
-  if [[ -z "${PHP_SOCK:-}" || ! -S "$PHP_SOCK" ]]; then
-    # Ensure php-fpm is started on the host
-    systemctl start php*-fpm >/dev/null 2>&1 || systemctl start php-fpm >/dev/null 2>&1 || true
-    sleep 0.5
-    PHP_SOCK="$(ls /run/php/php*-fpm.sock /run/php/php-fpm.sock 2>/dev/null | head -n1 || true)"
-    if [[ -n "$PHP_SOCK" ]]; then
-      local base
-      base="$(basename "$PHP_SOCK")"
-      if [[ "$base" =~ php([0-9.]+)-fpm\.sock ]]; then
-        PHP_VERSION="${BASH_REMATCH[1]}"
-      elif [[ "$base" == "php-fpm.sock" ]]; then
-        PHP_VERSION="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo "8.5")"
-      fi
-    fi
-  fi
-
-  [[ -n "${PHP_SOCK:-}" && -S "$PHP_SOCK" ]] || die "php-fpm socket not found (tried ${PHP_SOCK:-none}). Is php-fpm running? Try: systemctl restart php*-fpm"
-}
-
 mysql_root() {
   if [[ "${MYSQL_ROOT_AUTH:-socket}" == "password" && -n "${MYSQL_ROOT_PASSWORD:-}" ]]; then
     mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$@"
@@ -137,7 +103,6 @@ render() { # render <template> <destination>
     -e "s|__WWW_DOMAIN__|$WWW_DOMAIN|g" \
     -e "s|__CERT_NAME__|$DOMAIN|g" \
     -e "s|__APP_ROOT__|$APP_ROOT|g" \
-    -e "s|__PHP_SOCK__|$PHP_SOCK|g" \
     "$src" > "$dst"
   if [[ "$INCLUDE_WWW" != "true" ]]; then
     sed -i '/# >>> WWW_REDIRECT/,/# <<< WWW_REDIRECT/d' "$dst"
@@ -148,7 +113,6 @@ cert_exists() { [[ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]]; }
 
 install_nginx_site() { # install_nginx_site [auto|full]
   local mode="${1:-auto}"
-  detect_php_socket
   local avail="/etc/nginx/sites-available/$DOMAIN"
   if [[ "$mode" == "full" ]] || { [[ "$mode" == "auto" ]] && cert_exists; }; then
     render "$ROOT/deploy/nginx/aiameen.online.conf.template" "$avail"
@@ -168,6 +132,8 @@ write_api_env() {
   mkdir -p "$dir" /var/log/aiameen
   cat > "$dir/api.env" <<ENV
 # Managed by deploy.sh — do not edit by hand.
+PORT=$API_PORT
+HOST=0.0.0.0
 DB_HOST=$DB_HOST
 DB_PORT=$DB_PORT
 DB_NAME=$DB_NAME
@@ -177,13 +143,11 @@ DB_PASS=$DB_PASS
 MAIL_TO=$MAIL_TO
 MAIL_FROM_EMAIL=$MAIL_FROM_EMAIL
 MAIL_FROM_NAME=$MAIL_FROM_NAME
-MAIL_TRANSPORT=$MAIL_TRANSPORT
 SMTP_HOST=$SMTP_HOST
 SMTP_PORT=$SMTP_PORT
+SMTP_SECURE=$SMTP_SECURE
 SMTP_USER=$SMTP_USER
 SMTP_PASS=$SMTP_PASS
-SMTP_ENCRYPTION=$SMTP_ENCRYPTION
-SMTP_DEBUG=$SMTP_DEBUG
 
 QUIZ_SECRET=$QUIZ_SECRET
 RATE_LIMIT_PER_MINUTE=$RATE_LIMIT_PER_MINUTE
@@ -204,9 +168,7 @@ cmd_provision() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -y
   apt-get install -y \
-    nginx mysql-server ca-certificates curl git rsync unzip jq openssl ufw \
-    php-fpm php-cli php-mysql php-mbstring php-curl php-xml php-zip \
-    certbot
+    nginx mysql-server ca-certificates curl git rsync unzip jq openssl ufw certbot
 
   if [[ "$CREATE_SWAP" == "true" ]] && ! swapon --show | grep -q .; then
     log "creating 2G swapfile (safer builds on small instances)"
@@ -215,28 +177,16 @@ cmd_provision() {
     grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
   fi
 
-  if [[ "$SKIP_BUILD" != "true" ]]; then
-    local node_major=0
-    command -v node >/dev/null && node_major="$(node -v | sed -E 's/^v([0-9]+).*/\1/')"
-    if (( node_major < 18 )); then
-      log "installing Node.js 20.x (needed to build the SPA)"
-      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-      apt-get install -y nodejs
-    fi
-  fi
-
-  if ! command -v composer >/dev/null; then
-    log "installing Composer (PHP mailer dependency)"
-    curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  local node_major=0
+  command -v node >/dev/null && node_major="$(node -v | sed -E 's/^v([0-9]+).*/\1/')"
+  if (( node_major < 18 )); then
+    log "installing Node.js 20.x"
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
   fi
 
   systemctl enable --now nginx >/dev/null 2>&1 || true
   systemctl enable --now mysql >/dev/null 2>&1 || systemctl enable --now mysqld >/dev/null 2>&1 || true
-  # enable and start whichever php-fpm service exists
-  for svc in /lib/systemd/system/php*-fpm.service /usr/lib/systemd/system/php*-fpm.service /etc/systemd/system/php*-fpm.service; do
-    [[ -e "$svc" ]] && systemctl enable --now "$(basename "$svc")" >/dev/null 2>&1 || true
-  done
-  systemctl start php*-fpm >/dev/null 2>&1 || systemctl start php-fpm >/dev/null 2>&1 || true
 
   if [[ "$ENABLE_UFW" == "true" ]] && command -v ufw >/dev/null; then
     ufw allow "${SSH_PORT}/tcp" >/dev/null || true
@@ -251,18 +201,19 @@ cmd_provision() {
 cmd_config() {
   require_root
   step "Writing configuration"
-  detect_php_socket
 
   mkdir -p "/etc/aiameen" /var/log/aiameen "$APP_ROOT/public" "$APP_ROOT/api" /var/www/certbot
   write_api_env
 
-  # PHP hardening/limits
-  for sapi in /etc/php/*/fpm/conf.d /etc/php/*/cli/conf.d; do
-    [[ -d "$sapi" ]] && cp "$ROOT/deploy/php/99-aiameen.ini" "$sapi/99-aiameen.ini"
-  done
-  chown -R "$SITE_USER":"$SITE_USER" /var/log/aiameen
-  ok "installed PHP ini"
+  # Install and start Node.js portfolio-api systemd service
+  if [[ -f "$ROOT/deploy/systemd/portfolio-api.service" ]]; then
+    sed -e "s|/opt/portfolio|$ROOT|g" "$ROOT/deploy/systemd/portfolio-api.service" > /etc/systemd/system/portfolio-api.service
+    systemctl daemon-reload
+    systemctl enable --now portfolio-api.service
+    ok "installed and enabled portfolio-api service"
+  fi
 
+  chown -R "$SITE_USER":"$SITE_USER" /var/log/aiameen
   install_nginx_site
 }
 
@@ -323,21 +274,15 @@ cmd_release() {
   rsync -a --delete "$ROOT/dist/" "$APP_ROOT/public/"
 
   rsync -a --delete \
-    --exclude '.env' --exclude '.env.example' --exclude 'vendor/' --exclude 'tmp-logs/' \
+    --exclude '.env' --exclude '.env.example' --exclude 'tmp-logs/' \
     "$ROOT/api/" "$APP_ROOT/api/"
-
-  if command -v composer >/dev/null && [[ -f "$APP_ROOT/api/composer.json" ]]; then
-    log "composer install (PHPMailer)"
-    ( cd "$APP_ROOT/api" && composer install --no-dev --no-interaction --optimize-autoloader --quiet ) \
-      || warn "composer install failed — the API will fall back to mail(). Check network."
-  fi
 
   chown -R "$SITE_USER":"$SITE_USER" "$APP_ROOT" /var/log/aiameen
   find "$APP_ROOT" -type d -exec chmod 755 {} \;
   find "$APP_ROOT" -type f -exec chmod 644 {} \;
 
-  systemctl reload php*-fpm 2>/dev/null || true
-  ok "released"
+  systemctl restart portfolio-api 2>/dev/null || true
+  ok "released to $APP_ROOT and restarted portfolio-api"
 }
 
 cmd_tls() {
@@ -369,11 +314,8 @@ cmd_tls() {
 cmd_status() {
   require_root
   step "Service status"
-  for svc in nginx mysql; do
-    printf "  %-12s %s\n" "$svc" "$(systemctl is-active "$svc" 2>/dev/null || echo unknown)"
-  done
-  for sock in /run/php/php*-fpm.sock; do
-    [[ -S "$sock" ]] && printf "  %-12s %s\n" "php-fpm" "active ($sock)"
+  for svc in nginx mysql portfolio-api portfolio-autoupdate; do
+    printf "  %-22s %s\n" "$svc" "$(systemctl is-active "$svc" 2>/dev/null || echo unknown)"
   done
   echo
   command -v certbot >/dev/null && certbot certificates 2>/dev/null | grep -E "Certificate Name|Domains|Expiry" || warn "certbot not installed"
@@ -384,7 +326,7 @@ cmd_status() {
 cmd_logs() {
   require_root
   step "Tailing logs (Ctrl-C to stop)"
-  local files=(/var/log/nginx/error.log /var/log/nginx/access.log /var/log/aiameen/*.jsonl /var/log/aiameen/php-error.log)
+  local files=(/var/log/nginx/error.log /var/log/nginx/access.log /var/log/aiameen/*.jsonl)
   tail -n 30 -F "${files[@]}"
 }
 
@@ -407,11 +349,6 @@ cmd_audit() {
       npm audit fix --force || true
     fi
   fi
-
-  if command -v composer >/dev/null && [[ -f "$ROOT/api/composer.json" ]]; then
-    log "composer audit — PHP dependencies"
-    ( cd "$ROOT/api" && composer audit --no-dev ) || warn "composer audit reported advisories"
-  fi
   ok "audit complete"
 }
 
@@ -422,14 +359,7 @@ cmd_verify() {
 
   # ── services ──
   check "nginx service is active" systemctl is-active --quiet nginx || failures=$((failures + 1))
-  check "MySQL service is active" bash -c 'systemctl is-active --quiet mysql || systemctl is-active --quiet mysqld' || failures=$((failures + 1))
-  check "php-fpm is running (socket present)" bash -c 'ls /run/php/php*-fpm.sock >/dev/null 2>&1' || failures=$((failures + 1))
-
-  # ── php extensions required by the API / mailer ──
-  for ext in pdo_mysql openssl mbstring curl dom zip; do
-    check "php extension: $ext" php -r "exit(extension_loaded('$ext') ? 0 : 1);" || failures=$((failures + 1))
-  done
-  check "php extension: opcache" php -r "exit((extension_loaded('Zend OPcache') || extension_loaded('opcache')) ? 0 : 1);" || failures=$((failures + 1))
+  check "portfolio-api service is active" systemctl is-active --quiet portfolio-api || failures=$((failures + 1))
 
   # ── configuration ──
   check "api env exists with 640 perms" bash -c '[[ "$(stat -c %a /etc/aiameen/api.env)" == "640" ]]' || failures=$((failures + 1))
@@ -444,13 +374,13 @@ cmd_verify() {
   code="$(curl -sk -o /dev/null -w '%{http_code}' -H "Host: $DOMAIN" "https://127.0.0.1/" || echo 000)"
   check "HTTPS site responds 200" bash -c "[[ '$code' == 200 ]]" || failures=$((failures + 1))
 
-  # ── API + database ──
-  health="$(curl -sk -H "Host: $DOMAIN" "https://127.0.0.1/api/health.php" 2>/dev/null || true)"
+  # ── Node.js API health ──
+  health="$(curl -sk -H "Host: $DOMAIN" "https://127.0.0.1/api/health" 2>/dev/null || curl -s "http://127.0.0.1:3001/api/health" 2>/dev/null || true)"
   printf "  · API health: %s\n" "${health:-unreachable}"
-  if echo "$health" | grep -q '"database":"up"'; then
-    ok "database reachable from the API"
+  if echo "$health" | grep -q '"status":"ok"'; then
+    ok "Node.js API reachable and healthy"
   else
-    warn "API reported the database is down"; failures=$((failures + 1))
+    warn "API health check failed"; failures=$((failures + 1))
   fi
 
   # ── TLS certificate ──

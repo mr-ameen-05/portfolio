@@ -14,7 +14,7 @@ const serviceOptions = [
 ];
 
 const CONTACT_ENDPOINT: string =
-  import.meta.env.VITE_CONTACT_ENDPOINT || '/api/contact.php';
+  import.meta.env.VITE_CONTACT_ENDPOINT || '/api/contact';
 
 export default function ContactSection() {
   const [name, setName] = useState('');
@@ -40,7 +40,7 @@ export default function ContactSection() {
     }
 
     try {
-      const response = await fetch('/api/contact.php', {
+      const response = await fetch(CONTACT_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

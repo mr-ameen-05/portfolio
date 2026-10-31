@@ -1,0 +1,27 @@
+[Unit]
+Description=Portfolio Node.js Gmail SMTP Dispatcher API
+Documentation=https://github.com/mr-ameen-05/portfolio
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/portfolio
+ExecStart=/usr/bin/node /opt/portfolio/api/server.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=3001
+EnvironmentFile=-/etc/aiameen/api.env
+EnvironmentFile=-/opt/portfolio/deploy/deploy.env
+
+# Security & Sandboxing
+NoNewPrivileges=true
+
+# Logging to systemd journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=portfolio-api
+
+[Install]
+WantedBy=multi-user.target
