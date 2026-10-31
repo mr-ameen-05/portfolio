@@ -66,6 +66,8 @@ load_config() {
   : "${DB_NAME:?}"; : "${DB_USER:?}"; : "${DB_PASS:?}"
   DB_HOST="${DB_HOST:-127.0.0.1}"; DB_PORT="${DB_PORT:-3306}"
 
+  GOOGLE_SHEET_WEBHOOK_URL="${GOOGLE_SHEET_WEBHOOK_URL:-}"
+  SEND_EMAIL="${SEND_EMAIL:-false}"
   MAIL_TO="${MAIL_TO:-26alameen2005@gmail.com}"; MAIL_FROM_EMAIL="${MAIL_FROM_EMAIL:-26alameen2005@gmail.com}"
   MAIL_FROM_NAME="${MAIL_FROM_NAME:-Al Ameen N R}"
   SMTP_HOST="${SMTP_HOST:-smtp.gmail.com}"; SMTP_PORT="${SMTP_PORT:-465}"; SMTP_USER="${SMTP_USER:-}"
@@ -134,6 +136,8 @@ write_api_env() {
 # Managed by deploy.sh — do not edit by hand.
 PORT=$API_PORT
 HOST=0.0.0.0
+GOOGLE_SHEET_WEBHOOK_URL=$GOOGLE_SHEET_WEBHOOK_URL
+SEND_EMAIL=$SEND_EMAIL
 DB_HOST=$DB_HOST
 DB_PORT=$DB_PORT
 DB_NAME=$DB_NAME

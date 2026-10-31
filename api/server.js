@@ -13,6 +13,8 @@ function loadEnv() {
   const config = {
     PORT: process.env.PORT || process.env.API_PORT || '3001',
     HOST: process.env.HOST || '0.0.0.0',
+    GOOGLE_SHEET_WEBHOOK_URL: process.env.GOOGLE_SHEET_WEBHOOK_URL || '',
+    SEND_EMAIL: String(process.env.SEND_EMAIL || 'false').toLowerCase() === 'true',
     MAIL_TO: process.env.MAIL_TO || '26alameen2005@gmail.com',
     MAIL_FROM_EMAIL: process.env.MAIL_FROM_EMAIL || '26alameen2005@gmail.com',
     MAIL_FROM_NAME: process.env.MAIL_FROM_NAME || 'Al Ameen N R',
@@ -68,6 +70,7 @@ function loadEnv() {
   config.PORT = parseInt(config.PORT, 10) || 3001;
   config.SMTP_PORT = parseInt(config.SMTP_PORT, 10) || 465;
   config.SMTP_SECURE = String(config.SMTP_SECURE).toLowerCase() === 'true' || config.SMTP_PORT === 465;
+  config.SEND_EMAIL = String(config.SEND_EMAIL).toLowerCase() === 'true';
 
   // Clean Google App Password whitespace if user copied with spaces (e.g. "abcd efgh ijkl mnop")
   if (config.SMTP_PASS && (config.SMTP_HOST.includes('gmail.com') || !config.SMTP_HOST)) {
@@ -116,8 +119,14 @@ function createMailerTransport() {
 
 const mailer = createMailerTransport();
 
-// Verify SMTP connection on startup for fast diagnostics
-if (ENV.SMTP_USER && ENV.SMTP_PASS) {
+// Output startup service modes
+if (ENV.GOOGLE_SHEET_WEBHOOK_URL) {
+  console.log(`[GoogleSheet] ✓ Google Sheet logging enabled via webhook`);
+} else {
+  console.log(`[GoogleSheet] Notice: GOOGLE_SHEET_WEBHOOK_URL not configured. Submissions are saved to enquiries.jsonl`);
+}
+
+if (ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
   mailer.verify()
     .then(() => {
       console.log(`[SMTP] ✓ Connected & authenticated successfully to ${ENV.SMTP_HOST} (user: ${ENV.SMTP_USER})`);
@@ -126,8 +135,10 @@ if (ENV.SMTP_USER && ENV.SMTP_PASS) {
       console.error(`[SMTP] ✗ Connection verification warning: ${err.message}`);
       console.error(`[SMTP] Tip: For Gmail SMTP, ensure you use a 16-character Google App Password (https://myaccount.google.com/apppasswords) with 2FA enabled.`);
     });
+} else if (ENV.SEND_EMAIL) {
+  console.warn(`[SMTP] ! SEND_EMAIL is true but SMTP credentials are not configured in environment.`);
 } else {
-  console.warn(`[SMTP] ! SMTP credentials not fully configured. Set SMTP_USER and SMTP_PASS in deploy/deploy.env or /etc/aiameen/api.env.`);
+  console.log(`[Dispatch] Mode: Google Sheets & local audit log (Email dispatch disabled)`);
 }
 
 // ── 3. Sliding-Window Rate Limiter ───────────────────────────────────────────
@@ -402,7 +413,11 @@ const server = http.createServer(async (req, res) => {
       engine: 'Node.js',
       version: process.version,
       timestamp: new Date().toISOString(),
+      google_sheet: {
+        configured: Boolean(ENV.GOOGLE_SHEET_WEBHOOK_URL),
+      },
       smtp: {
+        enabled: ENV.SEND_EMAIL,
         configured: Boolean(ENV.SMTP_USER && ENV.SMTP_PASS),
         host: ENV.SMTP_HOST,
         port: ENV.SMTP_PORT,
@@ -466,12 +481,49 @@ const server = http.createServer(async (req, res) => {
     const timestamp = new Date().toISOString();
     const dossierData = { name, email, company, service, timeline, budget, description, clientIp, userAgent, timestamp };
 
+    // ── 1. Dispatch to Google Sheet Webhook ──────────────────────────────────
+    let sheetSaved = false;
+    let sheetError = null;
+
+    if (ENV.GOOGLE_SHEET_WEBHOOK_URL) {
+      try {
+        const sheetRes = await fetch(ENV.GOOGLE_SHEET_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            timestamp,
+            name,
+            email,
+            company,
+            service,
+            timeline,
+            budget,
+            description,
+            clientIp,
+            userAgent,
+          }),
+          redirect: 'follow',
+        });
+        if (sheetRes.ok) {
+          sheetSaved = true;
+          console.log(`[GoogleSheet] ✓ Logged enquiry for "${name}" <${email}>`);
+        } else {
+          sheetError = `HTTP ${sheetRes.status}`;
+          console.warn(`[GoogleSheet] ✗ Google Sheet webhook responded with HTTP ${sheetRes.status}`);
+        }
+      } catch (err) {
+        sheetError = err.message;
+        console.error('[GoogleSheet] Error posting to Google Sheet:', err.message);
+      }
+    }
+
+    // ── 2. Optional SMTP Email Dispatch (Only if explicitly enabled) ─────────
     let adminSent = false;
     let ackSent = false;
     let lastError = null;
 
-    if (ENV.SMTP_USER && ENV.SMTP_PASS) {
-      // 1. Dispatch Admin Notification Dossier
+    if (ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
+      // Admin Notification Dossier
       const adminMailOptions = {
         from: `"${ENV.MAIL_FROM_NAME}" <${ENV.SMTP_USER}>`,
         to: ENV.MAIL_TO,
@@ -481,14 +533,14 @@ const server = http.createServer(async (req, res) => {
         text: `New Technical Enquiry from ${name} (${email}, ${company})\nDomain: ${service}\nTimeline: ${timeline} | Budget: ${budget}\n\nDescription:\n${description}\n\nClient IP: ${clientIp} | Timestamp: ${timestamp}`,
       };
 
-      // 2. Dispatch Client Confirmation Receipt
+      // Client Confirmation Receipt
       const clientMailOptions = {
         from: `"${ENV.MAIL_FROM_NAME}" <${ENV.SMTP_USER}>`,
         to: email,
         replyTo: `"${ENV.MAIL_FROM_NAME}" <${ENV.MAIL_TO}>`,
         subject: `Technical Enquiry Received — Al Ameen N R`,
         html: renderClientAcknowledgement(dossierData),
-        text: `Hello ${name},\n\nThank you for reaching out. Your project enquiry regarding "${service}" has been received and queued for evaluation.\n\nAl Ameen N R will review your specification and follow up within 24–48 hours.\n\nSummary:\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nBest regards,\nAl Ameen N R\nSecurity & Systems Engineer\nhttps://aiameen.online`,
+        text: `Hello ${name},\n\nThank you for reaching out. Your project enquiry regarding "${service}" has been received and queued.\n\nSummary:\nService: ${service}\nTimeline: ${timeline}\nBudget: ${budget}\n\nBest regards,\nAl Ameen N R`,
       };
 
       const results = await Promise.allSettled([
@@ -496,22 +548,13 @@ const server = http.createServer(async (req, res) => {
         mailer.sendMail(clientMailOptions),
       ]);
 
-      if (results[0].status === 'fulfilled') {
-        adminSent = true;
-      } else {
-        lastError = results[0].reason?.message || 'Admin mail delivery failed';
-        console.error('[SMTP] Admin email dispatch failed:', results[0].reason);
-      }
+      if (results[0].status === 'fulfilled') adminSent = true;
+      else lastError = results[0].reason?.message;
 
-      if (results[1].status === 'fulfilled') {
-        ackSent = true;
-      } else {
-        console.warn('[SMTP] Client acknowledgement email dispatch failed:', results[1].reason);
-      }
-    } else {
-      console.warn('[SMTP] Skipped live dispatch because SMTP credentials are not configured in environment.');
+      if (results[1].status === 'fulfilled') ackSent = true;
     }
 
+    // ── 3. Persistent Local Log ──────────────────────────────────────────────
     logEnquiry({
       timestamp,
       name,
@@ -520,6 +563,8 @@ const server = http.createServer(async (req, res) => {
       service,
       timeline,
       budget,
+      sheet_saved: sheetSaved,
+      sheet_error: sheetError,
       admin_sent: adminSent,
       ack_sent: ackSent,
       client_ip: clientIp,
@@ -528,7 +573,10 @@ const server = http.createServer(async (req, res) => {
 
     sendJson(res, 200, {
       success: true,
-      message: `Project enquiry successfully dispatched to Al Ameen. A receipt confirmation has been transmitted to ${email}.`,
+      message: sheetSaved
+        ? `Project enquiry successfully submitted and recorded in Google Sheet.`
+        : `Project enquiry successfully received and securely queued.`,
+      sheet_saved: sheetSaved,
       admin_sent: adminSent,
       ack_sent: ackSent,
       reference: Math.random().toString(36).substring(2, 10).toUpperCase(),
