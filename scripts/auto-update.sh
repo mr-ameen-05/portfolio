@@ -29,35 +29,42 @@ STATE_FILE="$REPO_ROOT/.last_successful_commit"
 git config --global --add safe.directory "$REPO_ROOT" 2>/dev/null || true
 
 # Safe directory creation for log file
-if ! mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null; then
+if [[ ! -w "$(dirname "$LOG_FILE")" ]] 2>/dev/null; then
   LOG_FILE="/tmp/portfolio-autoupdate.log"
 fi
 
 # ── Formatting / Logger ──────────────────────────────────────────────────────
 timestamp() { date "+%Y-%m-%d %H:%M:%S"; }
 
+write_log() {
+  local msg="$1"
+  if [[ -w "$LOG_FILE" || (! -e "$LOG_FILE" && -w "$(dirname "$LOG_FILE")") ]] 2>/dev/null; then
+    echo "$msg" >> "$LOG_FILE" 2>/dev/null || true
+  fi
+}
+
 log() {
   local msg="[$(timestamp)] [INFO] $*"
   echo -e "\033[34m▸\033[0m $msg"
-  echo "$msg" >> "$LOG_FILE" 2>/dev/null || true
+  write_log "$msg"
 }
 
 ok() {
   local msg="[$(timestamp)] [SUCCESS] $*"
   echo -e "\033[32m✓\033[0m $msg"
-  echo "$msg" >> "$LOG_FILE" 2>/dev/null || true
+  write_log "$msg"
 }
 
 warn() {
   local msg="[$(timestamp)] [WARN] $*"
   echo -e "\033[33m!\033[0m $msg" >&2
-  echo "$msg" >> "$LOG_FILE" 2>/dev/null || true
+  write_log "$msg"
 }
 
 err() {
   local msg="[$(timestamp)] [ERROR] $*"
   echo -e "\033[31m✗ $msg\033[0m" >&2
-  echo "$msg" >> "$LOG_FILE" 2>/dev/null || true
+  write_log "$msg"
 }
 
 # ── Lock Management (Prevent Concurrent Update Instances) ───────────────────

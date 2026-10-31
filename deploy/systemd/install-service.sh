@@ -27,8 +27,12 @@ echo "Installing Portfolio Auto-Update Service..."
 echo "  Repository: $REPO_ROOT"
 echo "  Run as User: $CURRENT_USER:$CURRENT_GROUP"
 
-# Ensure script is executable
+# Ensure script is executable and repository permissions are clean
 chmod +x "$REPO_ROOT/scripts/auto-update.sh"
+chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$REPO_ROOT" 2>/dev/null || true
+chmod -R u+rwX "$REPO_ROOT/.git" 2>/dev/null || true
+mkdir -p "$REPO_ROOT/logs" 2>/dev/null || true
+chmod -R 775 "$REPO_ROOT/logs" 2>/dev/null || true
 
 case "$MODE" in
   --daemon)
