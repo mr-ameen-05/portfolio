@@ -6,10 +6,10 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=ameen
-Group=ameen
-WorkingDirectory=/home/ameen/Desktop/portfolio
-ExecStart=/home/ameen/Desktop/portfolio/scripts/auto-update.sh --check
+User=root
+Group=root
+WorkingDirectory=/opt/portfolio
+ExecStart=/opt/portfolio/scripts/auto-update.sh --check
 TimeoutSec=600
 
 # Environment configuration

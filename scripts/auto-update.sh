@@ -25,7 +25,13 @@ LOG_FILE="${AUTOUPDATE_LOG:-$REPO_ROOT/logs/auto-update.log}"
 LOCK_FILE="/tmp/portfolio-autoupdate.lock"
 STATE_FILE="$REPO_ROOT/.last_successful_commit"
 
-mkdir -p "$(dirname "$LOG_FILE")"
+# Ensure git trusts this repository directory even under different service users
+git config --global --add safe.directory "$REPO_ROOT" 2>/dev/null || true
+
+# Safe directory creation for log file
+if ! mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null; then
+  LOG_FILE="/tmp/portfolio-autoupdate.log"
+fi
 
 # ── Formatting / Logger ──────────────────────────────────────────────────────
 timestamp() { date "+%Y-%m-%d %H:%M:%S"; }
@@ -56,7 +62,10 @@ err() {
 
 # ── Lock Management (Prevent Concurrent Update Instances) ───────────────────
 acquire_lock() {
-  exec 200>"$LOCK_FILE"
+  if ! exec 200>"$LOCK_FILE" 2>/dev/null; then
+    LOCK_FILE="/tmp/portfolio-autoupdate-$$.lock"
+    exec 200>"$LOCK_FILE"
+  fi
   if ! flock -n 200; then
     warn "Another instance of auto-update is currently running. Exiting cleanly."
     exit 0
@@ -154,8 +163,22 @@ check_and_update() {
 
   log "Checking remote '$REMOTE' for branch '$BRANCH'..."
   if ! git fetch "$REMOTE" "$BRANCH" --quiet; then
-    err "Failed to fetch from remote '$REMOTE'. Check network or SSH keys."
-    return 1
+    local remote_url
+    remote_url=$(git remote get-url "$REMOTE" 2>/dev/null || echo "")
+    if [[ "$remote_url" =~ git@github\.com:(.+)\.git ]]; then
+      local https_url="https://github.com/${BASH_REMATCH[1]}.git"
+      warn "SSH fetch failed. Attempting fallback to public HTTPS ($https_url)..."
+      if git fetch "$https_url" "$BRANCH" --quiet; then
+        git remote set-url "$REMOTE" "$https_url"
+        ok "Switched remote '$REMOTE' to HTTPS for non-interactive 24/7 service."
+      else
+        err "Failed to fetch from remote '$REMOTE'. Check network or Git credentials."
+        return 1
+      fi
+    else
+      err "Failed to fetch from remote '$REMOTE'. Check network or Git credentials."
+      return 1
+    fi
   fi
 
   local local_commit remote_commit

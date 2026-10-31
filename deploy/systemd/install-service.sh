@@ -34,10 +34,10 @@ case "$MODE" in
   --daemon)
     TARGET_FILE="/etc/systemd/system/portfolio-autoupdate.service"
     sed \
-      -e "s|User=ameen|User=$CURRENT_USER|g" \
-      -e "s|Group=ameen|Group=$CURRENT_GROUP|g" \
-      -e "s|WorkingDirectory=/home/ameen/Desktop/portfolio|WorkingDirectory=$REPO_ROOT|g" \
-      -e "s|ExecStart=/home/ameen/Desktop/portfolio/scripts/auto-update.sh|ExecStart=$REPO_ROOT/scripts/auto-update.sh|g" \
+      -e "s|^User=.*|User=$CURRENT_USER|g" \
+      -e "s|^Group=.*|Group=$CURRENT_GROUP|g" \
+      -e "s|^WorkingDirectory=.*|WorkingDirectory=$REPO_ROOT|g" \
+      -e "s|^ExecStart=[^ ]*scripts/auto-update.sh|ExecStart=$REPO_ROOT/scripts/auto-update.sh|g" \
       "$SCRIPT_DIR/portfolio-autoupdate.service" > "$TARGET_FILE"
 
     systemctl daemon-reload
@@ -58,10 +58,10 @@ case "$MODE" in
     TIMER_FILE="/etc/systemd/system/portfolio-autoupdate.timer"
 
     sed \
-      -e "s|User=ameen|User=$CURRENT_USER|g" \
-      -e "s|Group=ameen|Group=$CURRENT_GROUP|g" \
-      -e "s|WorkingDirectory=/home/ameen/Desktop/portfolio|WorkingDirectory=$REPO_ROOT|g" \
-      -e "s|ExecStart=/home/ameen/Desktop/portfolio/scripts/auto-update.sh|ExecStart=$REPO_ROOT/scripts/auto-update.sh|g" \
+      -e "s|^User=.*|User=$CURRENT_USER|g" \
+      -e "s|^Group=.*|Group=$CURRENT_GROUP|g" \
+      -e "s|^WorkingDirectory=.*|WorkingDirectory=$REPO_ROOT|g" \
+      -e "s|^ExecStart=[^ ]*scripts/auto-update.sh|ExecStart=$REPO_ROOT/scripts/auto-update.sh|g" \
       "$SCRIPT_DIR/portfolio-autoupdate-oneshot.service" > "$SERVICE_FILE"
 
     cp "$SCRIPT_DIR/portfolio-autoupdate.timer" "$TIMER_FILE"
