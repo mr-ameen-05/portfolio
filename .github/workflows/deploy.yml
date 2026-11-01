@@ -19,11 +19,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Contact API regression check
+        run: npm test
 
       - name: Type-check
         run: npx tsc --noEmit

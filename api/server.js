@@ -87,6 +87,7 @@ function loadEnv() {
 }
 
 const ENV = loadEnv();
+const isVercel = Boolean(process.env.VERCEL);
 
 // ── 2. Lazy Nodemailer SMTP Transporter ───────────────────────────────────────
 let mailerInstance = null;
@@ -139,7 +140,7 @@ if (ENV.GOOGLE_SHEET_WEBHOOK_URL) {
   console.log(`[GoogleSheet] Notice: GOOGLE_SHEET_WEBHOOK_URL not configured. Submissions are saved to enquiries.jsonl`);
 }
 
-if (ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
+if (!isVercel && ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
   getMailer().then(mailer => {
     if (mailer) {
       mailer.verify()
@@ -154,6 +155,7 @@ if (ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
 }
 
 // ── 3. Sliding-Window Rate Limiter ───────────────────────────────────────────
+// shortcut: per-instance rate limiting only, use a shared store or Vercel Firewall for distributed abuse protection.
 const rateLimitMap = new Map();
 
 function checkRateLimit(ip) {
@@ -184,6 +186,8 @@ setInterval(() => {
 
 // ── 4. Logging Helper ────────────────────────────────────────────────────────
 function logEnquiry(entry) {
+  // Vercel files are ephemeral; external delivery is required before confirming receipt.
+  if (isVercel) return false;
   const jsonLine = JSON.stringify(entry) + '\n';
   console.log(`[Enquiry] [${entry.timestamp}] Lead: "${entry.name}" <${entry.email}> | Service: "${entry.service}" | AdminSent: ${entry.admin_sent} | AckSent: ${entry.ack_sent}`);
 
@@ -197,11 +201,12 @@ function logEnquiry(entry) {
     try {
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.appendFileSync(path.join(dir, 'enquiries.jsonl'), jsonLine);
-      break;
+      return true;
     } catch {
       // Try next directory
     }
   }
+  return false;
 }
 
 function escapeHtml(str) {
@@ -376,6 +381,16 @@ function renderClientAcknowledgement(data) {
 
 // ── 6. Request Handlers ──────────────────────────────────────────────────────
 function parseJsonBody(req) {
+  if ('body' in req) {
+    try {
+      if (Buffer.byteLength(typeof req.body === 'string' ? req.body : JSON.stringify(req.body) ?? '') > 512 * 1024) {
+        return Promise.reject(new Error('Payload too large'));
+      }
+      return Promise.resolve(typeof req.body === 'string' ? JSON.parse(req.body) : req.body);
+    } catch {
+      return Promise.reject(new Error('Invalid JSON payload'));
+    }
+  }
   return new Promise((resolve, reject) => {
     let body = '';
     req.on('data', chunk => {
@@ -400,6 +415,7 @@ function parseJsonBody(req) {
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
@@ -410,7 +426,7 @@ function sendJson(res, statusCode, data) {
 }
 
 // ── 7. HTTP Server ───────────────────────────────────────────────────────────
-const server = http.createServer(async (req, res) => {
+export default async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = url.pathname.replace(/\/+$/, '') || '/';
 
@@ -428,6 +444,10 @@ const server = http.createServer(async (req, res) => {
 
   // Route: GET /api/health (and alias /api/health.php)
   if ((pathname === '/api/health' || pathname === '/api/health.php') && req.method === 'GET') {
+    if (isVercel) {
+      sendJson(res, 200, { status: 'ok', service: 'portfolio-node-api' });
+      return;
+    }
     sendJson(res, 200, {
       status: 'ok',
       service: 'portfolio-node-api',
@@ -470,6 +490,11 @@ const server = http.createServer(async (req, res) => {
       payload = await parseJsonBody(req);
     } catch (err) {
       sendJson(res, 400, { success: false, error: err.message });
+      return;
+    }
+
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      sendJson(res, 400, { success: false, error: 'Expected a JSON object.' });
       return;
     }
 
@@ -557,13 +582,15 @@ const server = http.createServer(async (req, res) => {
             userAgent,
           }),
           redirect: 'follow',
+          signal: AbortSignal.timeout(10000),
         });
-        if (sheetRes.ok) {
+        const sheetResult = sheetRes.ok ? await sheetRes.json() : null;
+        if (sheetRes.ok && sheetResult?.success === true) {
           sheetSaved = true;
           console.log(`[GoogleSheet] ✓ Logged enquiry for "${name}" <${email}>`);
         } else {
-          sheetError = `HTTP ${sheetRes.status}`;
-          console.warn(`[GoogleSheet] ✗ Google Sheet webhook responded with HTTP ${sheetRes.status}`);
+          sheetError = sheetRes.ok ? 'Webhook did not confirm storage' : `HTTP ${sheetRes.status}`;
+          console.warn(`[GoogleSheet] ✗ ${sheetError}`);
         }
       } catch (err) {
         sheetError = err.message;
@@ -621,7 +648,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ── 3. Persistent Local Log ──────────────────────────────────────────────
-    logEnquiry({
+    const locallySaved = logEnquiry({
       timestamp,
       name,
       email,
@@ -637,6 +664,11 @@ const server = http.createServer(async (req, res) => {
       error: lastError,
     });
 
+    if (!sheetSaved && !adminSent && !locallySaved) {
+      sendJson(res, 503, { success: false, error: 'Unable to deliver your enquiry. Please try again later or contact me by email.' });
+      return;
+    }
+
     sendJson(res, 200, {
       success: true,
       message: sheetSaved
@@ -645,7 +677,7 @@ const server = http.createServer(async (req, res) => {
       sheet_saved: sheetSaved,
       admin_sent: adminSent,
       ack_sent: ackSent,
-      reference: Math.random().toString(36).substring(2, 10).toUpperCase(),
+      reference: refId,
     });
     return;
   }
@@ -655,22 +687,25 @@ const server = http.createServer(async (req, res) => {
     error: 'Not found',
     path: pathname,
   });
-});
-
-// Start listening
-server.listen(ENV.PORT, ENV.HOST, () => {
-  console.log(`[Server] Portfolio Node API running at http://${ENV.HOST}:${ENV.PORT}`);
-  console.log(`[Server] Healthcheck available at http://${ENV.HOST}:${ENV.PORT}/api/health`);
-  console.log(`[Server] Contact endpoint available at http://${ENV.HOST}:${ENV.PORT}/api/contact`);
-});
-
-// Graceful shutdown
-function shutdown(signal) {
-  console.log(`[Server] Received ${signal}, closing server...`);
-  server.close(() => {
-    console.log('[Server] Closed successfully.');
-    process.exit(0);
-  });
 }
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+
+// Keep the existing EC2/local server; Vercel invokes the exported handler directly.
+if (!isVercel && process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  const server = http.createServer(handler);
+  server.listen(ENV.PORT, ENV.HOST, () => {
+    console.log(`[Server] Portfolio Node API running at http://${ENV.HOST}:${ENV.PORT}`);
+    console.log(`[Server] Healthcheck available at http://${ENV.HOST}:${ENV.PORT}/api/health`);
+    console.log(`[Server] Contact endpoint available at http://${ENV.HOST}:${ENV.PORT}/api/contact`);
+  });
+
+  // Graceful shutdown
+  function shutdown(signal) {
+    console.log(`[Server] Received ${signal}, closing server...`);
+    server.close(() => {
+      console.log('[Server] Closed successfully.');
+      process.exit(0);
+    });
+  }
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}

@@ -38,6 +38,7 @@ known_hosts
 
 # ── Build Caches & Compiler Metadata ──────────────────────────────────────────
 .vite/
+dist/
 .cache/
 *.tsbuildinfo
 tsconfig.tsbuildinfo

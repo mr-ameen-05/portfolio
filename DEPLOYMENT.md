@@ -1,3 +1,8 @@
+# Deployment
+
+For the Vercel deployment and optimization review, see [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md).
+The instructions below describe the legacy AWS deployment.
+
 # Deploying aiameen.online to AWS EC2
 
 This document describes the production architecture and the one-command

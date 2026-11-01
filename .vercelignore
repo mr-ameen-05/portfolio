@@ -1,0 +1,16 @@
+# Deploy only the portfolio source and its API, not local state or other projects.
+.aws
+.codex
+.agents
+.impeccable
+.env*
+api/.env*
+logs
+dist
+learning-module-app
+deploy
+deploy.sh
+design
+Sprite action
+scratch*
+*.tsbuildinfo

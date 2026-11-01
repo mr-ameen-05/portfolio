@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const BASE_URL = 'https://aiameen.online'
 
@@ -13,14 +16,8 @@ function generateSeo() {
         const today = new Date().toISOString().split('T')[0]
         const urls = [
           { loc: `${BASE_URL}/`, changefreq: 'weekly', priority: '1.0', lastmod: today },
-          { loc: `${BASE_URL}/#projects`, changefreq: 'weekly', priority: '0.8', lastmod: today },
-          { loc: `${BASE_URL}/#field-notes`, changefreq: 'weekly', priority: '0.8', lastmod: today },
-          { loc: `${BASE_URL}/#journey`, changefreq: 'monthly', priority: '0.7', lastmod: today },
-          { loc: `${BASE_URL}/#community`, changefreq: 'monthly', priority: '0.7', lastmod: today },
-          { loc: `${BASE_URL}/#about`, changefreq: 'monthly', priority: '0.6', lastmod: today },
           { loc: `${BASE_URL}/privacy.html`, changefreq: 'yearly', priority: '0.3', lastmod: today },
           { loc: `${BASE_URL}/terms.html`, changefreq: 'yearly', priority: '0.3', lastmod: today },
-          { loc: `${BASE_URL}/llms.txt`, changefreq: 'monthly', priority: '0.5', lastmod: today },
         ]
 
         const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -52,12 +49,12 @@ Sitemap: ${BASE_URL}/sitemap.xml
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [react(), generateSeo()],
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:3001',
         changeOrigin: true,
       },
     },
