@@ -13,7 +13,7 @@
     "test": "node --test scripts/contact.test.mjs"
   },
   "dependencies": {
-    "@iconify/react": "^5.0.1",
+    "@iconify/react": "^6.0.2",
     "@tailwindcss/typography": "^0.5.13",
     "clsx": "^2.1.1",
     "framer-motion": "^11.3.1",
