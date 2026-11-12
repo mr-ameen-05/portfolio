@@ -69,9 +69,16 @@ export default function LearnAndGrowPage() {
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to submit enquiry. Please try again.');
+      const rawText = await response.text();
+      let data: any = null;
+      try {
+        data = rawText ? JSON.parse(rawText) : null;
+      } catch {
+        // Response was not JSON (e.g. Vercel 500 error page or HTML)
+      }
+
+      if (!response.ok || !data?.success) {
+        throw new Error(data?.error || `Server returned ${response.status}: Failed to submit enquiry. Please try again later.`);
       }
 
       setReferenceId(data.reference || 'CRS-QUEUED');

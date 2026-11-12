@@ -377,6 +377,8 @@ function renderClientAcknowledgement(data) {
   </div>
 </body>
 </html>`;
+}
+
 function renderCourseAdminDossier(data) {
   const { name, email, course, track, experience, goals, clientIp, userAgent, timestamp, refId } = data;
   return `<!DOCTYPE html>
