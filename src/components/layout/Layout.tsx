@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { SITE } from '../../config/site.config';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Youtube, Instagram, Github, Linkedin, Mail } from 'lucide-react';
 import { useSmoothScroll } from '../scroll/SmoothScrollContext';
+import { NavProfile } from './NavProfile';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState<string>('hero');
+  const location = useLocation();
+  const navigate = useNavigate();
   const { scrollTo } = useSmoothScroll();
 
   // Top global scroll progress tracker with spring physics
@@ -52,22 +55,57 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [mobileMenuOpen]);
 
   const navLinks = [
-    { href: '#projects', id: 'projects', label: 'Work' },
-    { href: '#services', id: 'services', label: 'Services' },
-    { href: '#stack', id: 'stack', label: 'Stack' },
-    { href: '#journey', id: 'journey', label: 'Evolution' },
-    { href: '#faq', id: 'faq', label: 'FAQ' },
-    { href: '#contact', id: 'contact', label: 'Contact' },
+    { href: '#projects', id: 'projects', label: 'Work', isRoute: false },
+    { href: '#services', id: 'services', label: 'Services', isRoute: false },
+    { href: '/learn', id: 'learn', label: 'Learn & Grow', isRoute: true },
+    { href: '#stack', id: 'stack', label: 'Stack', isRoute: false },
+    { href: '#journey', id: 'journey', label: 'Evolution', isRoute: false },
+    { href: '#faq', id: 'faq', label: 'FAQ', isRoute: false },
+    { href: '#contact', id: 'contact', label: 'Contact', isRoute: false },
   ];
 
-  const handleMobileNavClick = (href: string) => {
+  const handleMobileNavClick = (target: string | typeof navLinks[0]) => {
     setMobileMenuOpen(false);
-    scrollTo(href, { offset: -75, duration: 0.75 });
+    if (typeof target === 'string') {
+      if (location.pathname !== '/') {
+        navigate(`/${target}`);
+      } else {
+        scrollTo(target, { offset: -75, duration: 0.75 });
+      }
+      return;
+    }
+
+    if (target.isRoute) {
+      navigate(target.href);
+    } else {
+      if (location.pathname !== '/') {
+        navigate(`/${target.href}`);
+      } else {
+        scrollTo(target.href, { offset: -75, duration: 0.75 });
+      }
+    }
   };
 
-  const handleDesktopNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleDesktopNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string | typeof navLinks[0]) => {
+    if (typeof target === 'string') {
+      e.preventDefault();
+      if (location.pathname !== '/') {
+        navigate(`/${target}`);
+      } else {
+        scrollTo(target, { offset: -75, duration: 0.85 });
+      }
+      return;
+    }
+
+    if (target.isRoute) {
+      return; // Let standard Link handle route transition
+    }
     e.preventDefault();
-    scrollTo(href, { offset: -75, duration: 0.85 });
+    if (location.pathname !== '/') {
+      navigate(`/${target.href}`);
+    } else {
+      scrollTo(target.href, { offset: -75, duration: 0.85 });
+    }
   };
 
   return (
@@ -118,13 +156,44 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           >
             {navLinks.map((item, idx) => {
               const isHovered = hoveredIdx === idx;
-              const isActive = activeSection === item.id;
+              const isActive = item.isRoute 
+                ? location.pathname === item.href 
+                : (location.pathname === '/' && activeSection === item.id);
+              
+              if (item.isRoute) {
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.href}
+                    onMouseEnter={() => setHoveredIdx(idx)}
+                    className={`relative px-3.5 py-1.5 text-[13px] font-sans font-medium tracking-normal transition-colors cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
+                      isActive ? 'text-accent font-semibold' : 'text-text-secondary hover:text-text-primary'
+                    }`}
+                  >
+                    {isHovered && (
+                      <motion.span
+                        layoutId="nav-hover-pill"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                        className="absolute inset-0 bg-white/10 border border-white/5 rounded-full -z-10"
+                      />
+                    )}
+                    {isActive && !isHovered && (
+                      <motion.span
+                        layoutId="nav-active-dot"
+                        className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent shadow-[0_0_6px_#C8FF00]"
+                      />
+                    )}
+                    {item.label}
+                  </Link>
+                );
+              }
+
               return (
                 <a
                   key={item.label}
                   href={item.href}
                   onMouseEnter={() => setHoveredIdx(idx)}
-                  onClick={(e) => handleDesktopNavClick(e, item.href)}
+                  onClick={(e) => handleDesktopNavClick(e, item)}
                   className={`relative px-3.5 py-1.5 text-[13px] font-sans font-medium tracking-normal transition-colors cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
                     isActive ? 'text-accent font-semibold' : 'text-text-secondary hover:text-text-primary'
                   }`}
@@ -148,29 +217,33 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          {/* Action CTA Button */}
-          <div className="hidden md:flex items-center">
+          {/* Action CTA Button & Profile Placeholder */}
+          <div className="hidden md:flex items-center gap-3.5">
+            <NavProfile size="auto" />
             <a
               href="#contact"
               onClick={(e) => handleDesktopNavClick(e, '#contact')}
-              className="group relative px-4 py-1.5 rounded-full border border-accent/40 bg-accent/10 hover:bg-accent text-accent hover:text-black font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-300 hover:shadow-[0_0_18px_rgba(200,255,0,0.35)] active:scale-95 cursor-pointer inline-flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+              className="group relative px-4 py-2 rounded-full border border-accent/40 bg-accent/10 hover:bg-accent text-accent hover:text-black font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-300 hover:shadow-[0_0_18px_rgba(200,255,0,0.35)] active:scale-95 cursor-pointer inline-flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
             >
               <span>Discuss a Project</span>
               <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
           </div>
 
-          {/* Mobile Nav Toggle with Generous 48px Tap Target */}
-          <button 
-            type="button"
-            className="md:hidden flex flex-col items-center justify-center gap-1.5 w-11 h-11 -mr-2 z-50 active:scale-90 transition-transform cursor-pointer rounded-full hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-          >
-            <span className={`block w-5 h-0.5 bg-text-primary transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-text-primary transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 scale-0' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-text-primary transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-          </button>
+          {/* Mobile Right Controls: Profile Placeholder & Menu Toggle */}
+          <div className="md:hidden flex items-center gap-2.5">
+            <NavProfile size="auto" />
+            <button 
+              type="button"
+              className="flex flex-col items-center justify-center gap-1.5 w-10 h-10 -mr-1 z-50 active:scale-90 transition-transform cursor-pointer rounded-full hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+            >
+              <span className={`block w-5 h-0.5 bg-text-primary transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+              <span className={`block w-5 h-0.5 bg-text-primary transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 scale-0' : ''}`} />
+              <span className={`block w-5 h-0.5 bg-text-primary transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+            </button>
+          </div>
         </div>
       </motion.header>
 
@@ -186,14 +259,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           >
             <nav className="flex flex-col items-center gap-4 w-full max-w-xs">
               {navLinks.map((item, idx) => {
-                const isActive = activeSection === item.id;
+                const isActive = item.isRoute 
+                  ? location.pathname === item.href 
+                  : (location.pathname === '/' && activeSection === item.id);
                 return (
                   <motion.button 
                     key={item.label}
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.04 * idx, duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                    onClick={() => handleMobileNavClick(item.href)}
+                    onClick={() => handleMobileNavClick(item)}
                     className={`text-xl font-sans font-bold transition-colors tracking-tight py-2.5 px-6 text-center w-full rounded-xl hover:bg-white/5 cursor-pointer touch-manipulation flex items-center justify-center gap-2 ${
                       isActive ? 'text-accent' : 'text-text-secondary hover:text-accent'
                     }`}
@@ -250,46 +325,89 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Navigation
               </p>
               <div className="flex flex-col space-y-2">
-                {navLinks.map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    onClick={(e) => handleDesktopNavClick(e, item.href)}
-                    className="text-xs font-mono text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                  >
-                    {item.label}
-                  </a>
-                ))}
+                {navLinks.map((item) => {
+                  if (item.isRoute) {
+                    return (
+                      <Link
+                        key={item.label}
+                        to={item.href}
+                        className="text-xs font-mono text-text-secondary hover:text-accent transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  }
+                  return (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      onClick={(e) => handleDesktopNavClick(e, item)}
+                      className="text-xs font-mono text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                    >
+                      {item.label}
+                    </a>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Connect links */}
+            {/* Connect links with YouTube & Instagram */}
             <div>
               <p className="text-[11px] font-mono uppercase tracking-widest text-text-muted mb-3">
-                Connect
+                Connect &amp; Socials
               </p>
               <div className="flex flex-col space-y-2">
+                <span
+                  className="text-xs font-mono text-text-muted inline-flex items-center justify-between gap-1.5 cursor-default"
+                  title="Coming Soon"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <Youtube className="w-3.5 h-3.5 text-red-500/80" />
+                    <span>YouTube</span>
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/5 border border-white/10 uppercase">
+                    Soon
+                  </span>
+                </span>
+                <span
+                  className="text-xs font-mono text-text-muted inline-flex items-center justify-between gap-1.5 cursor-default"
+                  title="Coming Soon"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <Instagram className="w-3.5 h-3.5 text-pink-500/80" />
+                    <span>Instagram</span>
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/5 border border-white/10 uppercase">
+                    Soon
+                  </span>
+                </span>
                 <a
-                  href="https://www.linkedin.com/in/al-ameen05"
+                  href={SITE.social.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-mono text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1"
+                  className="text-xs font-mono text-text-secondary hover:text-blue-400 transition-colors inline-flex items-center gap-1.5"
                 >
-                  LinkedIn <ArrowUpRight className="w-3 h-3" />
+                  <Linkedin className="w-3.5 h-3.5 text-blue-400" />
+                  <span>LinkedIn</span>
+                  <ArrowUpRight className="w-3 h-3 opacity-60" />
                 </a>
                 <a
-                  href="https://github.com/mr-ameen-05"
+                  href={SITE.social.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-mono text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1"
+                  className="text-xs font-mono text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1.5"
                 >
-                  GitHub <ArrowUpRight className="w-3 h-3" />
+                  <Github className="w-3.5 h-3.5" />
+                  <span>GitHub</span>
+                  <ArrowUpRight className="w-3 h-3 opacity-60" />
                 </a>
                 <a
-                  href="mailto:26alameen2005@gmail.com"
-                  className="text-xs font-mono text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1"
+                  href={SITE.social.email}
+                  className="text-xs font-mono text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1.5"
                 >
-                  Email <ArrowUpRight className="w-3 h-3" />
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>Email</span>
+                  <ArrowUpRight className="w-3 h-3 opacity-60" />
                 </a>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Mail, Send, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { Github, Linkedin, Mail, Send, ShieldAlert, CheckCircle2, Youtube, Instagram } from 'lucide-react';
 import Icon3D from '../ui/Icon3D';
 
 const serviceOptions = [
@@ -155,6 +155,30 @@ export default function ContactSection() {
                 <Icon3D icon={Mail} size="sm" />
                 <span>26alameen2005@gmail.com</span>
               </a>
+
+              <div
+                className="flex items-center justify-between p-3.5 rounded-xl bg-bg-secondary border border-border-subtle text-xs sm:text-sm font-mono text-text-primary"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Icon3D icon={Youtube} size="sm" glowColor="#EF4444" />
+                  <span>YouTube Channel</span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-text-muted uppercase">
+                  Coming Soon
+                </span>
+              </div>
+
+              <div
+                className="flex items-center justify-between p-3.5 rounded-xl bg-bg-secondary border border-border-subtle text-xs sm:text-sm font-mono text-text-primary"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Icon3D icon={Instagram} size="sm" glowColor="#EC4899" />
+                  <span>Instagram Profile</span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-text-muted uppercase">
+                  Coming Soon
+                </span>
+              </div>
 
               <a
                 href="https://www.linkedin.com/in/al-ameen05"

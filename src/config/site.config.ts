@@ -28,12 +28,21 @@ export const SITE = {
       secondary: 'Explore My Work',
     },
   },
+  social: {
+    github: 'https://github.com/mr-ameen-05',
+    linkedin: 'https://www.linkedin.com/in/al-ameen05',
+    email: 'mailto:26alameen2005@gmail.com',
+    instagram: '#',
+    youtube: '#',
+  },
   nav: [
     { id: 'projects', label: 'Work' },
     { id: 'services', label: 'Services' },
-    { id: 'process', label: 'How I Work' },
-    { id: 'field-notes', label: 'Field Notes' },
-    { id: 'about', label: 'About' },
+    { id: 'learn', label: 'Learn & Grow' },
+    { id: 'stack', label: 'Stack' },
+    { id: 'journey', label: 'Evolution' },
+    { id: 'faq', label: 'FAQ' },
     { id: 'contact', label: 'Contact' },
   ],
 } as const;
+

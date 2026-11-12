@@ -188,31 +188,7 @@ function doPost(e) {
   lock.tryLock(10000);
 
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-
-    // 1. Initialize Sheet Headers if empty
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "Timestamp",
-        "Reference ID",
-        "Lead Name",
-        "Work Email",
-        "Company / Org",
-        "Service Scope",
-        "Timeline",
-        "Budget",
-        "Project Description",
-        "Ack Email Status",
-        "Client IP",
-        "User Agent"
-      ]);
-      var headerRange = sheet.getRange(1, 1, 1, 12);
-      headerRange.setFontWeight("bold");
-      headerRange.setBackground("#111111");
-      headerRange.setFontColor("#C8FF00");
-      sheet.setFrozenRows(1);
-    }
-
+  try {
     // 2. Parse Incoming Payload
     var data = {};
     if (e && e.postData && e.postData.contents) {
@@ -221,9 +197,56 @@ function doPost(e) {
       data = e.parameter;
     }
 
+    var isCourse = (data.type === "COURSE_ENQUIRY" || Boolean(data.course));
+    var targetSheetName = isCourse ? "Course_Leads" : "Project_Enquiries";
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(targetSheetName);
+
+    if (!sheet) {
+      sheet = ss.insertSheet(targetSheetName);
+      if (isCourse) {
+        sheet.appendRow([
+          "Ticket ID",
+          "Timestamp",
+          "Learner Name",
+          "Email Address",
+          "Target Course",
+          "Track",
+          "Experience Level",
+          "Status",
+          "Last Contacted",
+          "Cohort Batch",
+          "Payment Status",
+          "Goals & Notes",
+          "Client IP",
+          "User Agent"
+        ]);
+      } else {
+        sheet.appendRow([
+          "Timestamp",
+          "Reference ID",
+          "Lead Name",
+          "Work Email",
+          "Company / Org",
+          "Service Scope",
+          "Timeline",
+          "Budget",
+          "Project Description",
+          "Ack Email Status",
+          "Client IP",
+          "User Agent"
+        ]);
+      }
+      var headerRange = sheet.getRange(1, 1, 1, isCourse ? 14 : 12);
+      headerRange.setFontWeight("bold");
+      headerRange.setBackground("#111111");
+      headerRange.setFontColor("#C8FF00");
+      sheet.setFrozenRows(1);
+    }
+
     // 3. Reject Anonymous or Incomplete Submissions
-    var validationError = isAnonymousOrInvalid(data);
-    if (validationError) {
+    var validationError = isCourse ? null : isAnonymousOrInvalid(data);
+    if (!isCourse && validationError) {
       return ContentService
         .createTextOutput(JSON.stringify({
           success: false,
@@ -234,7 +257,7 @@ function doPost(e) {
     }
 
     var timestamp = data.timestamp || new Date().toISOString();
-    var refId = data.reference || Utilities.getUuid().substring(0, 8).toUpperCase();
+    var refId = data.reference || (isCourse ? ("CRS-" + Utilities.getUuid().substring(0, 6).toUpperCase()) : Utilities.getUuid().substring(0, 8).toUpperCase());
     var clientEmail = String(data.email).trim();
 
     // 4. Send Admin Notification & Auto-Acknowledgement
@@ -277,25 +300,46 @@ function doPost(e) {
     }
 
     // 5. Append Row to Google Sheet with Ack Email Status
-    sheet.appendRow([
-      timestamp,
-      refId,
-      data.name,
-      clientEmail,
-      data.company,
-      data.service || "Technical Consultation",
-      data.timeline || "Flexible",
-      data.budget || "To be scoped",
-      data.description || data.message || "",
-      ackStatus,
-      data.clientIp || "127.0.0.1",
-      data.userAgent || "Browser"
-    ]);
+    if (isCourse) {
+      sheet.appendRow([
+        refId,
+        timestamp,
+        data.name || "",
+        clientEmail,
+        data.course || "",
+        data.track || "",
+        data.experience || "",
+        "1. New Enquiry",
+        Utilities.formatDate(new Date(), "GMT+5:30", "yyyy-MM-dd"),
+        "Cohort 2026-Q1",
+        "Pending Verification",
+        data.goals || data.description || "",
+        data.clientIp || "127.0.0.1",
+        data.userAgent || "Browser"
+      ]);
+    } else {
+      sheet.appendRow([
+        timestamp,
+        refId,
+        data.name,
+        clientEmail,
+        data.company,
+        data.service || "Technical Consultation",
+        data.timeline || "Flexible",
+        data.budget || "To be scoped",
+        data.description || data.message || "",
+        ackStatus,
+        data.clientIp || "127.0.0.1",
+        data.userAgent || "Browser"
+      ]);
+    }
 
     return ContentService
       .createTextOutput(JSON.stringify({
         success: true,
-        message: "Enquiry successfully logged and acknowledgement email sent to " + clientEmail,
+        message: isCourse 
+          ? ("Course enquiry successfully logged for " + clientEmail)
+          : ("Enquiry successfully logged and acknowledgement email sent to " + clientEmail),
         reference: refId,
         ack_status: ackStatus
       }))

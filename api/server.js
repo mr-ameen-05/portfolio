@@ -377,7 +377,162 @@ function renderClientAcknowledgement(data) {
   </div>
 </body>
 </html>`;
+function renderCourseAdminDossier(data) {
+  const { name, email, course, track, experience, goals, clientIp, userAgent, timestamp, refId } = data;
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; padding: 24px; background-color: #0B0F17; color: #E2E8F0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; }
+    .card { max-width: 620px; margin: 0 auto; background: #131B2A; border: 1px solid #1E293B; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); }
+    .header { padding: 26px 32px; background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%); border-bottom: 2px solid #C8FF00; }
+    .header-tag { font-size: 11px; text-transform: uppercase; color: #C8FF00; letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 700; font-family: ui-monospace, monospace; }
+    .header-title { font-size: 20px; font-weight: 700; color: #FFFFFF; margin: 0; }
+    .content { padding: 32px; }
+    .table-details { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    .table-details td { padding: 10px 0; border-bottom: 1px solid #1E293B; vertical-align: top; }
+    .label { width: 140px; font-size: 12px; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.5px; font-weight: 600; padding-top: 3px; font-family: ui-monospace, monospace; }
+    .value { color: #FFFFFF; font-size: 14px; font-weight: 500; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 6px; background: rgba(200, 255, 0, 0.12); color: #C8FF00; border: 1px solid rgba(200, 255, 0, 0.3); font-size: 12px; font-weight: 700; font-family: ui-monospace, monospace; }
+    .brief-title { font-size: 12px; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 700; font-family: ui-monospace, monospace; }
+    .brief-box { background: #0A0E17; border: 1px solid #1E293B; border-radius: 8px; padding: 18px 20px; color: #E2E8F0; white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
+    .action-row { margin-top: 24px; }
+    .reply-btn { display: inline-block; padding: 12px 24px; background: #C8FF00; color: #000000 !important; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.3px; font-family: ui-monospace, monospace; }
+    .telemetry { margin-top: 24px; padding: 14px 18px; background: #0A0E17; border: 1px dashed #334155; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 11px; color: #64748B; line-height: 1.6; }
+    .footer { padding: 18px 32px; background: #0F172A; border-top: 1px solid #1E293B; font-size: 11px; color: #64748B; text-align: center; font-family: ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="header-tag">&bull; COURSE ENROLMENT &amp; ENQUIRY DISPATCH</div>
+      <h1 class="header-title">New Course Enquiry Received</h1>
+    </div>
+    <div class="content">
+      <table class="table-details">
+        <tr>
+          <td class="label">Learner Name:</td>
+          <td class="value"><strong>${escapeHtml(name)}</strong></td>
+        </tr>
+        <tr>
+          <td class="label">Learner Email:</td>
+          <td class="value"><a href="mailto:${escapeHtml(email)}" style="color: #C8FF00; text-decoration: underline; font-weight: 600;">${escapeHtml(email)}</a></td>
+        </tr>
+        <tr>
+          <td class="label">Target Course:</td>
+          <td class="value"><span class="badge">${escapeHtml(course)}</span></td>
+        </tr>
+        <tr>
+          <td class="label">Learning Track:</td>
+          <td class="value" style="color: #38BDF8; font-weight: 600;">${escapeHtml(track)}</td>
+        </tr>
+        <tr>
+          <td class="label">Current Level:</td>
+          <td class="value">${escapeHtml(experience || 'Not Specified')}</td>
+        </tr>
+        ${refId ? `<tr><td class="label">Enquiry Ref ID:</td><td class="value" style="font-family: ui-monospace, monospace; color: #94A3B8;">#${escapeHtml(refId)}</td></tr>` : ''}
+      </table>
+
+      ${goals ? `
+      <div class="brief-title">Learning Goals &amp; Specific Areas of Interest:</div>
+      <div class="brief-box">${escapeHtml(goals)}</div>
+      ` : ''}
+
+      <div class="action-row">
+        <a class="reply-btn" href="mailto:${escapeHtml(email)}?subject=Re:%20[${escapeHtml(encodeURIComponent(course))}]%20Course%20Information%20%26%20Enrolment">Reply Directly to ${escapeHtml(name)} &rarr;</a>
+      </div>
+
+      <div class="telemetry">
+        <div><strong>TIMESTAMP:</strong> ${escapeHtml(timestamp)}</div>
+        <div><strong>CLIENT IP:</strong> ${escapeHtml(clientIp)}</div>
+        <div><strong>AGENT:</strong> ${escapeHtml(userAgent)}</div>
+      </div>
+    </div>
+    <div class="footer">
+      TRANSMITTED FROM AL AMEEN N R &bull; LEARN &amp; GROW PLATFORM
+    </div>
+  </div>
+</body>
+</html>`;
 }
+
+function renderCourseClientAcknowledgement(data) {
+  const { name, course, track, refId } = data;
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; padding: 24px; background-color: #0B0F17; color: #E2E8F0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; }
+    .card { max-width: 620px; margin: 0 auto; background: #131B2A; border: 1px solid #1E293B; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); }
+    .header { padding: 26px 32px; background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%); border-bottom: 2px solid #C8FF00; }
+    .brand { font-size: 11px; text-transform: uppercase; color: #C8FF00; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 4px; font-family: ui-monospace, monospace; }
+    .header-title { font-size: 20px; font-weight: 700; color: #FFFFFF; margin: 0; }
+    .content { padding: 32px; }
+    .salutation { font-size: 16px; font-weight: 700; color: #FFFFFF; margin-bottom: 14px; }
+    p { margin: 0 0 16px 0; color: #94A3B8; line-height: 1.6; }
+    .steps-card { background: #0A0E17; border-left: 4px solid #C8FF00; border-top: 1px solid #1E293B; border-right: 1px solid #1E293B; border-bottom: 1px solid #1E293B; padding: 18px 20px; border-radius: 0 8px 8px 0; margin: 22px 0; }
+    .steps-card h4 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #C8FF00; font-weight: 700; font-family: ui-monospace, monospace; }
+    .steps-card ul { margin: 0; padding-left: 18px; color: #CBD5E1; font-size: 13.5px; }
+    .steps-card li { margin-bottom: 6px; }
+    .summary-card { background: #0F172A; border: 1px solid #1E293B; border-radius: 8px; padding: 18px 20px; margin: 22px 0; }
+    .summary-title { font-size: 11px; text-transform: uppercase; color: #94A3B8; letter-spacing: 1px; margin-bottom: 12px; font-weight: 700; font-family: ui-monospace, monospace; }
+    .summary-item { font-size: 13.5px; margin-bottom: 8px; color: #CBD5E1; }
+    .summary-item strong { color: #FFFFFF; }
+    .reply-box { padding: 14px 18px; background: rgba(200, 255, 0, 0.08); border: 1px solid rgba(200, 255, 0, 0.25); border-radius: 6px; font-size: 13px; color: #E2E8F0; margin-top: 24px; line-height: 1.5; }
+    .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1E293B; }
+    .sig-name { font-weight: 700; color: #FFFFFF; font-size: 15px; }
+    .sig-title { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .footer { padding: 18px 32px; background: #0F172A; border-top: 1px solid #1E293B; font-size: 11px; color: #64748B; text-align: center; font-family: ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="brand">AL AMEEN N R &bull; LEARN &amp; GROW ACADEMY</div>
+      <h1 class="header-title">Course Information Request Received</h1>
+    </div>
+    <div class="content">
+      <div class="salutation">Hello ${escapeHtml(name)},</div>
+      <p>Thank you for your interest in <strong style="color: #C8FF00;">${escapeHtml(course)}</strong>. Your request has been queued in the course enrolment registry.</p>
+      
+      <div class="steps-card">
+        <h4>What You Will Receive</h4>
+        <ul>
+          <li><strong style="color: #FFFFFF;">Curriculum &amp; Sandbox Access:</strong> Full syllabus details, interactive lab prerequisites, and module breakdown.</li>
+          <li><strong style="color: #FFFFFF;">Priority Release Notification:</strong> If this course is currently in development, you are granted priority early-bird access as new modules and labs drop.</li>
+          <li><strong style="color: #FFFFFF;">Direct Mentorship Channel:</strong> Personalized answers regarding career pathways (SOC, VAPT, Vibe Coding, or FDE Engineering).</li>
+        </ul>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">Requested Course Profile ${refId ? `(Reference: #${escapeHtml(refId)})` : ''}</div>
+        <div class="summary-item"><strong>Course:</strong> ${escapeHtml(course)}</div>
+        <div class="summary-item"><strong>Learning Track:</strong> ${escapeHtml(track)}</div>
+        <div class="summary-item"><strong>Status:</strong> Priority Queue Confirmed</div>
+      </div>
+
+      <div class="reply-box">
+        <strong>Have questions right now?</strong> Feel free to reply directly to this email with your current experience level or what specific topics you are most excited to master.
+      </div>
+
+      <div class="signature">
+        <div class="sig-name">Al Ameen N R</div>
+        <div class="sig-title">Cybersecurity Analyst &bull; Forward Deployed Engineer &bull; Course Creator</div>
+        <div class="sig-title" style="color: #94A3B8; margin-top: 4px;">Kerala, India &bull; <a href="https://aiameen.online" style="color: #C8FF00; text-decoration: none;">aiameen.online</a></div>
+      </div>
+    </div>
+    <div class="footer">
+      AUTOMATED COURSE ENROLMENT ACKNOWLEDGEMENT &bull; AL AMEEN N R ACADEMY
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 
 // ── 6. Request Handlers ──────────────────────────────────────────────────────
 function parseJsonBody(req) {
@@ -468,6 +623,73 @@ export default async function handler(req, res) {
       },
       uptime_seconds: Math.floor(process.uptime()),
     });
+    return;
+  }
+
+  // Route: GET /api/course-enquiries (Export to JSON or CSV for Excel)
+  if ((pathname === '/api/course-enquiries' || pathname === '/api/course-enquiries.csv') && req.method === 'GET') {
+    const isCsv = pathname.endsWith('.csv') || url.searchParams.get('format') === 'csv';
+    const logPaths = [
+      path.join(ROOT_DIR, 'logs', 'enquiries.jsonl'),
+      '/var/log/aiameen/enquiries.jsonl',
+      path.join(__dirname, 'enquiries.jsonl'),
+    ];
+
+    let lines = [];
+    for (const p of logPaths) {
+      if (fs.existsSync(p)) {
+        try {
+          const raw = fs.readFileSync(p, 'utf8');
+          lines = raw.split('\n').filter(Boolean);
+          break;
+        } catch {}
+      }
+    }
+
+    const courseLeads = [];
+    for (const line of lines) {
+      try {
+        const item = JSON.parse(line);
+        if (item.type === 'course_enquiry' || item.course) {
+          courseLeads.push(item);
+        }
+      } catch {}
+    }
+
+    if (isCsv) {
+      const escapeCsv = (val) => {
+        const str = String(val ?? '').replace(/"/g, '""');
+        return `"${str}"`;
+      };
+
+      const header = ['Ticket ID', 'Timestamp', 'Learner Name', 'Email Address', 'Target Course', 'Track', 'Experience Level', 'Status', 'Last Contacted', 'Cohort Batch', 'Payment Status', 'Goals & Notes'];
+      const rows = courseLeads.map(l => [
+        escapeCsv(l.reference || ''),
+        escapeCsv(l.timestamp || ''),
+        escapeCsv(l.name || ''),
+        escapeCsv(l.email || ''),
+        escapeCsv(l.course || ''),
+        escapeCsv(l.track || ''),
+        escapeCsv(l.experience || ''),
+        escapeCsv('1. New Enquiry'),
+        escapeCsv(l.timestamp ? l.timestamp.split('T')[0] : ''),
+        escapeCsv('Cohort 2026-Q1'),
+        escapeCsv('Pending Verification'),
+        escapeCsv(l.goals || '')
+      ].join(','));
+
+      const csvContent = '\uFEFF' + [header.join(','), ...rows].join('\r\n');
+      res.writeHead(200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="course_enquiries.csv"',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-cache',
+      });
+      res.end(csvContent);
+      return;
+    }
+
+    sendJson(res, 200, { success: true, count: courseLeads.length, leads: courseLeads });
     return;
   }
 
@@ -678,6 +900,177 @@ export default async function handler(req, res) {
       admin_sent: adminSent,
       ack_sent: ackSent,
       reference: refId,
+    });
+    return;
+  }
+
+  // Route: POST /api/course-enquiry
+  if ((pathname === '/api/course-enquiry' || pathname === '/api/course-enquiry.php') && req.method === 'POST') {
+    const clientIp = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress || '127.0.0.1').split(',')[0].trim();
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    // Rate limit check
+    if (!checkRateLimit(clientIp)) {
+      sendJson(res, 429, {
+        success: false,
+        error: 'Too many requests. Please wait a minute before submitting again.',
+      });
+      return;
+    }
+
+    let payload;
+    try {
+      payload = await parseJsonBody(req);
+    } catch (err) {
+      sendJson(res, 400, { success: false, error: err.message });
+      return;
+    }
+
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      sendJson(res, 400, { success: false, error: 'Expected a JSON object.' });
+      return;
+    }
+
+    const name = String(payload.name || '').trim();
+    const email = String(payload.email || '').trim().toLowerCase();
+    const course = String(payload.course || 'Cybersecurity & Systems Engineering').trim();
+    const track = String(payload.track || 'General Technical').trim();
+    const experience = String(payload.experience || 'Not Specified').trim();
+    const goals = String(payload.goals || payload.description || payload.message || '').trim();
+
+    const blockedKeywords = ['anonymous', 'anon', 'unknown', 'n/a', 'na', 'none', 'test', 'tester', 'fake'];
+    const blockedDomains = ['example.com', 'test.com', 'fake.com', 'tempmail.com', 'throwaway.com'];
+
+    const lowerName = name.toLowerCase();
+    if (!name || name.length < 2 || blockedKeywords.includes(lowerName)) {
+      sendJson(res, 400, {
+        success: false,
+        error: 'Please provide your real name for course enrolment.',
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      sendJson(res, 400, {
+        success: false,
+        error: 'Please provide a valid deliverable email address to receive course updates.',
+      });
+      return;
+    }
+
+    const emailDomain = email.split('@')[1];
+    if (blockedDomains.includes(emailDomain)) {
+      sendJson(res, 400, {
+        success: false,
+        error: 'Temporary or disposable email addresses are not accepted.',
+      });
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+    const refId = 'CRS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    const courseDossierData = { name, email, course, track, experience, goals, clientIp, userAgent, timestamp, refId };
+
+    // 1. Log to Course Webhook if configured (fallback to GOOGLE_SHEET_WEBHOOK_URL)
+    let sheetSaved = false;
+    let sheetError = null;
+    const courseWebhookUrl = ENV.COURSE_ENQUIRIES_WEBHOOK_URL || ENV.GOOGLE_SHEET_WEBHOOK_URL;
+
+    if (courseWebhookUrl) {
+      try {
+        const sheetRes = await fetch(courseWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            timestamp,
+            reference: refId,
+            type: 'COURSE_ENQUIRY',
+            name,
+            email,
+            course,
+            track,
+            experience,
+            goals,
+            clientIp,
+            userAgent,
+          }),
+          redirect: 'follow',
+          signal: AbortSignal.timeout(10000),
+        });
+        if (sheetRes.ok) sheetSaved = true;
+      } catch (err) {
+        sheetError = err.message;
+      }
+    }
+
+    // 2. Dual SMTP Email Dispatch (Admin Dossier + Client Course Ack)
+    let adminSent = false;
+    let ackSent = false;
+    let lastError = null;
+
+    if (ENV.SEND_EMAIL && ENV.SMTP_USER && ENV.SMTP_PASS) {
+      const adminEmail = ENV.ADMIN_EMAIL || ENV.MAIL_TO || ENV.SMTP_USER;
+      const senderEmail = ENV.MAIL_FROM_EMAIL || ENV.SMTP_USER;
+      const senderName = ENV.MAIL_FROM_NAME || 'Al Ameen N R';
+
+      const clientMailOptions = {
+        from: `"${senderName} Academy" <${senderEmail}>`,
+        to: email,
+        replyTo: `"${senderName}" <${adminEmail}>`,
+        subject: `[Course Enrolment] ${course} — ${senderName} Academy`,
+        html: renderCourseClientAcknowledgement(courseDossierData),
+        text: `Hello ${name},\n\nThank you for requesting information on "${course}". Your enquiry has been received and queued.\n\nTrack: ${track}\nReference ID: #${refId}\n\nBest regards,\n${senderName}`,
+      };
+
+      const adminMailOptions = {
+        from: `"${name} (Course Lead)" <${senderEmail}>`,
+        to: adminEmail,
+        replyTo: `"${name}" <${email}>`,
+        subject: `[Course Lead] ${name} &bull; ${course}`,
+        html: renderCourseAdminDossier(courseDossierData),
+        text: `New Course Lead: ${name} (${email})\nCourse: ${course} | Track: ${track}\nExperience: ${experience}\nGoals: ${goals}\n\nRef: #${refId}`,
+      };
+
+      const mailer = await getMailer();
+      if (mailer) {
+        const results = await Promise.allSettled([
+          mailer.sendMail(adminMailOptions),
+          mailer.sendMail(clientMailOptions),
+        ]);
+        if (results[0].status === 'fulfilled') adminSent = true;
+        else lastError = results[0].reason?.message;
+        if (results[1].status === 'fulfilled') ackSent = true;
+      }
+    }
+
+    // 3. Local Audit Logging
+    const locallySaved = logEnquiry({
+      timestamp,
+      type: 'course_enquiry',
+      name,
+      email,
+      course,
+      track,
+      experience,
+      goals,
+      sheet_saved: sheetSaved,
+      admin_sent: adminSent,
+      ack_sent: ackSent,
+      reference: refId,
+    });
+
+    if (!sheetSaved && !adminSent && !locallySaved) {
+      sendJson(res, 503, { success: false, error: 'Unable to deliver your course enquiry. Please try again later.' });
+      return;
+    }
+
+    sendJson(res, 200, {
+      success: true,
+      message: `Course enquiry for "${course}" successfully logged. Confirmation sent to ${email}.`,
+      reference: refId,
+      admin_sent: adminSent,
+      ack_sent: ackSent,
     });
     return;
   }

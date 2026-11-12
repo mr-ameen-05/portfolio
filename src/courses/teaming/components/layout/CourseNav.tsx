@@ -5,6 +5,7 @@ import { StorageBadge } from './StorageBadge';
 import { CourseSearchModal } from '../search/CourseSearchModal';
 import { progressService } from '../../services/progressService';
 import { useLearner } from '../../context/LearnerContext';
+import { NavProfile } from '../../../../components/layout/NavProfile';
 
 export const CourseNav: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -144,6 +145,9 @@ export const CourseNav: React.FC = () => {
 
             {/* Storage status badge */}
             <StorageBadge isServerSynced={profile?.source === 'server'} className="hidden md:inline-flex" />
+
+            {/* Profile Avatar Placeholder */}
+            <NavProfile size="sm" />
 
             {/* Mobile Menu Toggle */}
             <button

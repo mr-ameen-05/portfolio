@@ -11,7 +11,6 @@ import LaserInterlockDivider from './components/scroll/LaserInterlockDivider';
 import GlobalSprite from './components/sprite/GlobalSprite';
 import ScrollTelemetryHUD from './components/scroll/ScrollTelemetryHUD';
 
-// Lazy-load below-the-fold components to reduce initial JS bundle and boost mobile LCP
 const ProjectsSection = React.lazy(() => import('./components/projects/ProjectsSection'));
 const ServicesSection = React.lazy(() => import('./components/services/ServicesSection'));
 const TechStackSection = React.lazy(() => import('./components/stack/TechStackSection'));
@@ -19,6 +18,7 @@ const JourneySection = React.lazy(() => import('./components/journey/JourneySect
 const FAQSection = React.lazy(() => import('./components/faq/FAQSection'));
 const ContactSection = React.lazy(() => import('./components/contact/ContactSection'));
 const FinalCTASection = React.lazy(() => import('./components/cta/FinalCTASection'));
+const LearnAndGrowPage = React.lazy(() => import('./pages/LearnAndGrowPage'));
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { children: React.ReactNode }) {
@@ -124,6 +124,28 @@ function PortfolioHome() {
   );
 }
 
+function LearnView() {
+  return (
+    <SmoothScrollProvider>
+      <Layout>
+        <GlobalSprite />
+        <ScrollTelemetryHUD />
+        <main className="min-h-screen">
+          <ErrorBoundary>
+            <React.Suspense fallback={
+              <div className="min-h-screen flex items-center justify-center font-mono text-xs text-text-muted">
+                <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mb-2" />
+              </div>
+            }>
+              <LearnAndGrowPage />
+            </React.Suspense>
+          </ErrorBoundary>
+        </main>
+      </Layout>
+    </SmoothScrollProvider>
+  );
+}
+
 function App() {
   return (
     <ThemeProvider>
@@ -131,6 +153,9 @@ function App() {
         <Routes>
           {/* Main Portfolio Single-Page Experience */}
           <Route path="/" element={<PortfolioHome />} />
+
+          {/* Learn & Grow Academy Page */}
+          <Route path="/learn" element={<LearnView />} />
 
           {/* Subdomain Redirects for legacy course routes */}
           <Route path="/courses/*" element={<SubdomainRedirect />} />
